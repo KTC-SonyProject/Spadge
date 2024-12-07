@@ -12,8 +12,8 @@ services:
       - .:/app
     depends_on:
       - postgres
-    # ports:
-    #   - "8000:8000"
+    ports:
+      - "8765:8765"
 
   postgres:
     container_name: spadge-main_db

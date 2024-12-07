@@ -172,7 +172,7 @@ class ChatBody(Column):
         self.show_chat_history()
 
     def _initialize_chatbot(self, session_id) -> None:
-        self.chatbot_graph = ChatbotGraph(verbose=True)
+        self.chatbot_graph = ChatbotGraph(server=self.page.data["server"], verbose=True)
         self.session_id = session_id
         self.chatbot_graph.set_memory_config(self.session_id)
 

@@ -25,8 +25,8 @@ from flet import (
     icons,
 )
 
-from app.db_conn import DatabaseHandler
 from app.ai.settings import langsmith_settigns
+from app.db_conn import DatabaseHandler
 from app.settings import load_settings
 
 
