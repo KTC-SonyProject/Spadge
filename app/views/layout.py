@@ -14,8 +14,8 @@ from app.views.home_view import HomeView
 from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
-from app.views.voice_view import VoiceView
 from app.views.unity_view import UnityView
+from app.views.voice_view import VoiceView
 
 logger = logging.getLogger(__name__)
 

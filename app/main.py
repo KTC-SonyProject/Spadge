@@ -10,11 +10,11 @@ from flet import (
 )
 
 from app.controller.documents_manager import DocumentsManager
+from app.controller.file_controller import FileController
 from app.controller.settings_manager import SettingsManager
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
 from app.unity_conn import SocketServer
-from app.controller.file_controller import FileController
 from app.views.views import MyView
 
 server = SocketServer()
@@ -29,7 +29,7 @@ def main(page: Page):
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
-    file_controller = FileController(server)
+    file_controller = FileController(page, server)
 
     page.data = {
         "settings_file": "local.settings.json",
@@ -60,6 +60,8 @@ def main(page: Page):
     theme.page_transitions.windows = ft.PageTransitionTheme.NONE
     page.theme = theme
     page.update()
+
+    print(f"\n\n{os.getenv('FLET_APP_STORAGE_DATA')}\n\n")
 
     MyView(page)
 

@@ -1,12 +1,10 @@
 import logging
-import os
 
 from flet import (
     Column,
     Container,
     ElevatedButton,
     FilePicker,
-    FilePickerUploadFile,
     Page,
     Row,
     Tab,
@@ -16,8 +14,8 @@ from flet import (
     alignment,
 )
 
-from app.views.core import BaseTabBodyView
 from app.controller.file_controller import FileController
+from app.views.core import BaseTabBodyView
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +67,7 @@ class FileSettingsView(BaseTabBodyView):
                 self.upload_button,
             ]
        )
-    
+
     def on_file_selected(self, e):
         print(f"ファイルが選択されました: {e.files}")
         file_list = self.controller.handle_file_selection(e.files)
@@ -80,7 +78,7 @@ class FileSettingsView(BaseTabBodyView):
             self.selected_files.value = "No files selected"
             self.upload_button.visible = False
         self.page.update()
-    
+
     def upload_files(self, e):
         try:
             upload_list = self.controller.prepare_upload_files(self.page)
