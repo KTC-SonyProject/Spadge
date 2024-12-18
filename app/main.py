@@ -61,8 +61,6 @@ def main(page: Page):
     page.theme = theme
     page.update()
 
-    print(f"\n\n{os.getenv('FLET_APP_STORAGE_DATA')}\n\n")
-
     MyView(page)
 
     def on_close():
