@@ -122,11 +122,11 @@ class ChatMessage(Row):
 
 
 class ChatBody(Column):
-    def __init__(self, page: Page, session_id: str = "1"):
+    def __init__(self, page: Page, socket_server, session_id: str = "1"):
         super().__init__()
         self.page = page
         try:
-            self._initialize_chatbot(session_id)
+            self._initialize_chatbot(session_id, socket_server)
         except ValueError as e:
             self.controls = [Container(
                 content=Text(str(e), color=Colors.RED),
@@ -171,8 +171,8 @@ class ChatBody(Column):
         self.expand = True
         self.show_chat_history()
 
-    def _initialize_chatbot(self, session_id) -> None:
-        self.chatbot_graph = ChatbotGraph(server=self.page.data["server"], verbose=True)
+    def _initialize_chatbot(self, session_id, socket_server) -> None:
+        self.chatbot_graph = ChatbotGraph(server=socket_server, verbose=True)
         self.session_id = session_id
         self.chatbot_graph.set_memory_config(self.session_id)
 

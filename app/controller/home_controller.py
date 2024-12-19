@@ -45,6 +45,8 @@ class HomeController:
             ),
         ]
 
+        self.get_home_view()
+
     def _create_home_card(self, card_items: list[HomeCardItem]) -> list[HomeCard]:
         items = []
 

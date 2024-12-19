@@ -16,28 +16,47 @@ from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
 from app.unity_conn import SocketServer
 from app.views.views import MyView
+from app.service_container import Container
+
 
 server = SocketServer()
-server_thread = threading.Thread(target=server.start, daemon=True)
+server_thread = threading.Thread(target=server.start)
 server_thread.start()
+
+def initialize_services(page: Page) -> Container:
+    """必要なサービスを初期化してコンテナに登録"""
+    container = Container.get_instance()
+
+    # 各サービスの初期化
+    settings_manager = SettingsManager()
+    db_handler = DatabaseHandler(settings_manager)
+    docs_manager = DocumentsManager(db_handler)
+    file_controller = FileController(page, server)
+
+    # コンテナに登録
+    container.register("settings_manager", settings_manager)
+    container.register("db_handler", db_handler)
+    container.register("docs_manager", docs_manager)
+    container.register("socket_server", server)
+    # container.register("server_thread", server_thread)
+    container.register("file_controller", file_controller)
+
+    return container
 
 def main(page: Page):
     page.title = "Spadge"
     page.scroll = ScrollMode.AUTO
     page.padding = 10
 
-    settings_manager = SettingsManager()
-    db_handler = DatabaseHandler(settings_manager)
-    docs_manager = DocumentsManager(db_handler)
-    file_controller = FileController(page, server)
+    container = initialize_services(page)
 
     page.data = {
         "settings_file": "local.settings.json",
-        "settings": settings_manager,
-        "db": db_handler,
-        "docs_manager": docs_manager,
-        "server": server,
-        "file_controller": file_controller,
+        # "settings": settings_manager,
+        # "db": db_handler,
+        # "docs_manager": docs_manager,
+        # "server": server,
+        # "file_controller": file_controller,
     }
 
     page.fonts = {
@@ -65,7 +84,7 @@ def main(page: Page):
 
     def on_close():
         server.stop()
-        db_handler.close()
+        container.get("db_handler").close()
         server_thread.join()
         print("Application closed")
 
@@ -84,14 +103,13 @@ try:
     app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
 except KeyboardInterrupt:
     logger.info("App stopped by user")
+    container = Container.get_instance()
     server.stop()
+    container.get("db_handler").close()
     server_thread.join()
-    raise
-except OSError:
+except OSError as e:
     logger.error("Port is already in use")
-    server.stop()
-    server_thread.join()
-    # もう一度tryする
+    raise e
 except Exception as e:
     logger.error(f"Error starting app: {e}")
     raise e
