@@ -2,7 +2,6 @@ import logging
 
 from flet import (
     Page,
-    ScrollMode,
     TemplateRoute,
     View,
 )
@@ -14,6 +13,7 @@ from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteP
 from app.service_container import Container
 from app.views.documents_view import DocumentsView, EditDocumentsView
 from app.views.header_view import HeaderView
+
 # from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
@@ -79,7 +79,6 @@ class RoutingHandler:
         if not param_list:
             return params
         for param in param_list:
-            # paramのvalueがEnumの場合は、Enumの値を取得する
             param_value = param.value
             if isinstance(param_value, str) or isinstance(param_value, int):
                 params[param.key] = param_value
@@ -100,20 +99,11 @@ class MyLayout(View):
             route=route,
             scroll=None,
         )
-        self.page = page
-        # self.expand = True
 
-        # home_controller = HomeController(self.page)
-
-
-        # スクロールモードを設定しているとエラーが発生するため、チャットページのみスクロールモードを無効にする
-        if self.route == '/':
-            self.scroll = ScrollMode.AUTO
-
-        self.routing_handler = RoutingHandler(self.page)
+        self.routing_handler = RoutingHandler(page)
         title, layout = self.routing_handler.resolve_view(self.route)
 
         self.controls = [
-            HeaderView(self.page, title.upper()),
+            HeaderView(page, title.upper()),
             layout,
         ]

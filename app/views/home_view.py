@@ -5,7 +5,6 @@ from flet import (
     Icon,
     ListTile,
     MainAxisAlignment,
-    Page,
     Row,
     Text,
     TextButton,
@@ -16,7 +15,7 @@ from app.models.home_models import HomeCardItem
 
 
 class HomeCard(Card):
-    def __init__(self, page: Page, card_item: HomeCardItem):
+    def __init__(self, card_item: HomeCardItem):
         super().__init__(
             content=Container(
                 content=Column(

@@ -23,8 +23,6 @@ from flet import (
 logger = logging.getLogger(__name__)
 
 
-
-
 class BaseTabBodyView(Column):
     """
     タブのボディ部分の基底クラス

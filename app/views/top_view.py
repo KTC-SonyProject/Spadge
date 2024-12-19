@@ -1,8 +1,10 @@
 from flet import (
     Column,
+    Container,
     Markdown,
     MarkdownExtensionSet,
     Page,
+    ScrollMode,
     app,
 )
 
@@ -14,13 +16,18 @@ class TopView(Column):
     def __init__(self, page: Page):
         super().__init__(
             spacing=10,
+            expand=True,
+            scroll=ScrollMode.AUTO,
         )
         self.controls = [
-            Markdown(
-                value=md,
-                selectable=True,
-                extension_set=MarkdownExtensionSet.GITHUB_WEB,
-                on_tap_link=lambda e: self.page.launch_url(e.data),
+            Container(
+                expand=True,
+                content=Markdown(
+                    value=md,
+                    selectable=True,
+                    extension_set=MarkdownExtensionSet.GITHUB_WEB,
+                    on_tap_link=lambda e: page.launch_url(e.data),
+                )
             )
         ]
 

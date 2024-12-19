@@ -227,7 +227,7 @@ class SettingsController(AbstractController):
 
 
 if __name__ == "__main__":
-    import flet as ft
+    from flet import app
     def main(page: Page) -> None:
         page.title = "Settings"
         settings_manager = SettingsManager()
@@ -235,4 +235,4 @@ if __name__ == "__main__":
         settings_view = settings_controller.get_view()
         page.add(settings_view)
 
-    ft.app(main)
+    app(main)
