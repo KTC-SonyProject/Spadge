@@ -8,13 +8,13 @@ from flet import (
 )
 
 from app.components.chat import ChatBody
-from app.controller.core import AbstractController
 from app.controller.home_controller import HomeController
+from app.controller.settings_controller import SettingsController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
 from app.views.documents_view import DocumentsView, EditDocumentsView
 from app.views.header_view import HeaderView
-from app.views.settings_view import SettingsView
+# from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
 from app.views.unity_view import UnityView
@@ -35,7 +35,7 @@ ROUTES = {
     "/documents/:document_id/edit": RouteItem("Edit Document", EditDocumentsView, [
         RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
     ]),
-    "/settings": RouteItem("Settings", SettingsView, [
+    "/settings": RouteItem("Settings", SettingsController, [
         RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)
     ]),
     "/chat": RouteItem("Chat", ChatBody, [
@@ -60,8 +60,8 @@ class RoutingHandler:
         params = self._resolve_params(route_info.params, route)
         if extra_params:
             params.update(extra_params)
-        if route_info.layout == HomeController:
-            return route_info.title, route_info.layout(self.page).get_view()
+        if route_info.layout in {HomeController, SettingsController}:
+            return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
         return route_info.title, route_info.layout(self.page, **params)
 

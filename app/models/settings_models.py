@@ -1,5 +1,14 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
+
+class LlmProvider(Enum):
+    AZURE = "azure"
+    GEMINI = "gemini"
+    OLLAMA = "ollama"
+
+class EmbeddingProvider(Enum):
+    AZURE = "azure"
 
 # データクラスで設定の構造を定義
 @dataclass
@@ -25,6 +34,7 @@ class DatabaseSettings:
     postgres_settings: PostgresSettings = field(default_factory=PostgresSettings)
     sqlite_settings: SqLiteSettings = field(default_factory=SqLiteSettings)
 
+
 @dataclass
 class AzureLlmSettings:
     endpoint: str = ""
@@ -41,8 +51,8 @@ class LangsmithSettings:
 
 @dataclass
 class LlmSettings:
-    llm_provider: str = "azure"
-    embedding_provider: str = "azure"
+    llm_provider: str = LlmProvider.AZURE
+    embedding_provider: str = EmbeddingProvider.AZURE
     azure_llm_settings: AzureLlmSettings = field(default_factory=AzureLlmSettings)
     use_langsmith: bool = False
     langsmith_settings: LangsmithSettings = field(default_factory=LangsmithSettings)
