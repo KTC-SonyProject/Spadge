@@ -12,8 +12,9 @@ md = open("README.md").read()
 
 class TopView(Column):
     def __init__(self, page: Page):
-        super().__init__()
-        self.spacing = 10
+        super().__init__(
+            spacing=10,
+        )
         self.controls = [
             Markdown(
                 value=md,
