@@ -1,23 +1,11 @@
 from flet import (
-    Card,
-    Column,
-    Container,
-    Icon,
     Icons,
-    ListTile,
-    MainAxisAlignment,
     Page,
-    Row,
-    Text,
-    TextButton,
-    alignment,
     app,
 )
 
 from app.models.home_models import HomeCardItem, go_page
 from app.views.home_view import HomeCard, HomeCardList, HomeView
-
-
 
 
 class HomeController:

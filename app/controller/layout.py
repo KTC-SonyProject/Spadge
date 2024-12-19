@@ -1,6 +1,4 @@
 import logging
-from dataclasses import dataclass
-from enum import Enum
 
 from flet import (
     Page,
@@ -9,12 +7,12 @@ from flet import (
     View,
 )
 
-from app.service_container import Container
-from app.models.route_models import RouteParam, RouteParamKey, RouteItem, RouteParamValue
 from app.components.chat import ChatBody
+from app.controller.home_controller import HomeController
+from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
+from app.service_container import Container
 from app.views.documents_view import DocumentsView, EditDocumentsView
 from app.views.header_view import HeaderView
-from app.controller.home_controller import HomeController
 from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView

@@ -14,10 +14,9 @@ from app.controller.file_controller import FileController
 from app.controller.settings_manager import SettingsManager
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
+from app.service_container import Container
 from app.unity_conn import SocketServer
 from app.views.views import MyView
-from app.service_container import Container
-
 
 server = SocketServer()
 server_thread = threading.Thread(target=server.start)
