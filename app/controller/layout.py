@@ -69,7 +69,6 @@ class RoutingHandler:
             template_route = TemplateRoute(route)
             if template_route.match(pattern):
                 if hasattr(template_route, "document_id"):
-                    print(f"Document ID: {template_route.document_id}\n\n\n\n")
                     route_info.params.append(RouteParam("document_id", template_route.document_id))
                 return route_info
         return None
@@ -80,7 +79,6 @@ class RoutingHandler:
             return params
         for param in param_list:
             # paramのvalueがEnumの場合は、Enumの値を取得する
-            logger.debug(f"\n\nParam: {param}\n\n")
             param_value = param.value
             if isinstance(param_value, str) or isinstance(param_value, int):
                 params[param.key] = param_value
@@ -118,62 +116,3 @@ class MyLayout(View):
             HeaderView(self.page, title.upper()),
             layout,
         ]
-        # self.troute = TemplateRoute(self.route)
-
-        # self.route_config = {
-        #     "/": {
-        #         "title": "Top",
-        #         "layout": TopView(self.page),
-        #     },
-        #     "/home": {
-        #         "title": "Home",
-        #         "layout": home_controller.get_home_view(),
-        #     },
-        #     "/voice": {
-        #         "title": "Voice",
-        #         "layout": VoiceView(self.page),
-        #     },
-        #     "/documents": {
-        #         "title": "Documents",
-        #         "layout": DocumentsView(self.page, self.page.data["docs_manager"]),
-        #     },
-        #     "/settings": {
-        #         "title": "Settings",
-        #         # 'layout': SettingsBody(self.page),
-        #         "layout": SettingsView(self.page, self.page.data["settings"]),
-        #     },
-        #     "/chat": {
-        #         "title": "Chat",
-        #         "layout": ChatBody(self.page),
-        #     },
-        #     "/unity": {
-        #         "title": "Unity",
-        #         "layout": UnityView(self.page, self.page.data["file_controller"]),
-        #     },
-        # }
-
-        # self.default_route_config = {
-        #     "title": "404 Page Not Found",
-        #     "layout": TemplateView(self.page, "404 Page Not Found"),
-        # }
-
-        # if self.troute.match("/documents/:document_id"):
-        #     self.route_info = {
-        #         'title': 'Document',
-        #         'layout': DocumentsView(self.page, self.page.data['docs_manager'], self.troute.document_id),
-        #     }
-        #     logger.debug(f"Document ID: {self.troute.document_id}")
-        # elif self.troute.match("/documents/:document_id/edit"):
-        #     self.route_info = {
-        #         "title": "Edit Document",
-        #         "layout": EditDocumentsView(self.page, self.page.data["docs_manager"], self.troute.document_id),
-        #     }
-        #     logger.debug(f"Edit Document ID: {self.troute.document_id}")
-        # else:
-        #     self.route_info = self.route_config.get(self.route, self.default_route_config)
-        #     logger.debug(f"Route: {self.route}")
-
-        # self.controls = [
-        #     HeaderView(self.page, self.route_info["title"].upper()),
-        #     self.route_info["layout"],  # ルートごとに適切なレイアウトを取得
-        # ]
