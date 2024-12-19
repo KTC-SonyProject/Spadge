@@ -8,6 +8,7 @@ from flet import (
 )
 
 from app.components.chat import ChatBody
+from app.controller.core import AbstractController
 from app.controller.home_controller import HomeController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
@@ -60,7 +61,7 @@ class RoutingHandler:
         if extra_params:
             params.update(extra_params)
         if route_info.layout == HomeController:
-            return route_info.title, route_info.layout(self.page).get_home_view()
+            return route_info.title, route_info.layout(self.page).get_view()
         logger.debug(f"Route: {route}")
         return route_info.title, route_info.layout(self.page, **params)
 
