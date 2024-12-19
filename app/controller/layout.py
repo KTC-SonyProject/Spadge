@@ -10,7 +10,7 @@ from flet import (
 from app.components.chat import ChatBody
 from app.views.documents_view import DocumentsView, EditDocumentsView
 from app.views.header_view import HeaderView
-from app.views.home_view import HomeView
+from app.controller.home_controller import HomeController
 from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
@@ -19,6 +19,9 @@ from app.views.voice_view import VoiceView
 
 logger = logging.getLogger(__name__)
 
+
+
+
 class MyLayout(View):
     def __init__(self, page: Page, route='/'):
         super().__init__()
@@ -26,6 +29,8 @@ class MyLayout(View):
         self.route = route
         self.expand = True
         self.scroll = None
+
+        home_controller = HomeController(self.page)
 
         # スクロールモードを設定しているとエラーが発生するため、チャットページのみスクロールモードを無効にする
         if self.route == '/':
@@ -40,7 +45,7 @@ class MyLayout(View):
             },
             "/home": {
                 "title": "Home",
-                "layout": HomeView(self.page),
+                "layout": home_controller.get_home_view(),
             },
             "/voice": {
                 "title": "Voice",
