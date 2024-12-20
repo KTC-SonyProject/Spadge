@@ -25,9 +25,7 @@ ROUTES = {
     "/home": RouteItem("Home", HomeController),
     "/voice": RouteItem("Voice", VoiceView),
     "/documents": RouteItem(
-        "Documents",
-        DocumentsController,
-        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
+        "Documents", DocumentsController, [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
     ),
     "/documents/:document_id": RouteItem(
         "Document",
@@ -43,9 +41,7 @@ ROUTES = {
         ],
     ),
     "/settings": RouteItem(
-        "Settings",
-        SettingsController,
-        [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
+        "Settings", SettingsController, [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
     ),
     "/chat": RouteItem(
         "Chat",
@@ -53,15 +49,9 @@ ROUTES = {
         [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
     ),
     "/unity": RouteItem(
-        "Unity",
-        UnityView,
-        [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
+        "Unity", UnityView, [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
     ),
-    "/404": RouteItem(
-        "404 Page Not Found",
-        TemplateView,
-        [RouteParam("text", "404 Page Not Found")]
-    ),
+    "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }
 
 

@@ -5,8 +5,8 @@ from typing import Any
 from langchain.globals import set_verbose
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
-from app.models.settings_models import LlmProvider, EmbeddingProvider
 from app.controller.settings_manager import load_settings
+from app.models.settings_models import EmbeddingProvider, LlmProvider
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 import logging
 
-from flet import Page, TextField, InputBorder
+from flet import InputBorder, Page, TextField
 
 from app.ai.vector_db import delete_document_from_vectorstore, indexing_document
 from app.controller.core import AbstractController
@@ -17,6 +17,7 @@ from app.views.documents_view import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 class DocumentsSidebarController(AbstractController):
     def __init__(self, page: Page, docs_manager: DocumentsManager):
@@ -56,6 +57,7 @@ class DocumentsSidebarController(AbstractController):
         def no_action(_):
             self.add_doc_modal.open = False
             self.page.update()
+
         add_doc_title_field = TextField(
             label="タイトル名",
             border=InputBorder.UNDERLINE,
@@ -96,14 +98,11 @@ class DocumentsSidebarController(AbstractController):
         )
         return self.sidebar
 
+
 class DocumentsController(AbstractController):
     def __init__(
-            self,
-            page: Page,
-            docs_manager: DocumentsManager,
-            document_id: int | None = None,
-            is_edit: bool = False
-        ):
+        self, page: Page, docs_manager: DocumentsManager, document_id: int | None = None, is_edit: bool = False
+    ):
         super().__init__(page)
         self.manager = docs_manager
         self.docs_view = None
@@ -152,6 +151,7 @@ class DocumentsController(AbstractController):
         def cancel_action(_):
             self.edit_doc_modal.open = False
             self.page.update()
+
         self.edit_doc_modal = create_edit_doc_modal(
             self._save_document,
             self._back_page,
@@ -197,9 +197,5 @@ class DocumentsController(AbstractController):
             )
             return self.edit_view
         else:
-            self.docs_view = DocumentsView(
-                self.page,
-                self.sidebar,
-                doc["content"]
-            )
+            self.docs_view = DocumentsView(self.page, self.sidebar, doc["content"])
             return self.docs_view

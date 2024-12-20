@@ -63,11 +63,11 @@ def create_nav_rail_item(page: Page, title: str, id: int):
 
 
 def create_modal(
-        title: Control,
-        content: Control,
-        actions: list[Control],
-        actions_alignment: MainAxisAlignment = MainAxisAlignment.END
-    ):
+    title: Control,
+    content: Control,
+    actions: list[Control],
+    actions_alignment: MainAxisAlignment = MainAxisAlignment.END,
+):
     return AlertDialog(
         modal=True,
         inset_padding=padding.symmetric(vertical=40, horizontal=100),
@@ -219,14 +219,14 @@ class EditBody(Row):
 
 class EditDocumentsView(Column):
     def __init__(
-            self,
-            doc_id: int,
-            edit_body: EditBody,
-            open_modal: callable,
-            save_document: callable,
-            delete_document: callable,
-            title: str = "Untitle",
-        ):
+        self,
+        doc_id: int,
+        edit_body: EditBody,
+        open_modal: callable,
+        save_document: callable,
+        delete_document: callable,
+        title: str = "Untitle",
+    ):
         super().__init__(
             expand=True,
             horizontal_alignment=CrossAxisAlignment.CENTER,
