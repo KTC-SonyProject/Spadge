@@ -38,7 +38,7 @@ class HomeController(AbstractController):
         items = []
 
         for card_item in card_items:
-            items.append(HomeCard(self.page, card_item))
+            items.append(HomeCard(card_item))
 
         return items
 
@@ -50,6 +50,7 @@ class HomeController(AbstractController):
 
 
 if __name__ == "__main__":
+
     def main(page: Page) -> None:
         page.title = "test"
         home_controller = HomeController(page)

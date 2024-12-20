@@ -37,7 +37,6 @@ class BaseDatabaseHandler(ABC):
         pass
 
 
-
 class SQLiteDatabaseHandler(BaseDatabaseHandler):
     def __init__(self, database_path: str, init_sql_path: str | None = None):
         self.database_path = database_path
@@ -81,7 +80,6 @@ class SQLiteDatabaseHandler(BaseDatabaseHandler):
         if self.connection:
             self.connection.close()
             logger.info("SQLite connection closed.")
-
 
 
 class PostgreSQLDatabaseHandler(BaseDatabaseHandler):
@@ -146,6 +144,7 @@ class DatabaseHandler:
 
 if __name__ == "__main__":
     from app.controller.settings_manager import SettingsManager
+
     settings_manager = SettingsManager()
     db = DatabaseHandler(settings_manager)
 

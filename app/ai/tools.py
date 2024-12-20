@@ -15,6 +15,7 @@ from app.unity_conn import SocketServer
 class SearchDocumentInput(BaseModel):
     query: str = Field(description="ドキュメントを検索するクエリ")
 
+
 @tool("search_documents_tool", args_schema=SearchDocumentInput)
 def search_documents_tool(query: str) -> list[Document]:
     """
@@ -28,6 +29,7 @@ def search_documents_tool(query: str) -> list[Document]:
     #     "content": res["content"],
     # }
     return results
+
 
 class OperationCommand(Enum):
     next_scene = "次のシーン"
@@ -110,10 +112,9 @@ tools = [search_documents_tool]
 if __name__ == "__main__":
     print(f"{search_documents_tool.name=}, {search_documents_tool.description=}, {search_documents_tool.args=}")
 
-    server=SocketServer()
+    server = SocketServer()
     display_operation_tool = DisplayOperationTool(server=server.start())
     print(f"{display_operation_tool.name=}, {display_operation_tool.description=}, {display_operation_tool.args=}")
-
 
     # print(search_documents_tool.invoke("test"))
     print(display_operation_tool.invoke("次のシーン"))

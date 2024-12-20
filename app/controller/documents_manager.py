@@ -4,6 +4,7 @@ from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
 
+
 class DocumentsManager:
     """
     ドキュメント関連のデータ操作を提供するViewModel。
@@ -65,7 +66,6 @@ class DocumentsManager:
         """
         query = "DELETE FROM documents WHERE document_id = %s;"
         self.db_handler.execute_query(query, (document_id,))
-
 
 
 if __name__ == "__main__":

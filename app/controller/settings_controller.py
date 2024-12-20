@@ -1,5 +1,4 @@
 import logging
-import time
 
 from flet import (
     Column,
@@ -11,7 +10,7 @@ from flet import (
 from app.controller.core import AbstractController
 from app.controller.settings_manager import SettingsManager
 from app.models.settings_models import LlmProvider
-from app.views.core import banner_message, create_dropdown, create_switch, create_text_field
+from app.views.core import BannerView, create_dropdown, create_switch, create_text_field
 from app.views.settings_view import (
     BaseSettingsView,
     SettingsView,
@@ -21,42 +20,45 @@ from app.views.settings_view import (
 
 logger = logging.getLogger(__name__)
 
+
 class SettingsController(AbstractController):
     def __init__(self, page: Page, settings_manager: SettingsManager):
         super().__init__(page)
         self.manager = settings_manager
+        self.banner = BannerView(page)
 
-    def _show_banner(self, event, status, message):
-        self.banner = banner_message(status, message, self._close_banner)
-        self.page.overlay.append(self.banner)
-        self.banner.open = True
-        self.page.update()
-        time.sleep(2)
-        self._close_banner(event)
+    # def _show_banner(self, event, status, message):
+    #     self.page.overlay.append(self.banner)
+    #     self.banner.open = True
+    #     self.page.update()
+    #     time.sleep(2)
+    #     self._close_banner(event)
 
-    def _close_banner(self, _):
-        self.banner.open = False
-        self.page.update()
+    # def _close_banner(self, _):
+    #     self.banner.open = False
+    #     self.page.update()
 
     def _change_settings_value(self, key: str, update_ui: callable = None):
         def handler(event):
             self.manager.update_setting(key, event.control.value)
             if update_ui:
                 update_ui(event)
+
         return handler
 
     def _save_settings(self, event):
         try:
             self.manager.save_settings()
-            self._show_banner(event, "success", "Settings saved successfully.")
+            self.banner.show_banner("success", "Settings saved successfully.")
         except Exception as e:
             logger.error(f"Error saving settings: {e}")
-            self._show_banner(event, "error", "Error saving settings.")
+            self.banner.show_banner("error", "Error saving settings.")
 
     def _toggle_visibility(self, visible_body: Column):
         def update_ui(event):
             visible_body.visible = event.control.value
             self.page.update()
+
         return update_ui
 
     def _create_general_tab(self) -> BaseSettingsView:
@@ -74,7 +76,7 @@ class SettingsController(AbstractController):
                     value=self.manager.get_setting(f"{nested_key}.app_description"),
                     on_change=self._change_settings_value("app_description"),
                 ),
-            ]
+            ],
         )
 
     def _create_database_tab(self) -> BaseSettingsView:
@@ -109,7 +111,7 @@ class SettingsController(AbstractController):
                     value=self.manager.get_setting(f"{nested_key}.postgres_settings.database"),
                     on_change=self._change_settings_value(f"{nested_key}.postgres_settings.database"),
                 ),
-            ]
+            ],
         )
         return BaseSettingsView(
             title="Database",
@@ -118,12 +120,11 @@ class SettingsController(AbstractController):
                     label="Use Postgres",
                     value=self.manager.get_setting(f"{nested_key}.use_postgres"),
                     on_change=self._change_settings_value(
-                        f"{nested_key}.use_postgres",
-                        self._toggle_visibility(self.postgres_body)
+                        f"{nested_key}.use_postgres", self._toggle_visibility(self.postgres_body)
                     ),
                 ),
                 self.postgres_body,
-            ]
+            ],
         )
 
     def _get_provider_body(self, provider: str) -> Column:
@@ -164,10 +165,7 @@ class SettingsController(AbstractController):
             body = [
                 Text("Ollama is unsupported provider."),
             ]
-        return visible_body_column(
-            True,
-            body
-        )
+        return visible_body_column(True, body)
 
     def _update_provider_body(self, event):
         provider = event.control.value
@@ -192,7 +190,7 @@ class SettingsController(AbstractController):
                     password=True,
                     can_reveal_password=True,
                 ),
-            ]
+            ],
         )
         return BaseSettingsView(
             title="LLM Provider",
@@ -209,12 +207,11 @@ class SettingsController(AbstractController):
                     label="Use Langsmith",
                     value=self.manager.get_setting(f"{nested_key}.use_langsmith"),
                     on_change=self._change_settings_value(
-                        f"{nested_key}.use_langsmith",
-                        self._toggle_visibility(self.langsmith_body)
+                        f"{nested_key}.use_langsmith", self._toggle_visibility(self.langsmith_body)
                     ),
                 ),
                 self.langsmith_body,
-            ]
+            ],
         )
 
     def get_view(self) -> SettingsView:
@@ -228,6 +225,7 @@ class SettingsController(AbstractController):
 
 if __name__ == "__main__":
     from flet import app
+
     def main(page: Page) -> None:
         page.title = "Settings"
         settings_manager = SettingsManager()

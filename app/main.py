@@ -22,6 +22,7 @@ server = SocketServer()
 server_thread = threading.Thread(target=server.start)
 server_thread.start()
 
+
 def initialize_services(page: Page) -> Container:
     """必要なサービスを初期化してコンテナに登録"""
     container = Container.get_instance()
@@ -41,6 +42,7 @@ def initialize_services(page: Page) -> Container:
     container.register("file_controller", file_controller)
 
     return container
+
 
 def main(page: Page):
     page.title = "Spadge"
@@ -68,7 +70,6 @@ def main(page: Page):
     page.window.min_width = 800
     page.window.min_height = 600
 
-
     theme = ft.Theme()
     theme.font_family = "default"
     theme.page_transitions.android = ft.PageTransitionTheme.NONE
@@ -88,6 +89,7 @@ def main(page: Page):
         print("Application closed")
 
     page.on_close = on_close
+
 
 setup_logging()
 logger = logging.getLogger(__name__)

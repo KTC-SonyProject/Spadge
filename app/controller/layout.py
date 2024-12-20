@@ -7,14 +7,12 @@ from flet import (
 )
 
 from app.components.chat import ChatBody
+from app.controller.documents_controller import DocumentsController
 from app.controller.home_controller import HomeController
 from app.controller.settings_controller import SettingsController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
-from app.views.documents_view import DocumentsView, EditDocumentsView
 from app.views.header_view import HeaderView
-
-# from app.views.settings_view import SettingsView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
 from app.views.unity_view import UnityView
@@ -26,27 +24,44 @@ ROUTES = {
     "/": RouteItem("Top", TopView),
     "/home": RouteItem("Home", HomeController),
     "/voice": RouteItem("Voice", VoiceView),
-    "/documents": RouteItem("Documents", DocumentsView, [
-        RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)
-    ]),
-    "/documents/:document_id": RouteItem("Document", DocumentsView, [
-        RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
-    ]),
-    "/documents/:document_id/edit": RouteItem("Edit Document", EditDocumentsView, [
-        RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
-    ]),
-    "/settings": RouteItem("Settings", SettingsController, [
-        RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)
-    ]),
-    "/chat": RouteItem("Chat", ChatBody, [
-        RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
-    ]),
-    "/unity": RouteItem("Unity", UnityView, [
-        RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)
-    ]),
-    "/404": RouteItem("404 Page Not Found", TemplateView, [
-        RouteParam("text", "404 Page Not Found")
-    ]),
+    "/documents": RouteItem(
+        "Documents",
+        DocumentsController,
+        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
+    ),
+    "/documents/:document_id": RouteItem(
+        "Document",
+        DocumentsController,
+        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)],
+    ),
+    "/documents/:document_id/edit": RouteItem(
+        "Edit Document",
+        DocumentsController,
+        [
+            RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam("is_edit", True),
+        ],
+    ),
+    "/settings": RouteItem(
+        "Settings",
+        SettingsController,
+        [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
+    ),
+    "/chat": RouteItem(
+        "Chat",
+        ChatBody,
+        [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
+    ),
+    "/unity": RouteItem(
+        "Unity",
+        UnityView,
+        [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
+    ),
+    "/404": RouteItem(
+        "404 Page Not Found",
+        TemplateView,
+        [RouteParam("text", "404 Page Not Found")]
+    ),
 }
 
 
@@ -60,7 +75,7 @@ class RoutingHandler:
         params = self._resolve_params(route_info.params, route)
         if extra_params:
             params.update(extra_params)
-        if route_info.layout in {HomeController, SettingsController}:
+        if route_info.layout in {HomeController, SettingsController, DocumentsController}:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
         return route_info.title, route_info.layout(self.page, **params)
@@ -91,10 +106,8 @@ class RoutingHandler:
         return params
 
 
-
-
 class MyLayout(View):
-    def __init__(self, page: Page, route='/'):
+    def __init__(self, page: Page, route="/"):
         super().__init__(
             route=route,
             scroll=None,

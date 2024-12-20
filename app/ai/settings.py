@@ -5,14 +5,16 @@ from typing import Any
 from langchain.globals import set_verbose
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
+from app.models.settings_models import LlmProvider, EmbeddingProvider
 from app.controller.settings_manager import load_settings
 
 logger = logging.getLogger(__name__)
 
+
 def llm_settings(verbose: bool = False) -> Any:
     set_verbose(verbose)
     settings = load_settings("llm_settings")
-    if "azure" == settings.get("llm_provider"):
+    if settings.get("llm_provider") == LlmProvider.AZURE.value:
         settings = settings.get("azure_llm_settings")
         # 変数が空文字の場合はエラーを出す
         for key in settings:
@@ -29,27 +31,30 @@ def llm_settings(verbose: bool = False) -> Any:
             max_retries=2,
             streaming=True,
         )
-    elif "gemini" == settings.get("llm_provider"):
+    elif settings.get("llm_provider") == LlmProvider.GEMINI.value:
         print("Gemini is not implemented yet.")
         raise ValueError(f"Invalid LLM type: {settings.get("llm_provider")}")
-    elif "ollama" == settings.get("llm_provider"):
+    elif settings.get("llm_provider") == LlmProvider.OLLAMA.value:
         print("Ollama is not implemented yet.")
         raise ValueError(f"Invalid LLM type: {settings.get("llm_provider")}")
     else:
         raise ValueError(f"Invalid LLM type: {settings.get("llm_provider")}")
 
+
 def embedding_model_settings():
     settings = load_settings("llm_settings")
-    if "azure" == settings.get("embedding_provider"):
+    if settings.get("embedding_provider") == EmbeddingProvider.AZURE.value:
         settings = settings.get("azure_llm_settings")
-        os.environ["AZURE_API_KEY"] = settings.get("api_key")
+        os.environ["AZURE_OPENAI_API_KEY"] = settings.get("api_key")
+        model_name: str = settings.get("deployment_embedding_name")
         return AzureOpenAIEmbeddings(
+            model=model_name,
             azure_endpoint=settings.get("endpoint"),
-            azure_deployment=settings.get("deployment_embdding_name"),
             openai_api_version=settings.get("api_version"),
         )
     else:
         raise ValueError(f"Invalid embedding model type: {settings.get("embedding_provider")}")
+
 
 def langsmith_settigns():
     settings = load_settings("llm_settings")
@@ -62,6 +67,7 @@ def langsmith_settigns():
     else:
         os.environ["LANGCHAIN_TRACING_V2"] = "false"
         logger.info("Langsmith is not setting.")
+
 
 if __name__ == "__main__":
     llm = llm_settings(verbose=True)

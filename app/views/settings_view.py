@@ -1,4 +1,3 @@
-
 from flet import (
     Column,
     Container,
@@ -99,9 +98,11 @@ def create_llm_settings_body():
         ],
     )
 
+
 class LLMSettingsView(BaseSettingsView):
     def __init__(self, body_content: any):
         super().__init__("LLM Settings", body_content)
+
 
 class SettingsView(Column):
     def __init__(self, tabs: list[TabView], save_button_click: callable):

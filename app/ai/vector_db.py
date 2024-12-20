@@ -11,7 +11,7 @@ def create_document_obj(content: str, document_id: int, return_list: bool = True
     """
     ドキュメントオブジェクトを作成する関数
     """
-    document = Document(page_content=content, metadata={"source": document_id})
+    document = Document(page_content=content, metadata={"source": f"{document_id}"})
     if return_list:
         return [document]
     else:

@@ -27,7 +27,7 @@ class TopView(Column):
                     selectable=True,
                     extension_set=MarkdownExtensionSet.GITHUB_WEB,
                     on_tap_link=lambda e: page.launch_url(e.data),
-                )
+                ),
             )
         ]
 

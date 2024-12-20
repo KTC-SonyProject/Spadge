@@ -14,6 +14,7 @@ class RouteParamKey(Enum):
     SERVER_THREAD = "server_thread"
     FILE_CONTROLLER = "file_controller"
 
+
 class RouteParamValue(Enum):
     SETTINGS = "data:settings_manager"
     DB_HANDLER = "data:db_handler"
@@ -22,10 +23,12 @@ class RouteParamValue(Enum):
     SERVER_THREAD = "data:server_thread"
     FILE_CONTROLLER = "data:file_controller"
 
+
 @dataclass
 class RouteParam:
     key: RouteParamKey | str
     value: RouteParamValue | str | int
+
 
 @dataclass
 class RouteItem:

@@ -45,6 +45,7 @@ class HomeCardList(Column):
             controls=card_list,
         )
 
+
 class HomeView(Container):
     def __init__(self, home_card_list: HomeCardList):
         super().__init__(

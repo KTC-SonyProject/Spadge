@@ -33,7 +33,7 @@ class Message:
 
 # アイコン、名前、チャットの再利用可能なチャットメッセージ
 class ChatMessage(Row):
-    def __init__(self, message:Message):
+    def __init__(self, message: Message):
         super().__init__()
         self.vertical_alignment = CrossAxisAlignment.START
         if message.message_type == "ai":
@@ -43,7 +43,7 @@ class ChatMessage(Row):
                 CircleAvatar(
                     content=Text(self.get_initials(message.user_name)),
                     color=Colors.WHITE,
-                    bgcolor=self.get_avatar_color(message.user_name)
+                    bgcolor=self.get_avatar_color(message.user_name),
                 ),
                 # 名前とメッセージのカラム
                 Column(
@@ -54,12 +54,12 @@ class ChatMessage(Row):
                             selectable=True,
                             extension_set=MarkdownExtensionSet.GITHUB_WEB,
                             on_tap_link=self.tap_link,
-                        )
+                        ),
                     ],
                     tight=True,
                     spacing=5,
-                    expand=True
-                )
+                    expand=True,
+                ),
             ]
         else:
             self.alignment = MainAxisAlignment.END
@@ -78,7 +78,7 @@ class ChatMessage(Row):
                     tight=True,
                     spacing=5,
                     expand=True,
-                    horizontal_alignment=CrossAxisAlignment.END
+                    horizontal_alignment=CrossAxisAlignment.END,
                 ),
                 # # アイコン
                 # CircleAvatar(
@@ -119,8 +119,6 @@ class ChatMessage(Row):
             self.page.launch_url(e.data)
 
 
-
-
 class ChatBody(Column):
     def __init__(self, page: Page, socket_server, session_id: str = "1"):
         super().__init__()
@@ -128,10 +126,12 @@ class ChatBody(Column):
         try:
             self._initialize_chatbot(session_id, socket_server)
         except ValueError as e:
-            self.controls = [Container(
-                content=Text(str(e), color=Colors.RED),
-                padding=padding.all(20),
-            )]
+            self.controls = [
+                Container(
+                    content=Text(str(e), color=Colors.RED),
+                    padding=padding.all(20),
+                )
+            ]
             return
         self.chat = ListView(expand=True, spacing=50, auto_scroll=True)
         self.new_message = TextField(
@@ -142,31 +142,23 @@ class ChatBody(Column):
             max_lines=5,
             filled=True,
             expand=True,
-            on_submit=self.send_message_click
+            on_submit=self.send_message_click,
         )
-        self.progress = ProgressBar(
-            color=Colors.PINK,
-            bgcolor=Colors.GREY_200,
-            visible=False
-        )
+        self.progress = ProgressBar(color=Colors.PINK, bgcolor=Colors.GREY_200, visible=False)
         self.controls = [
             Container(
                 content=self.chat,
                 border=border.all(1, Colors.OUTLINE),
                 border_radius=5,
-                expand=True  # Containerも縦に展開する
+                expand=True,  # Containerも縦に展開する
             ),
             self.progress,
             Row(
                 [
                     self.new_message,
-                    IconButton(
-                        icon=Icons.SEND_ROUNDED,
-                        tooltip="Send message",
-                        on_click=self.send_message_click
-                    )
+                    IconButton(icon=Icons.SEND_ROUNDED, tooltip="Send message", on_click=self.send_message_click),
                 ]
-            )
+            ),
         ]
         self.expand = True
         self.show_chat_history()
@@ -202,10 +194,7 @@ class ChatBody(Column):
             print(e)
 
     def on_message(self, message: Message) -> None:
-        m = Container(
-            content=ChatMessage(message),
-            padding=padding.symmetric(horizontal=30, vertical=10)
-        )
+        m = Container(content=ChatMessage(message), padding=padding.symmetric(horizontal=30, vertical=10))
         self.chat.controls.append(m)
         self.page.update()
 
@@ -213,7 +202,7 @@ class ChatBody(Column):
         if self.new_message.value != "":
             # self.on_message(Message(user_name='user', text=self.new_message.value, message_type='human'))
             send_message = self.new_message.value
-            self.new_message.value = ''
+            self.new_message.value = ""
             self.progress.visible = True
             self.page.update()
             tool_used = False
@@ -232,7 +221,7 @@ class ChatBody(Column):
                             Message(
                                 user_name="AI",
                                 text=f"ツールを使用して取得した情報です:\n{urls_message}",
-                                message_type="ai"
+                                message_type="ai",
                             )
                         )
                         tool_used = False
@@ -258,9 +247,10 @@ class ChatBody(Column):
             self.page.update()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     def main(page: Page) -> None:
-        page.title = 'AI Chat'
+        page.title = "AI Chat"
         chat_page = ChatBody(page)
         page.add(chat_page)
 

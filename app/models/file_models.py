@@ -22,6 +22,7 @@ class FileModel:
 
         return self.page.get_upload_url(file.name, 600)
 
+
 if __name__ == "__main__":
     file_model = FileModel()
     file_model.set_selected_files(["test1.txt", "test2.txt"])
@@ -31,6 +32,6 @@ if __name__ == "__main__":
         # テストファイルがない場合は作成
         with open(f"{file_model.upload_url}/test1.txt", "w") as f:
             f.write("test1.txt")
-    print(file_model.get_file_path("test1.txt")) # /tmp/uploads/test1.txt
-    print(file_model.get_file_path("test2.txt")) # /tmp/uploads/test2.txt
-    print(file_model.get_file_path("test3.txt")) # None
+    print(file_model.get_file_path("test1.txt"))  # /tmp/uploads/test1.txt
+    print(file_model.get_file_path("test2.txt"))  # /tmp/uploads/test2.txt
+    print(file_model.get_file_path("test3.txt"))  # None

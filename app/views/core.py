@@ -3,6 +3,7 @@ View用の共通基底クラスや抽象クラスを定義
 """
 
 import logging
+import time
 
 from flet import (
     Banner,
@@ -12,6 +13,7 @@ from flet import (
     Dropdown,
     IconButton,
     Icons,
+    Page,
     Switch,
     Tab,
     Text,
@@ -23,10 +25,52 @@ from flet import (
 logger = logging.getLogger(__name__)
 
 
+def create_text_field(label, value, on_change, password=False, can_reveal_password=False):
+    """共通のTextField作成関数"""
+    return TextField(
+        label=label,
+        value=value,
+        on_change=on_change,
+        password=password,
+        can_reveal_password=can_reveal_password,
+    )
+
+
+def create_switch(label, value, on_change):
+    """共通のSwitch作成関数"""
+    return Switch(
+        label=label,
+        value=value,
+        on_change=on_change,
+    )
+
+
+def create_dropdown(label, value, items, on_change):
+    """共通のDropdown作成関数"""
+    options = [dropdown.Option(item) for item in items]
+    return Dropdown(
+        label=label,
+        value=value,
+        options=options,
+        on_change=on_change,
+    )
+
+
+def create_banner(status, message, close_banner):
+    """バナーメッセージを作成する"""
+    banner = Banner(
+        bgcolor="red" if status == "error" else "green",
+        content=Text(message),
+        actions=[IconButton(icon=Icons.CLOSE, on_click=close_banner)],
+    )
+    return banner
+
+
 class BaseTabBodyView(Column):
     """
     タブのボディ部分の基底クラス
     """
+
     def __init__(self, title: str, body_content: any):
         super().__init__(
             spacing=10,
@@ -42,9 +86,10 @@ class BaseTabBodyView(Column):
                 Column(
                     controls=body_content,
                     expand=True,
-                )
-            ]
+                ),
+            ],
         )
+
 
 class TabView(Tab):
     def __init__(self, title: str, content: BaseTabBodyView):
@@ -54,39 +99,19 @@ class TabView(Tab):
         )
 
 
-def create_text_field(label, value, on_change, password=False, can_reveal_password=False):
-    """共通のTextField作成関数"""
-    return TextField(
-        label=label,
-        value=value,
-        on_change=on_change,
-        password=password,
-        can_reveal_password=can_reveal_password,
-    )
+class BannerView:
+    def __init__(self, page: Page):
+        self.page = page
+        self.banner = None
 
-def create_switch(label, value, on_change):
-    """共通のSwitch作成関数"""
-    return Switch(
-        label=label,
-        value=value,
-        on_change=on_change,
-    )
+    def close_banner(self, _):
+        self.banner.open = False
+        self.page.update()
 
-def create_dropdown(label, value, items, on_change):
-    """共通のDropdown作成関数"""
-    options = [dropdown.Option(item) for item in items]
-    return Dropdown(
-        label=label,
-        value=value,
-        options=options,
-        on_change=on_change,
-    )
-
-def banner_message(status, message, close_banner):
-    """バナーメッセージを表示する"""
-    banner = Banner(
-        bgcolor="red" if status == "error" else "green",
-        content=Text(message),
-        actions=[IconButton(icon=Icons.CLOSE, on_click=close_banner)],
-    )
-    return banner
+    def show_banner(self, status, message):
+        self.banner = create_banner(status, message, self.close_banner)
+        self.page.overlay.append(self.banner)
+        self.banner.open = True
+        self.page.update()
+        time.sleep(2)
+        self.close_banner(None)

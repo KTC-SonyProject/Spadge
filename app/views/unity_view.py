@@ -45,7 +45,6 @@ class FileSettingsView(BaseTabBodyView):
         )
         self.controller = file_controller
 
-
     def create_body(self):
         self.file_picker = FilePicker(on_result=self.on_file_selected, on_upload=self.on_upload)
         self.page.overlay.append(self.file_picker)
@@ -65,8 +64,8 @@ class FileSettingsView(BaseTabBodyView):
                 ),
                 self.selected_files,
                 self.upload_button,
-            ]
-       )
+            ],
+        )
 
     def on_file_selected(self, e):
         print(f"ファイルが選択されました: {e.files}")
@@ -114,6 +113,7 @@ class FileSettingsView(BaseTabBodyView):
             self.selected_files.value = "Error uploading files"
         self.upload_button.visible = False
         self.page.update()
+
 
 # class FileSettingsBody(Column):
 #     def __init__(self, page: Page):

@@ -21,6 +21,7 @@ def input_thread(queue):
         user_input = input()  # ブロッキングな入力
         queue.put(user_input)  # 入力をキューに送る
 
+
 Thread(target=input_thread, args=(input_queue,), daemon=True).start()
 
 try:

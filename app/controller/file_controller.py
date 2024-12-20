@@ -8,19 +8,20 @@ from app.unity_conn import SocketServer
 
 logger = logging.getLogger(__name__)
 
+
 class FileController:
     def __init__(self, page: Page, socket_server: SocketServer):
         self.model = FileModel(page)
         self.server = socket_server
 
     def handle_file_selection(self, files: list[FilePickerUploadFile]) -> list[FilePickerUploadFile] | None:
-            """ファイル選択時にモデルを更新"""
-            if files:
-                selected_files = self.model.set_selected_files(files)
-                logger.debug(f"選択されたファイル: {selected_files}")
-                return selected_files
-            else:
-                return None
+        """ファイル選択時にモデルを更新"""
+        if files:
+            selected_files = self.model.set_selected_files(files)
+            logger.debug(f"選択されたファイル: {selected_files}")
+            return selected_files
+        else:
+            return None
 
     def prepare_upload_files(self) -> list[FilePickerUploadFile]:
         """ファイルの一時アップロード用URLを生成"""
@@ -69,4 +70,3 @@ if __name__ == "__main__":
         with open(f"{file_controller.model.upload_url}/test1.txt", "w") as f:
             f.write("test1.txt")
     print(file_controller.model.get_file_path("test1.txt"))  # /tmp/uploads/test1.txt
-

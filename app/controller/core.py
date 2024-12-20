@@ -17,7 +17,9 @@ class AbstractController(ABC):
     def get_view(self) -> callable:
         raise NotImplementedError
 
+
 def go_page(page: Page, path: str) -> callable:
     def handler(_: ControlEvent):
         page.go(path)
+
     return handler

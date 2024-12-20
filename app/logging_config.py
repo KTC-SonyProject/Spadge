@@ -13,13 +13,15 @@ class JSTFormatter(logging.Formatter):
             return dt.strftime(datefmt)
         return dt.isoformat()
 
+
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {"standard": {
-        "()": JSTFormatter,
-        "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        "datefmt": "%Y-%m-%d %H:%M:%S",
+    "formatters": {
+        "standard": {
+            "()": JSTFormatter,
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
     "handlers": {

@@ -6,7 +6,6 @@ from dataclasses import is_dataclass
 logger = logging.getLogger(__name__)
 
 
-
 def to_snake_case(name: str) -> str:
     """
     クラス名をスネークケースに変換する。

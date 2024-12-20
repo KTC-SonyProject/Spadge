@@ -7,14 +7,17 @@ class LlmProvider(Enum):
     GEMINI = "gemini"
     OLLAMA = "ollama"
 
+
 class EmbeddingProvider(Enum):
     AZURE = "azure"
+
 
 # データクラスで設定の構造を定義
 @dataclass
 class GeneralSettings:
     app_name: str = "Spadge"
     app_description: str = ""
+
 
 @dataclass
 class PostgresSettings:
@@ -24,9 +27,11 @@ class PostgresSettings:
     user: str = "postgres"
     password: str = "postgres"
 
+
 @dataclass
 class SqLiteSettings:
     database: str = "main_db.db"
+
 
 @dataclass
 class DatabaseSettings:
@@ -43,11 +48,13 @@ class AzureLlmSettings:
     deployment_embedding_name: str = ""
     api_version: str = ""
 
+
 @dataclass
 class LangsmithSettings:
     endpoint: str = "https://api.smith.langchain.com"
     project_name: str = ""
     api_key: str = ""
+
 
 @dataclass
 class LlmSettings:
@@ -63,10 +70,12 @@ class LlmSettings:
             return self.azure_llm_settings
         return None
 
+
 @dataclass
 class AppSettings:
     general_settings: GeneralSettings = field(default_factory=GeneralSettings)
     database_settings: DatabaseSettings = field(default_factory=DatabaseSettings)
     llm_settings: LlmSettings = field(default_factory=LlmSettings)
+
 
 DEFAULT_SETTINGS = AppSettings()
