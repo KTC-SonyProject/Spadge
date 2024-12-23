@@ -21,7 +21,7 @@ flet = {extras = ["all"], version = "^0.25.1"}
 
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.8.2"
+ruff = "^0.8.4"
 ipython = "^8.29.0"
 
 [build-system]
