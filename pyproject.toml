@@ -57,3 +57,6 @@ select = [
 ignore = [
 ]
 fixable = ["ALL"]
+
+[tool.ruff.lint.pylint]
+max-args = 6
