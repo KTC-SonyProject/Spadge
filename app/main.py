@@ -9,16 +9,16 @@ from flet import (
     app,
 )
 
-from app.controller.documents_manager import DocumentsManager
-from app.controller.file_controller import FileController
-from app.controller.settings_manager import SettingsManager
-from app.controller.socket_server import SocketServer
+from app.controller.manager.documents_manager import DocumentsManager
+from app.controller.manager.file_manager import FileManager
+from app.controller.manager.server_manager import ServerManager
+from app.controller.manager.settings_manager import SettingsManager
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
 from app.service_container import Container
 from app.views.views import MyView
 
-server = SocketServer()
+server = ServerManager()
 server_thread = threading.Thread(target=server.start)
 server_thread.start()
 
@@ -31,7 +31,7 @@ def initialize_services(page: Page) -> Container:
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
-    file_controller = FileController(page, server)
+    file_controller = FileManager(page, server)
 
     # コンテナに登録
     container.register("settings_manager", settings_manager)

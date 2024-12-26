@@ -46,7 +46,7 @@ def create_file_settings_body(
 
 
 # class FileSettingsView(BaseTabBodyView):
-#     def __init__(self, page: Page, file_controller: FileController):
+#     def __init__(self, page: Page, file_controller: FileManager):
 #         super().__init__(
 #             page,
 #             "File",
@@ -124,7 +124,7 @@ def create_file_settings_body(
 
 
 # class TabBody(Tab):
-#     def __init__(self, page: Page, title: str, file_controller: FileController | None = None):
+#     def __init__(self, page: Page, title: str, file_controller: FileManager | None = None):
 #         super().__init__()
 #         self.page = page
 #         self.text = title

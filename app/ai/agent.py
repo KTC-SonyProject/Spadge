@@ -15,8 +15,8 @@ from typing_extensions import TypedDict
 
 from app.ai.settings import langsmith_settigns, llm_settings
 from app.ai.tools import DisplayOperationTool, tools
-from app.controller.settings_manager import load_settings
-from app.controller.socket_server import SocketServer
+from app.controller.manager.server_manager import ServerManager
+from app.controller.manager.settings_manager import load_settings
 
 
 class State(TypedDict):
@@ -24,7 +24,7 @@ class State(TypedDict):
 
 
 class ChatbotGraph:
-    def __init__(self, server: SocketServer, verbose: bool = False):
+    def __init__(self, server: ServerManager, verbose: bool = False):
         self.graph_builder = StateGraph(State)
         langsmith_settigns()
         try:
@@ -99,9 +99,9 @@ if __name__ == "__main__":
     import pprint
     from threading import Thread
 
-    from app.controller.socket_server import SocketServer
+    from app.controller.manager.server_manager import ServerManager
 
-    server = SocketServer()
+    server = ServerManager()
     server_thread = Thread(target=server.start, daemon=True)
     server_thread.start()
 

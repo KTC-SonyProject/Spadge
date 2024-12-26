@@ -70,7 +70,7 @@ class DocumentsManager:
 
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
-    from app.controller.settings_manager import SettingsManager
+    from app.controller.manager.settings_manager import SettingsManager
 
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)

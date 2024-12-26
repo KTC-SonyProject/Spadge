@@ -3,14 +3,14 @@ import os
 
 from flet import FilePickerUploadFile, Page
 
-from app.controller.socket_server import SocketServer
+from app.controller.manager.server_manager import ServerManager
 from app.models.file_models import FileModel
 
 logger = logging.getLogger(__name__)
 
 
-class FileController:
-    def __init__(self, page: Page, socket_server: SocketServer):
+class FileManager:
+    def __init__(self, page: Page, socket_server: ServerManager):
         self.model = FileModel(page)
         self.server = socket_server
 
@@ -61,7 +61,7 @@ class FileController:
 
 
 if __name__ == "__main__":
-    file_controller = FileController(SocketServer())
+    file_controller = FileManager(ServerManager())
     file_controller.handle_file_selection(["test1.txt", "test2.txt"])
     print(file_controller.model.selected_files)
 

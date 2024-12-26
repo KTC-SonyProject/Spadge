@@ -5,7 +5,7 @@ from pathlib import Path
 
 from psycopg_pool import ConnectionPool
 
-from app.controller.settings_manager import SettingsManager
+from app.controller.manager.settings_manager import SettingsManager
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +143,7 @@ class DatabaseHandler:
 
 
 if __name__ == "__main__":
-    from app.controller.settings_manager import SettingsManager
+    from app.controller.manager.settings_manager import SettingsManager
 
     settings_manager = SettingsManager()
     db = DatabaseHandler(settings_manager)

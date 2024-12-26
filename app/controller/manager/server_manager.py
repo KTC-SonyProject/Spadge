@@ -5,7 +5,7 @@ import socket
 logger = logging.getLogger(__name__)
 
 
-class SocketServer:
+class ServerManager:
     """
     Socketサーバーを管理するクラス
     """

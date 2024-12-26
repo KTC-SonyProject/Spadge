@@ -4,7 +4,7 @@ from flet import InputBorder, Page, TextField
 
 from app.ai.vector_db import delete_document_from_vectorstore, indexing_document
 from app.controller.core import AbstractController
-from app.controller.documents_manager import DocumentsManager
+from app.controller.manager.documents_manager import DocumentsManager
 from app.views.core import BannerView
 from app.views.documents_view import (
     DocumentsView,

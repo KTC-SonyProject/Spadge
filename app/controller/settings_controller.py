@@ -8,7 +8,7 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
-from app.controller.settings_manager import SettingsManager
+from app.controller.manager.settings_manager import SettingsManager
 from app.models.settings_models import LlmProvider
 from app.views.core import BannerView, create_dropdown, create_switch, create_text_field
 from app.views.settings_view import (

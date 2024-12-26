@@ -9,7 +9,7 @@ from langchain_core.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 from app.ai.vector_db import get_vector_store
-from app.controller.socket_server import SocketServer
+from app.controller.manager.server_manager import ServerManager
 
 
 class SearchDocumentInput(BaseModel):
@@ -50,7 +50,7 @@ class DisplayOperationTool(BaseTool):
     description: str = "Displayの操作を行う"
     args_schema: type[BaseModel] = DisplayOperationInput
 
-    server: SocketServer
+    server: ServerManager
 
     def send_command(self, command: str) -> None:
         """
@@ -112,7 +112,7 @@ tools = [search_documents_tool]
 if __name__ == "__main__":
     print(f"{search_documents_tool.name=}, {search_documents_tool.description=}, {search_documents_tool.args=}")
 
-    server = SocketServer()
+    server = ServerManager()
     display_operation_tool = DisplayOperationTool(server=server.start())
     print(f"{display_operation_tool.name=}, {display_operation_tool.description=}, {display_operation_tool.args=}")
 

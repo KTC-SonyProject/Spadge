@@ -2,12 +2,12 @@ from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 
-from app.controller.socket_server import SocketServer
+from app.controller.manager.server_manager import ServerManager
 from app.logging_config import setup_logging
 
 setup_logging()
 
-server = SocketServer()
+server = ServerManager()
 server_thread = Thread(target=server.start, daemon=True)
 server_thread.start()
 

@@ -8,7 +8,7 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
-from app.controller.file_controller import FileController
+from app.controller.manager.file_manager import FileManager
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class UnityController(AbstractController):
-    def __init__(self, page: Page, file_controller: FileController):
+    def __init__(self, page: Page, file_controller: FileManager):
         super().__init__(page)
         self.file_controller = file_controller
 
@@ -107,11 +107,11 @@ class UnityController(AbstractController):
 if __name__ == "__main__":
     import flet as ft
 
-    from app.controller.socket_server import SocketServer
+    from app.controller.manager.server_manager import ServerManager
 
     def main(page):
-        server = SocketServer()
-        file_controller = FileController(page, server)
+        server = ServerManager()
+        file_controller = FileManager(page, server)
         unity_controller = UnityController(page, file_controller)
         page.add(unity_controller.get_view())
 
