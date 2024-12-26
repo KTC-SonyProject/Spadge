@@ -12,10 +12,10 @@ from flet import (
 from app.controller.documents_manager import DocumentsManager
 from app.controller.file_controller import FileController
 from app.controller.settings_manager import SettingsManager
+from app.controller.socket_server import SocketServer
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
 from app.service_container import Container
-from app.unity_conn import SocketServer
 from app.views.views import MyView
 
 server = SocketServer()

@@ -2,8 +2,8 @@ from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 
+from app.controller.socket_server import SocketServer
 from app.logging_config import setup_logging
-from app.unity_conn import SocketServer
 
 setup_logging()
 

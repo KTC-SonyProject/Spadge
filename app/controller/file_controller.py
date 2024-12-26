@@ -3,8 +3,8 @@ import os
 
 from flet import FilePickerUploadFile, Page
 
+from app.controller.socket_server import SocketServer
 from app.models.file_models import FileModel
-from app.unity_conn import SocketServer
 
 logger = logging.getLogger(__name__)
 

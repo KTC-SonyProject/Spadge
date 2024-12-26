@@ -9,7 +9,7 @@ from langchain_core.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 from app.ai.vector_db import get_vector_store
-from app.unity_conn import SocketServer
+from app.controller.socket_server import SocketServer
 
 
 class SearchDocumentInput(BaseModel):
