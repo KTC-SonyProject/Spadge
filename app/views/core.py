@@ -16,6 +16,8 @@ from flet import (
     Page,
     Switch,
     Tab,
+    TabAlignment,
+    Tabs,
     Text,
     TextField,
     alignment,
@@ -97,6 +99,16 @@ class TabView(Tab):
             text=title,
             content=content,
         )
+
+
+def create_tabs(tabs: list[TabView]):
+    return Tabs(
+        expand=True,
+        selected_index=0,
+        animation_duration=300,
+        tab_alignment=TabAlignment.CENTER,
+        tabs=tabs,
+    )
 
 
 class BannerView:

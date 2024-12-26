@@ -5,14 +5,18 @@ from flet import (
     Dropdown,
     ElevatedButton,
     Row,
-    TabAlignment,
-    Tabs,
     Text,
     alignment,
     dropdown,
 )
 
-from app.views.core import BaseTabBodyView, TabView, create_switch, create_text_field
+from app.views.core import (
+    BaseTabBodyView,
+    TabView,
+    create_switch,
+    create_tabs,
+    create_text_field,
+)
 
 
 class BaseSettingsView(BaseTabBodyView):
@@ -111,13 +115,7 @@ class SettingsView(Column):
             expand=True,
         )
 
-        self.controls = [
-            self.create_title(save_button_click),
-            self.create_tabs(tabs),
-        ]
-
-    def create_title(self, save_button_click: callable):
-        return Container(
+        title = Container(
             padding=10,
             alignment=alignment.center,
             content=Row(
@@ -129,11 +127,7 @@ class SettingsView(Column):
             ),
         )
 
-    def create_tabs(self, tabs: list[TabView]):
-        return Tabs(
-            expand=True,
-            selected_index=0,
-            animation_duration=300,
-            tab_alignment=TabAlignment.CENTER,
-            tabs=tabs,
-        )
+        self.controls = [
+            title,
+            create_tabs(tabs),
+        ]

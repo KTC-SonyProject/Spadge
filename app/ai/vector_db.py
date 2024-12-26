@@ -5,6 +5,7 @@ from langchain_core.documents import Document
 from app.ai.settings import embedding_model_settings
 from app.controller.settings_manager import SettingsManager, load_settings
 from app.models.database_models import DatabaseHandler
+
 # from app.db_conn import DatabaseHandler
 
 

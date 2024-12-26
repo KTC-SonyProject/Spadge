@@ -10,12 +10,14 @@ from app.components.chat import ChatBody
 from app.controller.documents_controller import DocumentsController
 from app.controller.home_controller import HomeController
 from app.controller.settings_controller import SettingsController
+from app.controller.unity_controller import UnityController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
 from app.views.header_view import HeaderView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
-from app.views.unity_view import UnityView
+
+# from app.views.unity_view import UnityView
 from app.views.voice_view import VoiceView
 
 logger = logging.getLogger(__name__)
@@ -49,7 +51,7 @@ ROUTES = {
         [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
     ),
     "/unity": RouteItem(
-        "Unity", UnityView, [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
+        "Unity", UnityController, [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }
@@ -65,7 +67,7 @@ class RoutingHandler:
         params = self._resolve_params(route_info.params, route)
         if extra_params:
             params.update(extra_params)
-        if route_info.layout in {HomeController, SettingsController, DocumentsController}:
+        if route_info.layout in {HomeController, SettingsController, DocumentsController, UnityController}:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
         return route_info.title, route_info.layout(self.page, **params)
