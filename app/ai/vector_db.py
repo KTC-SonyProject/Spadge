@@ -4,7 +4,8 @@ from langchain_core.documents import Document
 
 from app.ai.settings import embedding_model_settings
 from app.controller.settings_manager import SettingsManager, load_settings
-from app.db_conn import DatabaseHandler
+from app.models.database_models import DatabaseHandler
+# from app.db_conn import DatabaseHandler
 
 
 def create_document_obj(content: str, document_id: int, return_list: bool = True) -> Document | list[Document]:
