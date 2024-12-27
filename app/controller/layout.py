@@ -6,19 +6,18 @@ from flet import (
     View,
 )
 
-# from app.components.chat import ChatBody
-from app.controller.chat_controller import ChatController
-from app.controller.documents_controller import DocumentsController
-from app.controller.home_controller import HomeController
-from app.controller.settings_controller import SettingsController
-from app.controller.unity_controller import UnityController
+from app.controller import (
+    ChatController,
+    DocumentsController,
+    HomeController,
+    SettingsController,
+    UnityController,
+)
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
 from app.views.header_view import HeaderView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
-
-# from app.views.unity_view import UnityView
 from app.views.voice_view import VoiceView
 
 logger = logging.getLogger(__name__)
@@ -28,7 +27,9 @@ ROUTES = {
     "/home": RouteItem("Home", HomeController),
     "/voice": RouteItem("Voice", VoiceView),
     "/documents": RouteItem(
-        "Documents", DocumentsController, [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
+        "Documents",
+        DocumentsController,
+        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
     ),
     "/documents/:document_id": RouteItem(
         "Document",
@@ -44,7 +45,9 @@ ROUTES = {
         ],
     ),
     "/settings": RouteItem(
-        "Settings", SettingsController, [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
+        "Settings",
+        SettingsController,
+        [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
     ),
     "/chat": RouteItem(
         "Chat",
@@ -52,7 +55,9 @@ ROUTES = {
         [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
     ),
     "/unity": RouteItem(
-        "Unity", UnityController, [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
+        "Unity",
+        UnityController,
+        [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }

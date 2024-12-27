@@ -9,10 +9,12 @@ from flet import (
     app,
 )
 
-from app.controller.manager.documents_manager import DocumentsManager
-from app.controller.manager.file_manager import FileManager
-from app.controller.manager.server_manager import ServerManager
-from app.controller.manager.settings_manager import SettingsManager
+from app.controller import (
+    DocumentsManager,
+    FileManager,
+    ServerManager,
+    SettingsManager,
+)
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
 from app.service_container import Container
@@ -38,7 +40,6 @@ def initialize_services(page: Page) -> Container:
     container.register("db_handler", db_handler)
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
-    # container.register("server_thread", server_thread)
     container.register("file_controller", file_controller)
 
     return container
@@ -53,11 +54,6 @@ def main(page: Page):
 
     page.data = {
         "settings_file": "local.settings.json",
-        # "settings": settings_manager,
-        # "db": db_handler,
-        # "docs_manager": docs_manager,
-        # "server": server,
-        # "file_controller": file_controller,
     }
 
     page.fonts = {
