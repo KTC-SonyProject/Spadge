@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -20,8 +21,8 @@ class SettingsManager:
     設定のロード、操作、保存を行うManagerクラス。
     """
 
-    # STORAGE_FOLDER = os.environ["FLET_APP_STORAGE_DATA"]
-    SETTINGS_FILE = "local.settings.json"
+    STORAGE_FOLDER = os.environ["FLET_APP_STORAGE_DATA"]
+    SETTINGS_FILE = f"{STORAGE_FOLDER}/local.settings.json"
 
     def __init__(self):
         self.settings = self.load_settings()
@@ -118,7 +119,7 @@ def load_settings(key) -> dict:
     値を取得するのみ使用でき、設定の更新はできない。
     """
     try:
-        with open("local.settings.json", encoding="utf-8") as file:
+        with open(f"{os.environ["FLET_APP_STORAGE_DATA"]}/local.settings.json", encoding="utf-8") as file:
             data = json.load(file)
             return data[key]
     except (json.JSONDecodeError, KeyError):

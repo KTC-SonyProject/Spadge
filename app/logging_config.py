@@ -13,6 +13,7 @@ class JSTFormatter(logging.Formatter):
             return dt.strftime(datefmt)
         return dt.isoformat()
 
+
 STRAGE_DIR = os.getenv("FLET_APP_STORAGE_DATA", "logs")
 
 LOGGING_CONFIG_FULL = {
@@ -77,8 +78,8 @@ LOGGING_CONFIG = {
     "loggers": {
         "app": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
         "__main__": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
-        "": {"handlers": ["console"], "level": "INFO", "propagate": True}
-    }
+        "": {"handlers": ["console"], "level": "INFO", "propagate": True},
+    },
 }
 
 
