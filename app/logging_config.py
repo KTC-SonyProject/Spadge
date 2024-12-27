@@ -14,7 +14,9 @@ class JSTFormatter(logging.Formatter):
         return dt.isoformat()
 
 
-LOGGING_CONFIG = {
+STRAGE_DIR = os.getenv("FLET_APP_STORAGE_DATA", "logs")
+
+LOGGING_CONFIG_FULL = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -35,7 +37,7 @@ LOGGING_CONFIG = {
             "class": "logging.FileHandler",
             "formatter": "standard",
             "level": "INFO",
-            "filename": "app.log",
+            "filename": f"{STRAGE_DIR}/app.log",
             "mode": "a",
             "encoding": "utf-8",
         },
@@ -43,7 +45,7 @@ LOGGING_CONFIG = {
             "class": "logging.FileHandler",
             "formatter": "standard",
             "level": "INFO",
-            "filename": "full.log",
+            "filename": f"{STRAGE_DIR}/full.log",
             "mode": "a",
             "encoding": "utf-8",
         },
@@ -55,9 +57,43 @@ LOGGING_CONFIG = {
     },
 }
 
+LOGGING_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "()": JSTFormatter,
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "stream": "ext://sys.stdout",
+        },
+    },
+    "loggers": {
+        "app": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "__main__": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "": {"handlers": ["console"], "level": "INFO", "propagate": True},
+    },
+}
 
-def setup_logging():
-    logging.config.dictConfig(LOGGING_CONFIG)
-    # もしapp.logが存在していたら削除
-    if os.path.exists("./app.log"):
-        os.remove("app.log")
+
+def setup_logging(is_save_file: bool = False) -> None:
+    """
+    ロギング設定を行う
+
+    Args:
+        is_save_file (bool, optional): ログをファイルとして残すかどうか. Defaults to False.
+    """
+    if is_save_file:
+        logging.config.dictConfig(LOGGING_CONFIG_FULL)
+        # もしapp.logが存在していたら削除
+        if os.path.exists(f"{STRAGE_DIR}/app.log"):
+            os.remove(f"{STRAGE_DIR}/app.log")
+    else:
+        logging.config.dictConfig(LOGGING_CONFIG)
