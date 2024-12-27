@@ -3,20 +3,17 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 
 from app.ai.settings import embedding_model_settings
-from app.db_conn import DatabaseHandler
-from app.settings import load_settings
+from app.controller.manager.settings_manager import SettingsManager, load_settings
+from app.models.database_models import DatabaseHandler
+
+# from app.db_conn import DatabaseHandler
 
 
 def create_document_obj(content: str, document_id: int, return_list: bool = True) -> Document | list[Document]:
     """
     ドキュメントオブジェクトを作成する関数
     """
-    document = Document(
-        page_content=content,
-        metadata={
-            "source": document_id
-        }
-    )
+    document = Document(page_content=content, metadata={"source": f"{document_id}"})
     if return_list:
         return [document]
     else:
@@ -27,7 +24,7 @@ def get_main_db() -> str:
     """
     メインDBを取得する関数
     """
-    settings = load_settings("db_settings")
+    settings = load_settings("database_settings")
     if settings["use_postgres"]:
         return "postgresql://postgres:postgres@postgres:5432/main_db?sslmode=disable"
     else:
@@ -74,7 +71,8 @@ def delete_document_from_vectorstore(document_id: int):
     ドキュメントをベクトルストアから削除する関数
     """
     # 削除するドキュメント以外のドキュメントを取得する
-    db = DatabaseHandler(load_settings())
+    settings_manager = SettingsManager()
+    db = DatabaseHandler(settings_manager)
     all_documents = db.fetch_query("SELECT * FROM documents WHERE document_id != %s", (document_id,))
     docs = []
     for doc in all_documents:
@@ -94,6 +92,7 @@ def delete_document_from_vectorstore(document_id: int):
     print(f"{result=}")
     print("Document deleted from vector store.")
 
+
 # def add_document_to_vectorstore(content: str, document_id: int):
 #     """
 #     ドキュメントをベクトルストアに追加する関数
@@ -104,6 +103,7 @@ def delete_document_from_vectorstore(document_id: int):
 #     vector_store.add_documents(documents=documents, ids=uuids)
 #     print("Document added to vector store.")
 #     return uuids
+
 
 def _clear_vectordb():
     vectorstore = get_vector_store()
@@ -116,13 +116,11 @@ def _clear_vectordb():
     print("Vector store cleared.")
 
 
-
 if __name__ == "__main__":
     # indexing_document("Hello, world!sss", 1)
     # indexing_document("こんにちは、世界！", 2)
 
     # # delete_document_from_vectorstore(1)
-
 
     # results = get_vector_store().similarity_search(
     #     "test",
@@ -130,7 +128,5 @@ if __name__ == "__main__":
     # print(results)
     # for res in results:
     #     print(f"* {res.page_content} [{res.metadata}]")
-
-
 
     _clear_vectordb()

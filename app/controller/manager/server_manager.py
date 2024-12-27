@@ -4,10 +4,12 @@ import socket
 
 logger = logging.getLogger(__name__)
 
-class SocketServer:
+
+class ServerManager:
     """
     Socketサーバーを管理するクラス
     """
+
     def __init__(self, host="0.0.0.0", port=8765):
         self.host = host
         self.port = port
@@ -67,19 +69,19 @@ class SocketServer:
         """
         buffer = ""
         while True:
-            data = self.client_socket.recv(1024).decode('utf-8')
+            data = self.client_socket.recv(1024).decode("utf-8")
             if not data:
                 raise ConnectionError("クライアントとの接続が切断されました")
             buffer += data
-            lines = buffer.split('\n')
+            lines = buffer.split("\n")
             # 最後の行は未完成の可能性があるので、完全な行だけ処理
-            for i in range(len(lines)-1):
+            for i in range(len(lines) - 1):
                 line = lines[i].strip()
                 if line.startswith("RESULT:"):
                     # 結果を返す
-                    return line[len("RESULT:"):]
+                    return line[len("RESULT:") :]
             # 未完成の最後の行をbufferに残す
-            if not buffer.endswith('\n'):
+            if not buffer.endswith("\n"):
                 buffer = lines[-1]
             else:
                 buffer = ""
@@ -95,7 +97,7 @@ class SocketServer:
         try:
             # クライアントからのデータを受け取る処理（必要なら実装）
             while self.running:
-                data = client_socket.recv(1024).decode('utf-8')
+                data = client_socket.recv(1024).decode("utf-8")
                 if not data:
                     break
                 logger.debug(f"クライアントからのデータ: {data}")
@@ -116,7 +118,7 @@ class SocketServer:
         if self.client_socket:
             try:
                 message = f"COMMAND:{command}\n"
-                self.client_socket.sendall(message.encode('utf-8'))
+                self.client_socket.sendall(message.encode("utf-8"))
                 logger.debug(f"コマンドを送信しました: {command}")
 
                 # コマンドの実行結果を待機
@@ -152,7 +154,7 @@ class SocketServer:
             file_name = os.path.basename(file_path)
             file_size = os.path.getsize(file_path)
             file_header = f"FILE:{file_name}:{file_size}\n"
-            self.client_socket.sendall(file_header.encode('utf-8'))
+            self.client_socket.sendall(file_header.encode("utf-8"))
 
             # ファイル内容を送信
             with open(file_path, "rb") as f:

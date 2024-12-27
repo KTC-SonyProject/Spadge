@@ -2,12 +2,12 @@ from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 
+from app.controller.manager.server_manager import ServerManager
 from app.logging_config import setup_logging
-from app.unity_conn import SocketServer
 
 setup_logging()
 
-server = SocketServer()
+server = ServerManager()
 server_thread = Thread(target=server.start, daemon=True)
 server_thread.start()
 
@@ -20,6 +20,7 @@ def input_thread(queue):
     while True:
         user_input = input()  # ブロッキングな入力
         queue.put(user_input)  # 入力をキューに送る
+
 
 Thread(target=input_thread, args=(input_queue,), daemon=True).start()
 
@@ -65,6 +66,7 @@ try:
 
         # 入力に応じた処理
         if option == "1":
+            menu_displayed = False
             print("送信するコマンド: ", end="", flush=True)
             try:
                 command = input_queue.get(timeout=30)  # コマンド入力を待機
@@ -76,8 +78,9 @@ try:
                 print("接続が失われました。コマンド送信をキャンセルしました。")
                 continue
             server.send_command(command)
-            print("選択してください: ", end="", flush=True)
+            continue
         elif option == "2":
+            menu_displayed = False
             print("送信するファイルのパス: ", end="", flush=True)
             try:
                 file_path = input_queue.get(timeout=30)  # ファイルパス入力を待機
@@ -89,7 +92,7 @@ try:
                 print("接続が失われました。ファイル送信をキャンセルしました。")
                 continue
             server.send_file(file_path)
-            print("選択してください: ", end="", flush=True)
+            continue
         elif option.lower() == "q":
             server.stop()
             break

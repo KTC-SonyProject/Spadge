@@ -15,8 +15,8 @@ from typing_extensions import TypedDict
 
 from app.ai.settings import langsmith_settigns, llm_settings
 from app.ai.tools import DisplayOperationTool, tools
-from app.settings import load_settings
-from app.unity_conn import SocketServer
+from app.controller.manager.server_manager import ServerManager
+from app.controller.manager.settings_manager import load_settings
 
 
 class State(TypedDict):
@@ -24,7 +24,7 @@ class State(TypedDict):
 
 
 class ChatbotGraph:
-    def __init__(self, server: SocketServer, verbose: bool = False):
+    def __init__(self, server: ServerManager, verbose: bool = False):
         self.graph_builder = StateGraph(State)
         langsmith_settigns()
         try:
@@ -54,7 +54,7 @@ class ChatbotGraph:
         self.graph = self.graph_builder.compile(checkpointer=self.memory)
 
     def _initialize_memory(self) -> None:
-        settings = load_settings("db_settings")
+        settings = load_settings("database_settings")
         if settings["use_postgres"]:
             self.DB_URI = "postgresql://postgres:postgres@postgres:5432/main_db?sslmode=disable"
             self.connection_kwargs = {"autocommit": True, "prepare_threshold": 0}
@@ -81,27 +81,28 @@ class ChatbotGraph:
             raise ValueError("グラフの描画に失敗しました。") from e
 
     def stream_graph_updates(self, user_input: str, config: RunnableConfig | None = None) -> Iterator[Any]:
-        if config is None:
-            self.set_memory_config("1")
+        if config:
+            self.memory_config = config
+
+        if not hasattr(self, "memory_config"):
+            raise ValueError("メモリ設定がありません。")
 
         try:
             events = self.graph.stream({"messages": [("user", user_input)]}, self.memory_config, stream_mode="values")
             for event in events:
                 yield event["messages"][-1]
         except Exception as e:
+            print(e)
             raise ValueError("ストリーム更新に失敗しました。") from e
-
-
-
 
 
 if __name__ == "__main__":
     import pprint
     from threading import Thread
 
-    from app.unity_conn import SocketServer
+    from app.controller.manager.server_manager import ServerManager
 
-    server = SocketServer()
+    server = ServerManager()
     server_thread = Thread(target=server.start, daemon=True)
     server_thread.start()
 
@@ -109,7 +110,7 @@ if __name__ == "__main__":
 
     chatbot_graph.draw_graph()
 
-    config = {"configurable": {"thread_id": "1"}}
+    config = {"configurable": {"thread_id": "aaa"}}
     chat_history = chatbot_graph.graph.get_state(config)
     messages_list = chat_history.values["messages"]
     pprint.pprint(messages_list)
@@ -117,16 +118,14 @@ if __name__ == "__main__":
         sender = "ユーザー" if "HumanMessage" in str(type(message)) else "アシスタント"
         print(f"{i}. **{sender}:** {message.content}")
 
+    while True:
+        try:
+            user_input = input("User: ")
+            if user_input.lower() in ["quit", "exit", "q"]:
+                print("Goodbye!")
+                break
 
-
-    # while True:
-    #     try:
-    #         user_input = input("User: ")
-    #         if user_input.lower() in ["quit", "exit", "q"]:
-    #             print("Goodbye!")
-    #             break
-
-    #         for response in chatbot_graph.stream_graph_updates(user_input):
-    #             print("Assistant:", response.pretty_print())
-    #     except Exception as e:
-    #         raise ValueError("ストリーム更新に失敗しました。") from e
+            for response in chatbot_graph.stream_graph_updates(user_input, config):
+                print("Assistant:", response.pretty_print())
+        except Exception as e:
+            raise ValueError("ストリーム更新に失敗しました。") from e

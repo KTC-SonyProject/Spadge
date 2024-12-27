@@ -37,6 +37,7 @@ exclude = [
     "venv",
     "__pycache__",
     ".git",
+    "__init__.py",
 ]
 
 line-length = 120
@@ -57,3 +58,6 @@ select = [
 ignore = [
 ]
 fixable = ["ALL"]
+
+[tool.ruff.lint.pylint]
+max-args = 6

@@ -5,13 +5,13 @@ from flet import (
 )
 
 
-class ContentBody(Column):
-    def __init__(self, page: Page, text:str='Body Text'):
+class TemplateView(Column):
+    def __init__(self, page: Page, text: str = "Body Text"):
         super().__init__()
         self.text = text
         self.spacing = 10
         self.controls = [
-            Text('**********************'),
+            Text("**********************"),
             Text(self.text),
-            Text('**********************'),
+            Text("**********************"),
         ]

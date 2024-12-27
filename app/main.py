@@ -9,27 +9,51 @@ from flet import (
     app,
 )
 
-from app.db_conn import DatabaseHandler
+from app.controller import (
+    DocumentsManager,
+    FileManager,
+    ServerManager,
+    SettingsManager,
+)
 from app.logging_config import setup_logging
-from app.settings import load_settings
-from app.unity_conn import SocketServer
-from app.views import MyView
+from app.models.database_models import DatabaseHandler
+from app.service_container import Container
+from app.views.views import MyView
 
-server = SocketServer()
-server_thread = threading.Thread(target=server.start, daemon=True)
+server = ServerManager()
+server_thread = threading.Thread(target=server.start)
 server_thread.start()
+
+
+def initialize_services(page: Page) -> Container:
+    """必要なサービスを初期化してコンテナに登録"""
+    container = Container.get_instance()
+
+    # 各サービスの初期化
+    settings_manager = SettingsManager()
+    db_handler = DatabaseHandler(settings_manager)
+    docs_manager = DocumentsManager(db_handler)
+    file_controller = FileManager(page, server)
+
+    # コンテナに登録
+    container.register("settings_manager", settings_manager)
+    container.register("db_handler", db_handler)
+    container.register("docs_manager", docs_manager)
+    container.register("socket_server", server)
+    container.register("file_controller", file_controller)
+
+    return container
+
 
 def main(page: Page):
     page.title = "Spadge"
     page.scroll = ScrollMode.AUTO
     page.padding = 10
 
-    db = DatabaseHandler(load_settings())
+    container = initialize_services(page)
+
     page.data = {
         "settings_file": "local.settings.json",
-        "settings": load_settings,
-        "db": db,
-        "server": server,
     }
 
     page.fonts = {
@@ -41,7 +65,6 @@ def main(page: Page):
     page.window.height = 900
     page.window.min_width = 800
     page.window.min_height = 600
-
 
     theme = ft.Theme()
     theme.font_family = "default"
@@ -57,11 +80,12 @@ def main(page: Page):
 
     def on_close():
         server.stop()
-        db.close()
+        container.get("db_handler").close()
         server_thread.join()
         print("Application closed")
 
     page.on_close = on_close
+
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -73,18 +97,16 @@ if not os.environ.get("FLET_SECRET_KEY"):
     os.environ["FLET_SECRET_KEY"] = "secret"
 
 try:
-    app(target=main, port=8000, assets_dir="assets", upload_dir="assets/uploads")
+    app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
 except KeyboardInterrupt:
     logger.info("App stopped by user")
+    container = Container.get_instance()
     server.stop()
+    container.get("db_handler").close()
     server_thread.join()
-    raise
-except OSError:
+except OSError as e:
     logger.error("Port is already in use")
-    server.stop()
-    server_thread.join()
-    # もう一度tryする
-    app(target=main, port=8000, assets_dir="assets", upload_dir="assets/uploads")
+    raise e
 except Exception as e:
     logger.error(f"Error starting app: {e}")
     raise e
