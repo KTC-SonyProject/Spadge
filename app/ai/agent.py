@@ -81,10 +81,11 @@ class ChatbotGraph:
             raise ValueError("グラフの描画に失敗しました。") from e
 
     def stream_graph_updates(self, user_input: str, config: RunnableConfig | None = None) -> Iterator[Any]:
-        if config is None:
-            self.set_memory_config("1")
-        else:
+        if config:
             self.memory_config = config
+
+        if not hasattr(self, "memory_config"):
+            raise ValueError("メモリ設定がありません。")
 
         try:
             events = self.graph.stream({"messages": [("user", user_input)]}, self.memory_config, stream_mode="values")
@@ -109,7 +110,7 @@ if __name__ == "__main__":
 
     chatbot_graph.draw_graph()
 
-    config = {"configurable": {"thread_id": "1"}}
+    config = {"configurable": {"thread_id": "aaa"}}
     chat_history = chatbot_graph.graph.get_state(config)
     messages_list = chat_history.values["messages"]
     pprint.pprint(messages_list)

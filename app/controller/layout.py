@@ -6,7 +6,8 @@ from flet import (
     View,
 )
 
-from app.components.chat import ChatBody
+# from app.components.chat import ChatBody
+from app.controller.chat_controller import ChatController
 from app.controller.documents_controller import DocumentsController
 from app.controller.home_controller import HomeController
 from app.controller.settings_controller import SettingsController
@@ -47,7 +48,7 @@ ROUTES = {
     ),
     "/chat": RouteItem(
         "Chat",
-        ChatBody,
+        ChatController,
         [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
     ),
     "/unity": RouteItem(
@@ -67,7 +68,13 @@ class RoutingHandler:
         params = self._resolve_params(route_info.params, route)
         if extra_params:
             params.update(extra_params)
-        if route_info.layout in {HomeController, SettingsController, DocumentsController, UnityController}:
+        if route_info.layout in {
+            HomeController,
+            SettingsController,
+            DocumentsController,
+            UnityController,
+            ChatController,
+        }:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
         return route_info.title, route_info.layout(self.page, **params)
