@@ -78,4 +78,20 @@ class AppSettings:
     llm_settings: LlmSettings = field(default_factory=LlmSettings)
 
 
+# Enumオブジェクトを文字列に変換するカスタムシリアライザ
+def custom_serializer(obj):
+    if isinstance(obj, Enum):
+        return obj.value  # Enumの値（文字列）を返す
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+
 DEFAULT_SETTINGS = AppSettings()
+
+
+if __name__ == "__main__":
+    # from app.logging_config import setup_logging
+    import json
+    from dataclasses import asdict
+
+    # setup_logging()
+    print(json.dumps(asdict(DEFAULT_SETTINGS), default=custom_serializer, indent=4))
