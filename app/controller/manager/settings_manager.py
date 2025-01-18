@@ -10,6 +10,7 @@ from app.models import settings_models as models
 from app.models.settings_models import (
     DEFAULT_SETTINGS,
     AppSettings,
+    custom_serializer,
 )
 
 # ロギング設定
@@ -50,7 +51,7 @@ class SettingsManager:
         現在の設定をファイルに保存する。
         """
         with open(self.SETTINGS_FILE, "w", encoding="utf-8") as file:
-            json.dump(asdict(self.settings), file, indent=4, ensure_ascii=False)
+            json.dump(asdict(self.settings), file, indent=4, ensure_ascii=False, default=custom_serializer)
         logger.info("設定を保存しました。")
 
     def get_setting(self, path: str) -> Any:
