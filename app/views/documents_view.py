@@ -46,7 +46,7 @@ def create_rail_description(page: Page, title: str, id: int):
             IconButton(
                 icon=Icons.EDIT_NOTE,
                 tooltip="Edit Documents",
-                on_click=lambda e: page.go(f"/documents/{id}/edit"),
+                on_click=lambda _: page.go(f"/documents/{id}/edit"),
             ),
         ],
     )
@@ -117,12 +117,14 @@ class Sidebar(Container):
         toggle_nav_rail: callable,
     ):
         super().__init__(
-            expand=True,
+            # expand=True,
             visible=True,
         )
         self.nav_rail_visible = True
         self.nav_rail_items = nav_rail_items
         self.nav_rail = NavigationRail(
+            # min_extended_width=50,
+            # min_width=20,
             selected_index=None,
             label_type=NavigationRailLabelType.ALL,
             leading=FloatingActionButton(icon=Icons.CREATE, text="ADD DOCUMENT", on_click=open_modal),
