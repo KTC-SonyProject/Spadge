@@ -95,12 +95,12 @@ class FileManager:
         """ZIPファイルを解凍"""
         upload_dir = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads"
         try:
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+            with zipfile.ZipFile(file_path, "r") as zip_ref:
                 extracted_files = []
 
                 for entry in zip_ref.namelist():
                     # ディレクトリはスキップ
-                    if entry.endswith('/'):
+                    if entry.endswith("/"):
                         logger.debug(f"ディレクトリをスキップ: {entry}")
                         continue
 

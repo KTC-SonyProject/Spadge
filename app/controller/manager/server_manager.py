@@ -94,7 +94,7 @@ class ServerManager:
         if self.thread and self.thread.is_alive():
             try:
                 # if self.thread != threading.current_thread():
-                    self.thread.join(timeout=3)
+                self.thread.join(timeout=3)
             except RuntimeError as _:
                 pass
 

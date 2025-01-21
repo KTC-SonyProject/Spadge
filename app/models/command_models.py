@@ -270,3 +270,26 @@ class PingCommand(CommandBase):
         body = {}
         self.command_body = body
         return body
+
+
+class ResponseModel:
+    """
+    レスポンスモデル
+    """
+
+    def __init__(self, header: str, body: dict):
+        self._header = header
+        self._body = body
+
+    @property
+    def header(self) -> str:
+        return self._header
+
+    @property
+    def body(self) -> dict:
+        return self._body
+
+    @classmethod
+    def from_str(cls, response_str: str) -> "ResponseModel":
+        header, body = response_str.split("\n", 1)
+        return cls(header, json.loads(body))
