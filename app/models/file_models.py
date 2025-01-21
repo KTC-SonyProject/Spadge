@@ -1,13 +1,13 @@
 import logging
 import os
 
-from flet import FilePickerUploadFile
+from flet import FilePickerUploadFile, Page
 
 logger = logging.getLogger(__name__)
 
 
 class FileModel:
-    def __init__(self, page):
+    def __init__(self, page: Page):
         self.page = page
         self.selected_files = []
 
