@@ -22,7 +22,6 @@ class HeaderView(AppBar):
         self.page_title = page_title
         self.toggle_dark_light_icon = IconButton(
             icon=Icons.LIGHT_MODE_OUTLINED if self.page.theme_mode == "light" else Icons.DARK_MODE_OUTLINED,
-            selected_icon=Icons.DARK_MODE_OUTLINED if self.page.theme_mode == "light" else Icons.LIGHT_MODE_OUTLINED,
             tooltip="switch light and dark mode",
             on_click=self.toggle_icon,
         )
@@ -35,7 +34,7 @@ class HeaderView(AppBar):
             PopupMenuItem(text="Top", on_click=lambda _: self.page.go("/")),
             PopupMenuItem(text="Home", on_click=lambda _: self.page.go("/home")),
             PopupMenuItem(),
-            PopupMenuItem(text="Voice", on_click=lambda _: self.page.go("/voice")),
+            PopupMenuItem(text="Chat", on_click=lambda _: self.page.go("/chat")),
             PopupMenuItem(text="Documents", on_click=lambda _: self.page.go("/documents")),
             PopupMenuItem(text="Unity App", on_click=lambda _: self.page.go("/unity")),
             PopupMenuItem(),
@@ -62,8 +61,13 @@ class HeaderView(AppBar):
         ]
 
     def toggle_icon(self, e):
+        # テーマモードを切り替え
         self.page.theme_mode = "light" if self.page.theme_mode == "dark" else "dark"
-        self.toggle_dark_light_icon.selected = not self.toggle_dark_light_icon.selected
+        # アイコンを切り替え
+        self.toggle_dark_light_icon.icon = (
+            Icons.LIGHT_MODE_OUTLINED if self.page.theme_mode == "light" else Icons.DARK_MODE_OUTLINED
+        )
+        # ページを更新
         self.page.update()
 
 

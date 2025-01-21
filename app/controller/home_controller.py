@@ -15,16 +15,22 @@ class HomeController(AbstractController):
 
         self.HOME_CARD_ITEMS = [
             HomeCardItem(
-                title="Voice",
-                subtitle="AIと会話を通じて展示物の情報について質問したり、画面の操作を行うことができます。",
-                icon=Icons.VOICE_CHAT,
-                go_page=go_page(self.page, "/voice"),
+                title="Chat",
+                subtitle="AIとチャットを通じて展示物の情報について質問したり、画面の操作を行うことができます。",
+                icon=Icons.CHAT,
+                go_page=go_page(self.page, "/chat"),
             ),
             HomeCardItem(
                 title="Documents",
                 subtitle="展示物の情報を閲覧することができます。",
                 icon=Icons.DESCRIPTION,
                 go_page=go_page(self.page, "/documents"),
+            ),
+            HomeCardItem(
+                title="Unity",
+                subtitle="Unityアプリケーションを操作することができます。",
+                icon=Icons.CODE,
+                go_page=go_page(self.page, "/unity"),
             ),
             HomeCardItem(
                 title="Settings",
