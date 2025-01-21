@@ -3,15 +3,15 @@ from queue import Empty, Queue
 from threading import Thread
 from time import sleep
 
+from app.controller.manager.server_manager import ServerManager
 from app.models.command_models import (
     ControlCommand,
-    TransferCommand,
     ListCommand,
     NextCommand,
-    PreviousCommand,
     PingCommand,
+    PreviousCommand,
+    TransferCommand,
 )
-from app.controller.manager.server_manager import ServerManager
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -62,7 +62,6 @@ def display_menu():
     print("6: pingコマンドを送信")
     print("q: サーバーを停止")
     print("----------------")
-    
 
 
 def choose_command(command_num: str):
@@ -85,13 +84,13 @@ def choose_command(command_num: str):
             command_obj = ListCommand()
         case "6":
             command_obj = PingCommand()
-        case "q": # サーバーを停止
+        case "q":  # サーバーを停止
             server.stop()
             return
         case _:
             print("無効な選択です。もう一度試してください")
             return
-        
+
     server.send_command(command_obj)
 
 

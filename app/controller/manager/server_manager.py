@@ -43,8 +43,6 @@ class ServerManager:
 
         self.wait_for_connection()
 
-
-
     def wait_for_connection(self) -> None:
         """
         クライアントの接続を待機

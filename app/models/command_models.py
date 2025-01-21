@@ -257,7 +257,7 @@ class ListCommand(CommandBase):
         body = {}
         self.command_body = body
         return body
-    
+
 
 class PingCommand(CommandBase):
     """
@@ -276,5 +276,3 @@ class PingCommand(CommandBase):
         body = {}
         self.command_body = body
         return body
-    
-

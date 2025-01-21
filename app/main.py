@@ -1,8 +1,7 @@
+import atexit
 import logging
 import os
 import threading
-import atexit
-import asyncio
 
 import flet as ft
 from flet import (
@@ -30,6 +29,7 @@ server_thread = threading.Thread(target=server.start, daemon=True)
 
 # async def run_flet_app():
 #     await app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
+
 
 def server_clean_up():
     server.stop()

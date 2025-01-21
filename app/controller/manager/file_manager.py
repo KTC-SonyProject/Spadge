@@ -4,8 +4,8 @@ import os
 from flet import FilePickerUploadFile, Page
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.file_models import FileModel
 from app.models.command_models import TransferCommand
+from app.models.file_models import FileModel
 
 logger = logging.getLogger(__name__)
 
