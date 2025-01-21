@@ -1,9 +1,9 @@
 import json
 import logging
 import socket
+import threading
 import time
 
-from app.logging_config import safe_log
 from app.models.command_models import CommandBase, PingCommand, TransferCommand
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ class ServerManager:
         self.server_socket = None
         self.client_socket = None
         self.client_address = None
+        self.thread = None
         self.running = False
         self.is_connected = False
 
@@ -28,13 +29,11 @@ class ServerManager:
         サーバを起動
         """
         try:
-            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.server_socket.bind((self.host, self.port))
-            self.server_socket.listen(1)
-            self.server_socket.settimeout(1)
-            logger.info(f"サーバーが起動しました: {self.host}:{self.port}")
+            logger.info(f"Starting server: {self.host}:{self.port}")
             self.running = True
+            self.server_socket = self._create_server_socket()
+            self.thread = threading.Thread(target=self.wait_for_connection, daemon=True)
+            self.thread.start()
         except OSError as e:
             logger.error(f"サーバを起動させるポートがすでに使用されています: {e}")
             self.stop()
@@ -42,7 +41,16 @@ class ServerManager:
             logger.error(f"サーバーの起動中にエラーが発生しました: {e}")
             self.stop()
 
-        self.wait_for_connection()
+    def _create_server_socket(self) -> socket.socket:
+        """
+        サーバーソケットを作成
+        """
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_socket.bind((self.host, self.port))
+        server_socket.listen(1)
+        server_socket.settimeout(1)
+        return server_socket
 
     def wait_for_connection(self) -> None:
         """
@@ -59,8 +67,9 @@ class ServerManager:
                     self.handle_client(self.client_socket)
                 except TimeoutError:
                     continue
-        except KeyboardInterrupt:
-            logger.info("サーバーを停止します")
+        except OSError as e:
+            if self.running:
+                logger.error(f"サーバーでエラーが発生しました {e} (type: {type(e)})")
         except BaseException as e:
             logger.error(f"サーバーでエラーが発生しました {e} (type: {type(e)})")
         finally:
@@ -81,7 +90,9 @@ class ServerManager:
                 self.client_socket.close()
         if self.server_socket:
             self.server_socket.close()
-        safe_log(logger, logging.INFO, "サーバーを停止しました")
+        if self.thread and self.thread != threading.current_thread():
+            self.thread.join()
+        # safe_log(logger, logging.INFO, "サーバーを停止しました")
 
     def _wait_for_result(self) -> dict:
         logger.debug("Waiting for result...")
@@ -112,7 +123,6 @@ class ServerManager:
         except Exception as e:
             logger.error(f"接続確認中にエラーが発生しました: {e}")
             return False
-
 
     def handle_client(self, client_socket: socket.socket) -> None:
         """
