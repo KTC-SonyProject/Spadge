@@ -97,3 +97,20 @@ def setup_logging(is_save_file: bool = False) -> None:
             os.remove(f"{STRAGE_DIR}/app.log")
     else:
         logging.config.dictConfig(LOGGING_CONFIG)
+
+
+def safe_log(logger, level, message: str) -> None:
+    """
+    ログの失敗を無視してログを出力する
+
+    Args:
+        logger (logging.Logger): ロガー
+        level (int): ログレベル
+        message (str): ログメッセージ
+    """
+    try:
+        if logger.handlers:
+            logger.log(level, message)
+    except Exception as _:
+        # ログの失敗を無視
+        pass

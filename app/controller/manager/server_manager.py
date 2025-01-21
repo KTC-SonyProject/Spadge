@@ -1,9 +1,8 @@
-import logging
-import os
-import socket
 import json
-import sys
+import logging
+import socket
 
+from app.logging_config import safe_log
 from app.models.command_models import CommandBase, TransferCommand
 
 logger = logging.getLogger(__name__)
@@ -29,29 +28,42 @@ class ServerManager:
         """
         try:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server_socket.bind((self.host, self.port))
             self.server_socket.listen(1)
+            self.server_socket.settimeout(1)
             logger.info(f"サーバーが起動しました: {self.host}:{self.port}")
             self.running = True
         except OSError as e:
             logger.error(f"サーバを起動させるポートがすでに使用されています: {e}")
             self.stop()
-            raise e
-        except Exception as e:
+        except BaseException as e:
             logger.error(f"サーバーの起動中にエラーが発生しました: {e}")
             self.stop()
-            raise e
 
+        self.wait_for_connection()
+
+
+
+    def wait_for_connection(self) -> None:
+        """
+        クライアントの接続を待機
+        """
         try:
+            logger.info("クライアントの接続を待機中...")
             while self.running:
-                logger.info("クライアントの接続を待機中...")
-                self.client_socket, self.client_address = self.server_socket.accept()
-                logger.info(f"クライアントが接続しました: {self.client_address}")
-                self.handle_client(self.client_socket)
+                if self.server_socket is None:
+                    break
+                try:
+                    self.client_socket, self.client_address = self.server_socket.accept()
+                    logger.info(f"クライアントが接続しました: {self.client_address}")
+                    self.handle_client(self.client_socket)
+                except TimeoutError:
+                    continue
         except KeyboardInterrupt:
             logger.info("サーバーを停止します")
-        except Exception as e:
-            logger.error(f"サーバーでエラーが発生しました {e}")
+        except BaseException as e:
+            logger.error(f"サーバーでエラーが発生しました {e} (type: {type(e)})")
         finally:
             self.stop()
 
@@ -62,12 +74,15 @@ class ServerManager:
         self.running = False
         self.is_connected = False
         if self.client_socket:
-            self.client_socket.close()
+            try:
+                self.client_socket.sendall(b"quit\n".encode("utf-8"))
+            except Exception as e:
+                logger.warning(f"クライアントに終了メッセージを送信中にエラーが発生しました: {e}")
+            finally:
+                self.client_socket.close()
         if self.server_socket:
             self.server_socket.close()
-        logger.info("サーバーを完全に停止しました")
-        # appを終了
-        sys.exit(0)
+        safe_log(logger, logging.INFO, "サーバーを停止しました")
 
     def _wait_for_result(self) -> dict:
         logger.info("Waiting for result...")
@@ -82,8 +97,6 @@ class ServerManager:
         except json.JSONDecodeError as e:
             logger.error(f"ボディの文字列を辞書型に変換中にエラーが発生しました: {e}")
             body_dict = {"status_message": "ERROR", "error_message": str(e)}
-        except Exception as e:
-            raise e
 
         logger.debug(f"受信したレスポンス: ヘッダー={header}, ボディ={body_dict}")
         return body_dict
@@ -98,8 +111,9 @@ class ServerManager:
         self.is_connected = True
         try:
             # クライアントからのデータを受け取る処理（必要なら実装）
-            while self.running:
-                pass
+            while self.is_connected:
+                if not self.client_socket:
+                    break
                 # data = client_socket.recv(1024).decode("utf-8")
                 # if not data:
                 #     break
@@ -110,6 +124,7 @@ class ServerManager:
             client_socket.close()
             self.is_connected = False
             logger.info("クライアントとの接続を終了しました")
+            self.wait_for_connection()
 
     def _send_command(self, command: CommandBase) -> dict:
         if self.client_socket:

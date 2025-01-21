@@ -1,6 +1,8 @@
 import logging
 import os
 import threading
+import atexit
+import asyncio
 
 import flet as ft
 from flet import (
@@ -21,8 +23,18 @@ from app.service_container import Container
 from app.views.views import MyView
 
 server = ServerManager()
-server_thread = threading.Thread(target=server.start)
-server_thread.start()
+server_thread = threading.Thread(target=server.start, daemon=True)
+
+# async def run_server():
+#     await asyncio.to_thread(server.start)
+
+# async def run_flet_app():
+#     await app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
+
+def server_clean_up():
+    server.stop()
+    if server_thread.is_alive():
+        server_thread.join()
 
 
 def initialize_services(page: Page) -> Container:
@@ -87,6 +99,12 @@ def main(page: Page):
     page.on_close = on_close
 
 
+# async def start_app():
+#     server_task = asyncio.create_task(run_server())
+#     flet_task = asyncio.create_task(run_flet_app())
+
+#     await asyncio.gather(server_task, flet_task)
+
 setup_logging()
 logger = logging.getLogger(__name__)
 logger.info("app started")
@@ -97,6 +115,8 @@ if not os.environ.get("FLET_SECRET_KEY"):
     os.environ["FLET_SECRET_KEY"] = "secret"
 
 try:
+    server_thread.start()
+    atexit.register(server_clean_up)
     app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
 except KeyboardInterrupt:
     logger.info("App stopped by user")

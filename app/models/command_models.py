@@ -195,3 +195,86 @@ class TransferCommand(CommandBase):
         self.command_body = body
         return body
 
+
+class NextCommand(CommandBase):
+    """
+    次のオブジェクトに変更するコマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="NEXT",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        # body = {
+        #     "hoge": "fuga"
+        # }
+        body = {}
+        self.command_body = body
+        return body
+
+
+class PreviousCommand(CommandBase):
+    """
+    前のオブジェクトに変更するコマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="PREVIOUS",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        # body = {
+        #     "hoge": "fuga"
+        # }
+        body = {}
+        self.command_body = body
+        return body
+
+
+class ListCommand(CommandBase):
+    """
+    オブジェクトリスト取得コマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="LIST",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {}
+        self.command_body = body
+        return body
+    
+
+class PingCommand(CommandBase):
+    """
+    Pingコマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="PING",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {}
+        self.command_body = body
+        return body
+    
+
