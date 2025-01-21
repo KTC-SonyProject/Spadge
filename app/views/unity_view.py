@@ -5,6 +5,7 @@ from flet import (
     Container,
     ElevatedButton,
     FilePicker,
+    ListView,
     Row,
     Text,
     alignment,
@@ -20,17 +21,61 @@ class BaseUnityTabView(BaseTabBodyView):
         super().__init__(title, body_content)
 
 
-def create_display_settings_body():
-    return Column(
-        controls=[Text("Display Settings")],
+def create_obj_list_view(show_obj: callable, delete_obj: callable, obj_list: list[str] | None = None) -> ListView:
+    lv = ListView(
+        expand=1,
+        spacing=10,
+        padding=20,
     )
+    if not obj_list:
+        obj_list = ["obj_example1", "obj_example2", "obj_example3"]
+    for obj in obj_list:
+        lv.controls.append(
+            Row(
+                controls=[
+                    Text(obj, size=15),
+                    ElevatedButton(
+                        text="表示",
+                        on_click=lambda _, obj=obj: show_obj(obj),
+                    ),
+                    ElevatedButton(
+                        text="削除",
+                        on_click=lambda _, obj=obj: delete_obj(obj),
+                    ),
+                ]
+            )
+        )
+    return lv
+
+
+class ObjListView(Column):
+    def __init__(self, obj_list: list[str] | None = None):
+        super().__init__(
+            controls=[
+                Text("Upload object 一覧", size=20),
+                create_obj_list_view(self.show_obj, self.delete_obj, obj_list),
+            ]
+        )
+
+    def update_obj_list(self, obj_list: list[str]):
+        self.controls[1] = create_obj_list_view(obj_list)
+
+    def show_obj(self, obj: str):
+        logger.info(f"Show {obj}")
+
+    def delete_obj(self, obj: str):
+        logger.info(f"Delete {obj}")
+
+
+def create_display_settings_body() -> Column:
+    return ObjListView()
 
 
 def create_file_settings_body(
     file_picker: FilePicker,
     selected_files: Text,
     upload_button: ElevatedButton,
-):
+) -> Column:
     return Column(
         alignment=alignment.center,
         expand=True,
@@ -42,7 +87,7 @@ def create_file_settings_body(
                         # on_click=lambda _: file_picker.pick_files(allowed_extensions=["txt", "pdf", "obj", "ply"]),
                         on_click=lambda _: file_picker.pick_files(
                             allow_multiple=True,
-                            allowed_extensions=["obj", "mtl", "jpg", "txt", "ply"], # ファイル拡張子の指定(デバッグ用)
+                            allowed_extensions=["obj", "mtl", "jpg", "txt", "ply"],  # ファイル拡張子の指定(デバッグ用)
                         ),
                     ),
                     ElevatedButton(
@@ -51,7 +96,7 @@ def create_file_settings_body(
                             allow_multiple=False,
                             allowed_extensions=["zip"],
                         ),
-                    )
+                    ),
                 ]
             ),
             selected_files,
