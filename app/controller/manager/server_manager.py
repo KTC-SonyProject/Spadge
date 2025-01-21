@@ -1,9 +1,10 @@
 import json
 import logging
 import socket
+import time
 
 from app.logging_config import safe_log
-from app.models.command_models import CommandBase, TransferCommand
+from app.models.command_models import CommandBase, PingCommand, TransferCommand
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class ServerManager:
         safe_log(logger, logging.INFO, "サーバーを停止しました")
 
     def _wait_for_result(self) -> dict:
-        logger.info("Waiting for result...")
+        logger.debug("Waiting for result...")
 
         data = self.client_socket.recv(1024).decode("utf-8")
         response = data.split("\n")
@@ -99,6 +100,20 @@ class ServerManager:
         logger.debug(f"受信したレスポンス: ヘッダー={header}, ボディ={body_dict}")
         return body_dict
 
+    def _check_connection(self) -> bool:
+        try:
+            command = PingCommand()
+            result = self.send_command(command)
+            if result["status_message"] == "OK":
+                return True
+            else:
+                logger.warning(f"接続確認に失敗しました: {result}")
+                return False
+        except Exception as e:
+            logger.error(f"接続確認中にエラーが発生しました: {e}")
+            return False
+
+
     def handle_client(self, client_socket: socket.socket) -> None:
         """
         クライアントとの通信を処理するスレッドを管理
@@ -108,14 +123,10 @@ class ServerManager:
         """
         self.is_connected = True
         try:
-            # クライアントからのデータを受け取る処理（必要なら実装）
             while self.is_connected:
-                if not self.client_socket:
+                if not self._check_connection():
                     break
-                # data = client_socket.recv(1024).decode("utf-8")
-                # if not data:
-                #     break
-                # logger.debug(f"クライアントからのデータ: {data}")
+                time.sleep(10)
         except Exception as e:
             logger.error(f"クライアント処理中にエラーが発生しました: {e}")
         finally:

@@ -210,9 +210,6 @@ class NextCommand(CommandBase):
         """
         コマンドのボディを生成
         """
-        # body = {
-        #     "hoge": "fuga"
-        # }
         body = {}
         self.command_body = body
         return body
@@ -232,9 +229,6 @@ class PreviousCommand(CommandBase):
         """
         コマンドのボディを生成
         """
-        # body = {
-        #     "hoge": "fuga"
-        # }
         body = {}
         self.command_body = body
         return body
