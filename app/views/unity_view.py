@@ -37,7 +37,11 @@ def create_file_settings_body(
         controls=[
             ElevatedButton(
                 text="ファイルを選択",
-                on_click=lambda _: file_picker.pick_files(allowed_extensions=["txt", "pdf", "obj", "ply"]),
+                # on_click=lambda _: file_picker.pick_files(allowed_extensions=["txt", "pdf", "obj", "ply"]),
+                on_click=lambda _: file_picker.pick_files(
+                    allow_multiple=True,
+                    allowed_extensions=["obj", "mtl", "jpg", "txt", "pdf", "ply"], # ファイル拡張子の指定(デバッグ用)
+                ),
             ),
             selected_files,
             upload_button,

@@ -38,9 +38,13 @@ class UnityController(AbstractController):
 
     def _upload_files(self, _):
         try:
-            upload_list = self.file_manager.prepare_upload_files()
-            logger.debug(f"Upload list: {upload_list}")
-            self.file_picker.upload(upload_list)
+            for f in self.file_manager.model.selected_files:
+                logger.debug(f"Uploading: {f.name}")
+                upload_file = self.file_manager.prepare_upload_single_file(f.name)
+                self.file_picker.upload([upload_file])
+            # upload_list = self.file_manager.prepare_upload_files()
+            # logger.debug(f"Upload list: {upload_list}")
+            # self.file_picker.upload(upload_list)
         except Exception as err:
             logger.error(f"Error uploading files: {err}")
             self.selected_files.value = "Error uploading files"
@@ -48,7 +52,6 @@ class UnityController(AbstractController):
             self.page.update()
 
     def _on_upload(self, e):
-        # TODO: uploadボタンを押した際の挙動がうまく動かない、今後修正予定
         if e.progress is None:
             logger.error(f"Error uploading files: {e.error}")
             self.selected_files.value = "Error uploading files"

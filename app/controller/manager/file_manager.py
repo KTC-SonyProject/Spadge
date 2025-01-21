@@ -24,6 +24,16 @@ class FileManager:
         else:
             return None
 
+    def prepare_upload_single_file(self, file_name: str) -> FilePickerUploadFile:
+        """ファイルの一時アップロード用URLを生成"""
+        try:
+            upload_url = self.model.get_upload_url(file_name)
+            logger.debug(f"アップロードURL: {upload_url}")
+            return FilePickerUploadFile(file_name, upload_url)
+        except Exception as e:
+            logger.error(f"ファイル準備中にエラー: {e}")
+            raise e
+
     def prepare_upload_files(self) -> list[FilePickerUploadFile]:
         """ファイルの一時アップロード用URLを生成"""
         upload_list = []
