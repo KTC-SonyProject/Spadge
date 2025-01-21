@@ -51,7 +51,7 @@ ROUTES = {
         [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
     ),
     "/unity": RouteItem(
-        "Unity", UnityController, [RouteParam(RouteParamKey.FILE_CONTROLLER, RouteParamValue.FILE_CONTROLLER)]
+        "Unity", UnityController, [RouteParam(RouteParamKey.FILE_MANAGER, RouteParamValue.FILE_MANAGER)]
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }

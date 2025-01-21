@@ -35,14 +35,14 @@ def initialize_services(page: Page) -> Container:
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
-    file_controller = FileManager(page, server)
+    file_manager = FileManager(page, server)
 
     # コンテナに登録
     container.register("settings_manager", settings_manager)
     container.register("db_handler", db_handler)
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
-    container.register("file_controller", file_controller)
+    container.register("file_manager", file_manager)
 
     return container
 
@@ -52,7 +52,7 @@ def main(page: Page):
     page.scroll = ScrollMode.AUTO
     page.padding = 10
 
-    # container = initialize_services(page)
+    initialize_services(page)
 
     page.data = {
         "settings_file": "local.settings.json",
