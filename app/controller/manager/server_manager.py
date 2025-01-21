@@ -59,6 +59,7 @@ class ServerManager:
         try:
             logger.info("クライアントの接続を待機中...")
             while self.running:
+                # time.sleep(0.1)
                 if self.server_socket is None:
                     break
                 try:
@@ -90,9 +91,12 @@ class ServerManager:
                 self.client_socket.close()
         if self.server_socket:
             self.server_socket.close()
-        if self.thread and self.thread != threading.current_thread():
-            self.thread.join()
-        # safe_log(logger, logging.INFO, "サーバーを停止しました")
+        if self.thread and self.thread.is_alive():
+            try:
+                # if self.thread != threading.current_thread():
+                    self.thread.join(timeout=3)
+            except RuntimeError as _:
+                pass
 
     def _wait_for_result(self) -> dict:
         logger.debug("Waiting for result...")
@@ -143,7 +147,6 @@ class ServerManager:
             client_socket.close()
             self.is_connected = False
             logger.info("クライアントとの接続を終了しました")
-            self.wait_for_connection()
 
     def _send_command(self, command: CommandBase) -> dict:
         if self.client_socket:

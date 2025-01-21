@@ -112,4 +112,5 @@ finally:
     # container = Container.get_instance()
     # container.get("db_handler").close_connection()
     server.stop()
+    server.thread.join(timeout=3)
     logging.shutdown()
