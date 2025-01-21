@@ -1,6 +1,6 @@
+import atexit
 import logging
 import os
-import threading
 
 import flet as ft
 from flet import (
@@ -21,8 +21,10 @@ from app.service_container import Container
 from app.views.views import MyView
 
 server = ServerManager()
-server_thread = threading.Thread(target=server.start)
-server_thread.start()
+
+
+def server_clean_up():
+    server.stop()
 
 
 def initialize_services(page: Page) -> Container:
@@ -33,14 +35,14 @@ def initialize_services(page: Page) -> Container:
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
-    file_controller = FileManager(page, server)
+    file_manager = FileManager(page, server)
 
     # コンテナに登録
     container.register("settings_manager", settings_manager)
     container.register("db_handler", db_handler)
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
-    container.register("file_controller", file_controller)
+    container.register("file_manager", file_manager)
 
     return container
 
@@ -50,7 +52,7 @@ def main(page: Page):
     page.scroll = ScrollMode.AUTO
     page.padding = 10
 
-    container = initialize_services(page)
+    initialize_services(page)
 
     page.data = {
         "settings_file": "local.settings.json",
@@ -80,8 +82,7 @@ def main(page: Page):
 
     def on_close():
         server.stop()
-        container.get("db_handler").close()
-        server_thread.join()
+        # container.get("db_handler").close_connection()
         print("Application closed")
 
     page.on_close = on_close
@@ -97,16 +98,19 @@ if not os.environ.get("FLET_SECRET_KEY"):
     os.environ["FLET_SECRET_KEY"] = "secret"
 
 try:
+    server.start()  # ServerManagerがスレッドを内部で管理
+    atexit.register(server_clean_up)
     app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
 except KeyboardInterrupt:
     logger.info("App stopped by user")
-    container = Container.get_instance()
-    server.stop()
-    container.get("db_handler").close()
-    server_thread.join()
 except OSError as e:
-    logger.error("Port is already in use")
-    raise e
+    logger.error(f"Port is already in use or invalid: {e}")
 except Exception as e:
     logger.error(f"Error starting app: {e}")
-    raise e
+finally:
+    # logger.info("App stopped")
+    # container = Container.get_instance()
+    # container.get("db_handler").close_connection()
+    server.stop()
+    server.thread.join(timeout=3)
+    logging.shutdown()

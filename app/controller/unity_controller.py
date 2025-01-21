@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 
 
 class UnityController(AbstractController):
-    def __init__(self, page: Page, file_controller: FileManager):
+    def __init__(self, page: Page, file_manager: FileManager):
         super().__init__(page)
-        self.file_controller = file_controller
+        self.file_manager = file_manager
 
     def _on_file_selected(self, e):
         logger.debug(f"Selected files: {e.files}")
-        file_list = self.file_controller.handle_file_selection(e.files)
+        file_list = self.file_manager.handle_file_selection(e.files)
         if file_list:
             self.selected_files.value = ", ".join(map(lambda f: f.name, file_list))
             self.upload_button.visible = True
@@ -36,11 +36,15 @@ class UnityController(AbstractController):
             self.upload_button.visible = False
         self.page.update()
 
+    def _upload_file(self, file_name):
+        logger.debug(f"Uploading: {file_name}")
+        upload_file = self.file_manager.prepare_upload_single_file(file_name)
+        self.file_picker.upload([upload_file])
+
     def _upload_files(self, _):
         try:
-            upload_list = self.file_controller.prepare_upload_files()
-            logger.debug(f"Upload list: {upload_list}")
-            self.file_picker.upload(upload_list)
+            for f in self.file_manager.model.selected_files:
+                self._upload_file(f.name)
         except Exception as err:
             logger.error(f"Error uploading files: {err}")
             self.selected_files.value = "Error uploading files"
@@ -48,7 +52,6 @@ class UnityController(AbstractController):
             self.page.update()
 
     def _on_upload(self, e):
-        # TODO: uploadボタンを押した際の挙動がうまく動かない、今後修正予定
         if e.progress is None:
             logger.error(f"Error uploading files: {e.error}")
             self.selected_files.value = "Error uploading files"
@@ -64,7 +67,7 @@ class UnityController(AbstractController):
 
     def _on_upload_complete(self, e):
         logger.debug(f"Temporary upload complete: {e.file_name}")
-        success, result = self.file_controller.send_file_to_unity(e.file_name)
+        success, result = self.file_manager.send_file_to_unity(e.file_name)
         if success:
             self.selected_files.value = "File upload complete"
         else:
@@ -111,8 +114,8 @@ if __name__ == "__main__":
 
     def main(page):
         server = ServerManager()
-        file_controller = FileManager(page, server)
-        unity_controller = UnityController(page, file_controller)
+        file_manager = FileManager(page, server)
+        unity_controller = UnityController(page, file_manager)
         page.add(unity_controller.get_view())
 
     ft.app(target=main)

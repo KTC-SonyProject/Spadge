@@ -58,8 +58,8 @@ class LangsmithSettings:
 
 @dataclass
 class LlmSettings:
-    llm_provider: str = LlmProvider.AZURE
-    embedding_provider: str = EmbeddingProvider.AZURE
+    llm_provider: LlmProvider = LlmProvider.AZURE
+    embedding_provider: EmbeddingProvider = EmbeddingProvider.AZURE
     azure_llm_settings: AzureLlmSettings = field(default_factory=AzureLlmSettings)
     use_langsmith: bool = False
     langsmith_settings: LangsmithSettings = field(default_factory=LangsmithSettings)

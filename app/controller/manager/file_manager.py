@@ -1,9 +1,11 @@
 import logging
 import os
+import zipfile
 
 from flet import FilePickerUploadFile, Page
 
 from app.controller.manager.server_manager import ServerManager
+from app.models.command_models import TransferCommand
 from app.models.file_models import FileModel
 
 logger = logging.getLogger(__name__)
@@ -23,13 +25,23 @@ class FileManager:
         else:
             return None
 
+    def prepare_upload_single_file(self, file_name: str) -> FilePickerUploadFile:
+        """ファイルの一時アップロード用URLを生成"""
+        try:
+            upload_url = self.model.get_upload_url(file_name)
+            logger.debug(f"アップロードURL: {upload_url}")
+            return FilePickerUploadFile(file_name, upload_url)
+        except Exception as e:
+            logger.error(f"ファイル準備中にエラー: {e}")
+            raise e
+
     def prepare_upload_files(self) -> list[FilePickerUploadFile]:
         """ファイルの一時アップロード用URLを生成"""
         upload_list = []
         try:
             for f in self.model.selected_files:
                 logger.debug(f"ファイル準備中: {f.name}")
-                upload_url = self.model.get_file_path(f)
+                upload_url = self.model.get_upload_url(f.name)
                 logger.debug(f"アップロードURL: {upload_url}")
                 upload_list.append(FilePickerUploadFile(f.name, upload_url))
             return upload_list
@@ -37,27 +49,77 @@ class FileManager:
             logger.error(f"ファイル準備中にエラー: {e}")
             raise e
 
-    def send_file_to_unity(self, file_name) -> tuple[bool, str]:
+    def _send_file(self, command: TransferCommand) -> dict:
+        """ファイルをUnityアプリに送信"""
+        result = self.server.send_file(command)
+        os.remove(command.file_path)  # 一時ファイルを削除
+        return result
+
+    def send_file_to_unity(self, file_name: str) -> tuple[bool, dict]:
         """Unityアプリにファイルを送信"""
-        file_path = self.model.get_file_path(file_name)
+        command = TransferCommand(self.model.get_file_path(file_name))
         try:
             # ファイルの確認
-            self._file_check(file_path)
+            self._file_check(command.file_path)
 
-            logger.debug(f"Unityにファイル送信中: {file_path}")
-            result = self.server.send_file(file_path)
-            os.remove(file_path)  # 一時ファイルを削除
+            if self._is_zip_file(command.file_path):
+                # zipファイルの場合は解凍
+                extracted_files = self._unzip_file(command.file_path)
+                for extracted_file in extracted_files:
+                    file_path = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads/{extracted_file}"
+                    command = TransferCommand(file_path)
+                    self._send_file(command)
+                result = {"status_message": "OK", "message": "zipファイル送信完了"}
+            else:
+                result = self._send_file(command)
             logger.debug(f"Unity送信結果: {result}")
             return True, result
         except Exception as e:
             logger.error(f"Unity送信エラー: {e}")
-            return False, str(e)
+            return False, {"status_message": "ERROR", "error_message": f"Unity送信エラー: {e}"}
 
     def _file_check(self, file_path: str) -> bool:
         """ファイルが存在するか確認"""
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"ファイルが見つかりません: {file_path}")
         return True
+
+    def _is_zip_file(self, file_path: str) -> bool:
+        """ファイルがzip形式か確認"""
+        if file_path.endswith(".zip"):
+            return True
+        else:
+            return False
+
+    def _unzip_file(self, file_path: str) -> list[str]:
+        """ZIPファイルを解凍"""
+        upload_dir = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads"
+        try:
+            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                extracted_files = []
+
+                for entry in zip_ref.namelist():
+                    # ディレクトリはスキップ
+                    if entry.endswith('/'):
+                        logger.debug(f"ディレクトリをスキップ: {entry}")
+                        continue
+
+                    extracted_file_path = os.path.join(upload_dir, entry)
+
+                    # 必要なディレクトリを作成
+                    os.makedirs(os.path.dirname(extracted_file_path), exist_ok=True)
+
+                    # ファイルを展開
+                    with zip_ref.open(entry) as source, open(extracted_file_path, "wb") as target:
+                        target.write(source.read())
+
+                    extracted_files.append(entry)
+
+                logger.debug(f"展開されたファイル: {extracted_files}")
+                return extracted_files
+        except Exception as e:
+            logger.error(f"ZIPファイル解凍エラー: {e}")
+            raise e
 
 
 if __name__ == "__main__":
