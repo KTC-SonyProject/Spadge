@@ -1,6 +1,10 @@
 import logging
 import os
 import socket
+import json
+import sys
+
+from app.models.command_models import CommandBase, TransferCommand
 
 logger = logging.getLogger(__name__)
 
@@ -62,29 +66,27 @@ class ServerManager:
         if self.server_socket:
             self.server_socket.close()
         logger.info("サーバーを完全に停止しました")
+        # appを終了
+        sys.exit(0)
 
-    def _wait_for_result(self) -> str:
-        """
-        クライアントからRESULT行を受け取るまでブロッキングで待機するユーティリティ
-        """
-        buffer = ""
-        while True:
-            data = self.client_socket.recv(1024).decode("utf-8")
-            if not data:
-                raise ConnectionError("クライアントとの接続が切断されました")
-            buffer += data
-            lines = buffer.split("\n")
-            # 最後の行は未完成の可能性があるので、完全な行だけ処理
-            for i in range(len(lines) - 1):
-                line = lines[i].strip()
-                if line.startswith("RESULT:"):
-                    # 結果を返す
-                    return line[len("RESULT:") :]
-            # 未完成の最後の行をbufferに残す
-            if not buffer.endswith("\n"):
-                buffer = lines[-1]
-            else:
-                buffer = ""
+    def _wait_for_result(self) -> dict:
+        logger.info("Waiting for result...")
+
+        data = self.client_socket.recv(1024).decode("utf-8")
+        response = data.split("\n")
+        header = response[0]
+        body = response[1]
+        # ボディの文字列を辞書型に変換
+        try:
+            body_dict = json.loads(body)
+        except json.JSONDecodeError as e:
+            logger.error(f"ボディの文字列を辞書型に変換中にエラーが発生しました: {e}")
+            body_dict = {"status_message": "ERROR", "error_message": str(e)}
+        except Exception as e:
+            raise e
+
+        logger.debug(f"受信したレスポンス: ヘッダー={header}, ボディ={body_dict}")
+        return body_dict
 
     def handle_client(self, client_socket: socket.socket) -> None:
         """
@@ -97,10 +99,11 @@ class ServerManager:
         try:
             # クライアントからのデータを受け取る処理（必要なら実装）
             while self.running:
-                data = client_socket.recv(1024).decode("utf-8")
-                if not data:
-                    break
-                logger.debug(f"クライアントからのデータ: {data}")
+                pass
+                # data = client_socket.recv(1024).decode("utf-8")
+                # if not data:
+                #     break
+                # logger.debug(f"クライアントからのデータ: {data}")
         except Exception as e:
             logger.error(f"クライアント処理中にエラーが発生しました: {e}")
         finally:
@@ -108,29 +111,34 @@ class ServerManager:
             self.is_connected = False
             logger.info("クライアントとの接続を終了しました")
 
-    def send_command(self, command: str) -> str:
+    def _send_command(self, command: CommandBase) -> dict:
+        if self.client_socket:
+            try:
+                full_message = command.get_command()
+                self.client_socket.sendall(full_message.encode("utf-8"))
+
+                result = self._wait_for_result()
+                return result
+            except Exception as e:
+                logger.error(f"コマンド送信中にエラーが発生しました: {e}")
+                raise e
+        else:
+            logger.warning("クライアントが接続されていません")
+            return {"status_message": "ERROR", "error_message": "クライアントが接続されていません"}
+
+    def send_command(self, command: CommandBase) -> dict:
         """
         クライアントにコマンドを送信
 
         Args:
-            command (str): 送信するコマンド
+            command (CommandBase): 送信するコマンドのインスタンス
         """
-        if self.client_socket:
-            try:
-                message = f"COMMAND:{command}\n"
-                self.client_socket.sendall(message.encode("utf-8"))
-                logger.debug(f"コマンドを送信しました: {command}")
+        if isinstance(command, TransferCommand):
+            return self.send_file(command)
 
-                # コマンドの実行結果を待機
-                result = self._wait_for_result()
-                logger.info(f"コマンドの実行結果: {result}")
-                return result
-            except Exception as e:
-                logger.error(f"コマンド送信中にエラーが発生しました: {e}")
-        else:
-            logger.warning("クライアントが接続されていません")
+        return self._send_command(command)
 
-    def send_file(self, file_path: str) -> str:
+    def send_file(self, command: TransferCommand) -> dict:
         """
         クライアントにファイルを送信
 
@@ -141,31 +149,18 @@ class ServerManager:
             FileNotFoundError: ファイルが見つからない場合
             e: その他のエラー
         """
-        if not self.client_socket:
-            logger.warning("クライアントが接続されていません")
-            raise ConnectionError("クライアントが接続されていません")
+        result = self._send_command(command)
 
-        try:
-            if not os.path.isfile(file_path):
-                logger.error(f"ファイルが見つかりません: {file_path}")
-                raise FileNotFoundError(f"ファイルが見つかりません: {file_path}")
+        if result["status_message"] != "OK":
+            logger.error(f"ファイル情報の送信に失敗しました: {result}")
+            raise Exception(f"ファイル情報の送信に失敗しました: {result}")
 
-            # ファイル情報を送信
-            file_name = os.path.basename(file_path)
-            file_size = os.path.getsize(file_path)
-            file_header = f"FILE:{file_name}:{file_size}\n"
-            self.client_socket.sendall(file_header.encode("utf-8"))
+        with open(command.file_path, "rb") as f:
+            while chunk := f.read(1024):
+                self.client_socket.sendall(chunk)
 
-            # ファイル内容を送信
-            with open(file_path, "rb") as f:
-                while chunk := f.read(1024):
-                    self.client_socket.sendall(chunk)
+        logger.debug(f"ファイルを送信しました: {command.file_path}")
 
-            logger.debug(f"ファイルを送信しました: {file_path}")
-
-            # ファイルの送信結果を待機
-            result = self._wait_for_result()
-            logger.info(f"ファイルの送信結果: {result}")
-            return result
-        except Exception as e:
-            raise e
+        result = self._wait_for_result()
+        logger.info(f"ファイルの送信結果: {result}")
+        return result

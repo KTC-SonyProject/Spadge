@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from app.ai.vector_db import get_vector_store
 from app.controller.manager.server_manager import ServerManager
+from app.models.command_models import ControlCommand
 
 
 class SearchDocumentInput(BaseModel):
@@ -32,9 +33,9 @@ def search_documents_tool(query: str) -> list[Document]:
 
 
 class OperationCommand(Enum):
-    next_scene = "次のシーン"
-    previous_scene = "前のシーン"
-    rotate_scene = "シーンを回転"
+    next = "次のシーン"
+    previous = "前のシーン"
+    rotate = "シーンを回転"
 
 
 class DisplayOperationInput(BaseModel):
@@ -52,13 +53,14 @@ class DisplayOperationTool(BaseTool):
 
     server: ServerManager
 
-    def send_command(self, command: str) -> None:
+    def send_command(self, action: str) -> None:
         """
         クライアントにコマンドを送信
 
         Args:
             command (str): 送信するコマンド
         """
+        command = ControlCommand(object_id="123", action=action, action_parameters={"operation": action})
         try:
             self.server.send_command(command)
         except Exception as e:
@@ -75,13 +77,13 @@ class DisplayOperationTool(BaseTool):
         Returns:
             str: 操作結果
         """
-        if OperationCommand.next_scene.value == operation:
+        if OperationCommand.next.value == operation:
             # 次のシーンを表示する
             self.send_command("next")
-        elif OperationCommand.previous_scene.value == operation:
+        elif OperationCommand.previous.value == operation:
             # 前のシーンを表示する
             self.send_command("previous")
-        elif OperationCommand.rotate_scene.value == operation:
+        elif OperationCommand.rotate.value == operation:
             # シーンを回転する
             self.send_command("rotate")
         else:

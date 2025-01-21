@@ -15,10 +15,10 @@ class FileModel:
         self.selected_files = files
         return self.selected_files
 
-    def get_file_path(self, file: FilePickerUploadFile) -> str | None:
+    def get_file_path(self, file: FilePickerUploadFile) -> str:
         if file not in self.selected_files:
             logger.error(f"ファイルが見つかりません: {file}")
-            return None
+            raise FileNotFoundError(f"ファイルが見つかりません: {file}")
 
         return self.page.get_upload_url(file.name, 600)
 

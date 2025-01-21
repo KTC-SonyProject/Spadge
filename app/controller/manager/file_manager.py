@@ -5,6 +5,7 @@ from flet import FilePickerUploadFile, Page
 
 from app.controller.manager.server_manager import ServerManager
 from app.models.file_models import FileModel
+from app.models.command_models import TransferCommand
 
 logger = logging.getLogger(__name__)
 
@@ -37,21 +38,21 @@ class FileManager:
             logger.error(f"ファイル準備中にエラー: {e}")
             raise e
 
-    def send_file_to_unity(self, file_name) -> tuple[bool, str]:
+    def send_file_to_unity(self, file_name: str) -> tuple[bool, dict]:
         """Unityアプリにファイルを送信"""
-        file_path = self.model.get_file_path(file_name)
+        command = TransferCommand(self.model.get_file_path(file_name))
         try:
             # ファイルの確認
-            self._file_check(file_path)
+            self._file_check(command.file_path)
 
-            logger.debug(f"Unityにファイル送信中: {file_path}")
-            result = self.server.send_file(file_path)
-            os.remove(file_path)  # 一時ファイルを削除
+            logger.debug(f"Unityにファイル送信中: {command.file_path}")
+            result = self.server.send_file(command)
+            os.remove(command.file_path)  # 一時ファイルを削除
             logger.debug(f"Unity送信結果: {result}")
             return True, result
         except Exception as e:
             logger.error(f"Unity送信エラー: {e}")
-            return False, str(e)
+            raise e
 
     def _file_check(self, file_path: str) -> bool:
         """ファイルが存在するか確認"""
