@@ -30,7 +30,7 @@ class FileManager:
         try:
             for f in self.model.selected_files:
                 logger.debug(f"ファイル準備中: {f.name}")
-                upload_url = self.model.get_file_path(f)
+                upload_url = self.model.get_upload_url(f.name)
                 logger.debug(f"アップロードURL: {upload_url}")
                 upload_list.append(FilePickerUploadFile(f.name, upload_url))
             return upload_list
@@ -52,7 +52,7 @@ class FileManager:
             return True, result
         except Exception as e:
             logger.error(f"Unity送信エラー: {e}")
-            raise e
+            return False, {"status_message": "ERROR", "error_message": f"Unity送信エラー: {e}"}
 
     def _file_check(self, file_path: str) -> bool:
         """ファイルが存在するか確認"""

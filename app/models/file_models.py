@@ -15,12 +15,17 @@ class FileModel:
         self.selected_files = files
         return self.selected_files
 
-    def get_file_path(self, file: FilePickerUploadFile) -> str:
-        if file not in self.selected_files:
-            logger.error(f"ファイルが見つかりません: {file}")
-            raise FileNotFoundError(f"ファイルが見つかりません: {file}")
+    def get_file_path(self, file_name: str) -> str:
+        for file in self.selected_files:
+            if file.name == file_name:
+                file_path = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads/{file.name}"
+                logger.debug(f"get_file_path for: {file_path}")
+                return file_path
 
-        return self.page.get_upload_url(file.name, 600)
+    def get_upload_url(self, file_name: str) -> str:
+        for file in self.selected_files:
+            if file.name == file_name:
+                return self.page.get_upload_url(file.name, 600)
 
 
 if __name__ == "__main__":
