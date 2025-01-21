@@ -36,15 +36,15 @@ class UnityController(AbstractController):
             self.upload_button.visible = False
         self.page.update()
 
+    def _upload_file(self, file_name):
+        logger.debug(f"Uploading: {file_name}")
+        upload_file = self.file_manager.prepare_upload_single_file(file_name)
+        self.file_picker.upload([upload_file])
+
     def _upload_files(self, _):
         try:
             for f in self.file_manager.model.selected_files:
-                logger.debug(f"Uploading: {f.name}")
-                upload_file = self.file_manager.prepare_upload_single_file(f.name)
-                self.file_picker.upload([upload_file])
-            # upload_list = self.file_manager.prepare_upload_files()
-            # logger.debug(f"Upload list: {upload_list}")
-            # self.file_picker.upload(upload_list)
+                self._upload_file(f.name)
         except Exception as err:
             logger.error(f"Error uploading files: {err}")
             self.selected_files.value = "Error uploading files"

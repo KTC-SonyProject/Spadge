@@ -140,7 +140,7 @@ class ServerManager:
             while self.is_connected:
                 if not self._check_connection():
                     break
-                time.sleep(10)
+                time.sleep(60)
         except Exception as e:
             logger.error(f"クライアント処理中にエラーが発生しました: {e}")
         finally:
