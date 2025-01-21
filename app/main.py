@@ -120,13 +120,18 @@ try:
     app(target=main, port=8000, assets_dir="assets", upload_dir="storage/temp/uploads")
 except KeyboardInterrupt:
     logger.info("App stopped by user")
-    container = Container.get_instance()
-    server.stop()
-    container.get("db_handler").close()
-    server_thread.join()
 except OSError as e:
     logger.error("Port is already in use")
     raise e
 except Exception as e:
     logger.error(f"Error starting app: {e}")
     raise e
+finally:
+    logger.info("App stopped")
+    container = Container.get_instance()
+    server.stop()
+    container.get("db_handler").close()
+    server_thread.join()
+    logger.info("App stopped")
+    logging.shutdown()
+
