@@ -56,7 +56,7 @@ class SQLiteDatabaseHandler(BaseDatabaseHandler):
         Path(self.database_path).touch()
         if self.init_sql_path:
             with sqlite3.connect(self.database_path) as connection:
-                with open(self.init_sql_path) as f:
+                with open(self.init_sql_path, encoding="utf-8") as f:
                     connection.executescript(f.read())
             logger.info("SQLite database created with initial schema.")
 

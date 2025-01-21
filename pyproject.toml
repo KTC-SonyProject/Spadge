@@ -18,6 +18,7 @@ psycopg2-binary = "^2.9.10"
 langgraph-checkpoint-postgres = "^2.0.4"
 langchain-chroma = "^0.1.4"
 flet = {extras = ["all"], version = "^0.25.1"}
+psycopg = {extras = ["binary"], version = "^3.2.4"}
 
 
 [tool.poetry.group.dev.dependencies]

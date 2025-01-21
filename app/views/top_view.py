@@ -9,7 +9,7 @@ from flet import (
 )
 
 # カレントディレクトリにあるREADME.mdを取得
-md = open("README.md").read()
+md = open("README.md", encoding="utf-8").read()
 
 
 class TopView(Column):
