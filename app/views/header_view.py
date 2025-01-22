@@ -1,3 +1,5 @@
+import socket
+
 from flet import (
     AppBar,
     Colors,
@@ -52,6 +54,7 @@ class HeaderView(AppBar):
                 content=Row(
                     alignment=MainAxisAlignment.SPACE_BETWEEN,
                     controls=[
+                        Text("IP: " + self.get_opc_ip()),
                         self.chat_icon,
                         self.toggle_dark_light_icon,
                         PopupMenuButton(items=self.appbar_items),
@@ -69,6 +72,11 @@ class HeaderView(AppBar):
         )
         # ページを更新
         self.page.update()
+
+    # 動作しているOPCのIPアドレスを取得
+    def get_opc_ip(self):
+        host_ip = socket.gethostbyname('host.docker.internal')
+        return host_ip
 
 
 if __name__ == "__main__":
