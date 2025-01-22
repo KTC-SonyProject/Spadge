@@ -38,7 +38,8 @@ class UnityController(AbstractController):
         # jsonの中からresultの値を取得
         # resultがない場合は空のリストを返す
         try:
-            obj_list = res_json["result"]
+            # "example.obj, example2.obj"のような文字列をリストに変換
+            obj_list = res_json["result"].split(", ")
         except KeyError:
             obj_list = None
         logger.debug(f"Object list: {obj_list}")
