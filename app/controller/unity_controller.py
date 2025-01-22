@@ -8,22 +8,41 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
-from app.controller.manager.file_manager import FileManager
+from app.controller.manager import (
+    FileManager,
+    ServerManager,
+)
+from app.models.command_models import ListCommand
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
     UnityView,
     create_display_settings_body,
     create_file_settings_body,
+    ObjListView,
 )
 
 logger = logging.getLogger(__name__)
 
 
 class UnityController(AbstractController):
-    def __init__(self, page: Page, file_manager: FileManager):
+    def __init__(self, page: Page, file_manager: FileManager, socket_server: ServerManager):
         super().__init__(page)
         self.file_manager = file_manager
+        self.server = socket_server
+
+    def _get_list(self):
+        command = ListCommand()
+        res_json = self.server.send_command(command)
+        logger.debug(f"Response: {res_json}")
+        # jsonの中からresultの値を取得
+        # resultがない場合は空のリストを返す
+        try:
+            obj_list = res_json["result"]
+        except KeyError:
+            obj_list = ["Unityと接続されていないか、オブジェクトがありません"]
+        logger.debug(f"Object list: {obj_list}")
+        return obj_list
 
     def _on_file_selected(self, e):
         logger.debug(f"Selected files: {e.files}")
@@ -79,7 +98,7 @@ class UnityController(AbstractController):
     def _create_display_settings_tab(self):
         return BaseUnityTabView(
             "Display",
-            [create_display_settings_body()],
+            [ObjListView(self._get_list())],
         )
 
     def _create_file_settings_tab(self):
