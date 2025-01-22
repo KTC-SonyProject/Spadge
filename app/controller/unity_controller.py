@@ -40,7 +40,7 @@ class UnityController(AbstractController):
         try:
             obj_list = res_json["result"]
         except KeyError:
-            obj_list = ["Unityと接続されていないか、オブジェクトがありません"]
+            obj_list = None
         logger.debug(f"Object list: {obj_list}")
         return obj_list
 
@@ -98,7 +98,7 @@ class UnityController(AbstractController):
     def _create_display_settings_tab(self):
         return BaseUnityTabView(
             "Display",
-            [ObjListView(self._get_list())],
+            [ObjListView(self._get_list)],
         )
 
     def _create_file_settings_tab(self):

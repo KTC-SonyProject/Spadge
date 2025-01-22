@@ -9,6 +9,7 @@ from flet import (
     Row,
     Text,
     alignment,
+    MainAxisAlignment,
 )
 
 from app.views.core import BaseTabBodyView, TabView, create_tabs
@@ -27,38 +28,54 @@ def create_obj_list_view(show_obj: callable, delete_obj: callable, obj_list: lis
         spacing=10,
         padding=20,
     )
-    if not obj_list:
-        obj_list = ["obj_example1", "obj_example2", "obj_example3"]
-    for obj in obj_list:
-        lv.controls.append(
-            Row(
-                controls=[
-                    Text(obj, size=15),
-                    ElevatedButton(
-                        text="表示",
-                        on_click=lambda _, obj=obj: show_obj(obj),
-                    ),
-                    ElevatedButton(
-                        text="削除",
-                        on_click=lambda _, obj=obj: delete_obj(obj),
-                    ),
-                ]
-            )
+    if obj_list is None:
+        lv = ListView(
+            controls=[
+                Text("Unityと接続されていないか、オブジェクトがありません", size=15),
+            ]
         )
+    else:
+        for obj in obj_list:
+            lv.controls.append(
+                Row(
+                    controls=[
+                        Text(obj, size=15),
+                        ElevatedButton(
+                            text="表示",
+                            on_click=lambda _, obj=obj: show_obj(obj),
+                        ),
+                        ElevatedButton(
+                            text="削除",
+                            on_click=lambda _, obj=obj: delete_obj(obj),
+                        ),
+                    ]
+                )
+            )
     return lv
 
 
 class ObjListView(Column):
-    def __init__(self, obj_list: list[str] | None = None):
+    def __init__(self, get_obj_list: callable):
         super().__init__(
             controls=[
-                Text("Upload object 一覧", size=20),
-                create_obj_list_view(self.show_obj, self.delete_obj, obj_list),
-            ]
+                Row(
+                    [
+                        Text("Upload object 一覧", size=20),
+                        ElevatedButton(
+                            text="リストを更新する",
+                            on_click=lambda _: self.update_obj_list(),
+                        ),
+                    ],
+                    alignment=MainAxisAlignment.SPACE_BETWEEN,
+                ),
+                create_obj_list_view(self.show_obj, self.delete_obj, get_obj_list()),
+            ],
+            expand=True,
         )
+        self.get_obj_list = get_obj_list
 
-    def update_obj_list(self, obj_list: list[str]):
-        self.controls[1] = create_obj_list_view(obj_list)
+    def update_obj_list(self):
+        self.controls[1] = create_obj_list_view(self.show_obj, self.delete_obj, self.get_obj_list())
 
     def show_obj(self, obj: str):
         logger.info(f"Show {obj}")
