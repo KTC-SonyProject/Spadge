@@ -36,6 +36,7 @@ class OperationCommand(Enum):
     next = "次のシーン"
     previous = "前のシーン"
     rotate = "シーンを回転"
+    update = "○○に変更" # 特定の名前のオブジェクトに変更する(ここがいまいちわかってないので修正お願いします。)
 
 
 class DisplayOperationInput(BaseModel):
@@ -86,6 +87,9 @@ class DisplayOperationTool(BaseTool):
         elif OperationCommand.rotate.value == operation:
             # シーンを回転する
             self.send_command("rotate")
+        elif OperationCommand.update.value == operation:
+            # 特定の名前のオブジェクトに変更する
+            self.send_command("update")
         else:
             raise ValueError(f"Invalid operation: {operation}")
 
