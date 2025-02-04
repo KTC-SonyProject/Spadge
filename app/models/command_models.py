@@ -272,6 +272,40 @@ class PingCommand(CommandBase):
         return body
 
 
+class UpdateCommand(CommandBase):
+    """
+    特定の名前のオブジェクトに変更するコマンド
+    """
+
+    def __init__(self, file_name: str | None = None):
+        super().__init__(
+            command_name="UPDATE",
+        )
+        self._file_name = file_name
+
+    @property
+    def file_name(self) -> str:
+        if self._file_name is None:
+            raise ValueError("file_nameが設定されていません")
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("file_nameは文字列で指定してください")
+        self._file_name = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {
+            "file_name": self.file_name,
+        }
+        self.command_body = body
+        return body
+
+
 class ResponseModel:
     """
     レスポンスモデル
