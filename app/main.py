@@ -48,9 +48,8 @@ def initialize_services(page: Page) -> Container:
 
 
 def main(page: Page):
-    page.title = "Spadge"
+    page.title = "SPADGE"
     page.scroll = ScrollMode.AUTO
-    page.padding = 10
 
     initialize_services(page)
 

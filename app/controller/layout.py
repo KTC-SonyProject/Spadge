@@ -115,6 +115,8 @@ class MyLayout(View):
         super().__init__(
             route=route,
             scroll=None,
+            spacing=0,
+            padding=0,
         )
 
         self.routing_handler = RoutingHandler(page)
