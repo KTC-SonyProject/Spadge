@@ -15,6 +15,7 @@ from app.controller import (
 )
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
+from app.views.footer_view import FooterView
 from app.views.header_view import HeaderView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
@@ -122,4 +123,5 @@ class MyLayout(View):
         self.controls = [
             HeaderView(page, title.upper()),
             layout,
+            FooterView(page),
         ]
