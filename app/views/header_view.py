@@ -75,7 +75,7 @@ class HeaderView(AppBar):
 
     # 動作しているOPCのIPアドレスを取得
     def get_opc_ip(self):
-        host_ip = socket.gethostbyname('host.docker.internal')
+        host_ip = socket.gethostbyname("host.docker.internal")
         return host_ip
 
 
