@@ -27,39 +27,60 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
             controls=[
                 Column(
                     controls=[
-                        Text("ヒトとヒト、コトとヒトを繋ぐ", size=50, weight="bold", color=Colors.WHITE),
+                        Text("ヒトとヒト、コトとヒトを繋ぐ", size=30, weight="bold", color=Colors.WHITE),
                         Text("Connecting People to People, Things to People", size=15, color=Colors.GREY),
                     ],
                     alignment=MainAxisAlignment.CENTER,
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                 ),
-                Text("SRD × AI で、リアルな体験をもっと身近に。", size=20, color=Colors.WHITE),
-                Row(
+                Column(
                     controls=[
-                        ElevatedButton(
-                            text="体験する",
-                            bgcolor=Colors.BLUE,
-                            color=Colors.WHITE,
-                            on_click=lambda _: page.go("/home"),
-                        ),
-                        ElevatedButton(
-                            text="使い方を知る",
-                            bgcolor=Colors.WHITE,
-                            color=Colors.BLUE,
-                            on_click=scroll_to_step_section,
+                        Text("SRD × AI で、リアルな体験をもっと身近に。", size=20, color=Colors.WHITE),
+                        Row(
+                            controls=[
+                                ElevatedButton(
+                                    text="体験する",
+                                    bgcolor=Colors.BLUE,
+                                    color=Colors.WHITE,
+                                    on_click=lambda _: page.go("/home"),
+                                ),
+                                ElevatedButton(
+                                    text="使い方を知る",
+                                    bgcolor=Colors.WHITE,
+                                    color=Colors.BLUE,
+                                    on_click=scroll_to_step_section,
+                                ),
+                            ],
+                            alignment=MainAxisAlignment.CENTER,
+                            spacing=20,
                         ),
                     ],
                     alignment=MainAxisAlignment.CENTER,
-                    spacing=20,
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+                ),
+                Text(" ", size=20, color=Colors.WHITE),
+                Column(
+                    controls=[
+                        Text("Spatial × Bridge", size=20, color=Colors.GREY, font_family="icon-stentiga"),
+                        Text(
+                            "SPADGE",
+                            size=75,
+                            color=Colors.WHITE,
+                            font_family="icon-stentiga",
+                        ),
+                    ],
+                    alignment=MainAxisAlignment.CENTER,
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+                    spacing=0,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
             horizontal_alignment=CrossAxisAlignment.CENTER,
-            spacing=30,
+            spacing=50,
         ),
         alignment=alignment.center,
         padding=40,
-        height=500,
+        height=600,
         expand=True,
         gradient=LinearGradient(
             begin=alignment.top_center, end=alignment.bottom_center, colors=[Colors.BLUE, Colors.BLUE_GREY]

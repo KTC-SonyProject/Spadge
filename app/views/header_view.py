@@ -17,15 +17,14 @@ import socket
 #     Image,
 #     ImageFit,
 # )
-
-import socket
 from flet import (
     AppBar,
     Colors,
     Container,
-    Icon,
     IconButton,
     Icons,
+    Image,
+    ImageFit,
     MainAxisAlignment,
     Page,
     PopupMenuButton,
@@ -33,8 +32,6 @@ from flet import (
     Row,
     Text,
     margin,
-    Image,
-    ImageFit,
 )
 
 # class HeaderView(Container):
@@ -45,7 +42,7 @@ from flet import (
 #         )
 #         self.page = page
 #         self.page_title = page_title
-        
+
 #         # ライト/ダークモード切替用のアイコンボタン
 #         self.toggle_dark_light_icon = IconButton(
 #             icon=Icons.LIGHT_MODE_OUTLINED if self.page.theme_mode == "light" else Icons.DARK_MODE_OUTLINED,
@@ -115,7 +112,7 @@ from flet import (
 #             alignment=MainAxisAlignment.SPACE_BETWEEN,
 #             vertical_alignment="center",
 #         )
-    
+
 #     def toggle_icon(self, e):
 #         # テーマモードを切り替え、対応するアイコンに更新する
 #         self.page.theme_mode = "light" if self.page.theme_mode == "dark" else "dark"
@@ -123,12 +120,11 @@ from flet import (
 #             Icons.LIGHT_MODE_OUTLINED if self.page.theme_mode == "light" else Icons.DARK_MODE_OUTLINED
 #         )
 #         self.page.update()
-    
+
 #     def get_opc_ip(self):
 #         # 動作中のOPCのIPアドレスを取得する（host.docker.internalを利用）
 #         host_ip = socket.gethostbyname("host.docker.internal")
 #         return host_ip
-
 
 
 class HeaderView(AppBar):
