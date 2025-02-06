@@ -59,19 +59,31 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
                     horizontal_alignment=CrossAxisAlignment.CENTER,
                 ),
                 Text(" ", size=20, color=Colors.WHITE),
-                Column(
+                Row(
                     controls=[
-                        Text("Spatial × Bridge", size=20, color=Colors.GREY, font_family="icon-stentiga"),
-                        Text(
-                            "SPADGE",
-                            size=75,
-                            color=Colors.WHITE,
-                            font_family="icon-stentiga",
+                        Image(
+                            src="icon.png",
+                            width=150,
+                            height=150,
+                            fit=ImageFit.COVER,
+                        ),
+                        Column(
+                            controls=[
+                                Text("Spatial × Bridge", size=20, color=Colors.GREY, font_family="icon-stentiga"),
+                                Text(
+                                    "SPADGE",
+                                    size=75,
+                                    color=Colors.WHITE,
+                                    font_family="icon-stentiga",
+                                ),
+                            ],
+                            alignment=MainAxisAlignment.CENTER,
+                            horizontal_alignment=CrossAxisAlignment.CENTER,
+                            spacing=0,
                         ),
                     ],
                     alignment=MainAxisAlignment.CENTER,
-                    horizontal_alignment=CrossAxisAlignment.CENTER,
-                    spacing=0,
+                    spacing=10,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
