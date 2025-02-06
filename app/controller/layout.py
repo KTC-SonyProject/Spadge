@@ -4,6 +4,7 @@ from flet import (
     Page,
     TemplateRoute,
     View,
+    Column,
 )
 
 from app.controller import (
@@ -121,9 +122,10 @@ class MyLayout(View):
 
         self.routing_handler = RoutingHandler(page)
         title, layout = self.routing_handler.resolve_view(self.route)
+        layout.controls.append(FooterView(page))
 
         self.controls = [
             HeaderView(page, title.upper()),
             layout,
-            FooterView(page),
+            # FooterView(page),
         ]

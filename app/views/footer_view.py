@@ -8,6 +8,7 @@ from flet import (
     Row,
     Text,
     TextButton,
+    alignment,
 )
 
 
@@ -16,6 +17,7 @@ class FooterView(Container):
         super().__init__(
             padding=10,
             bgcolor=Colors.SURFACE_CONTAINER_HIGHEST,
+            alignment=alignment.center,
         )
         self.page = page
         self.content = Column(
@@ -41,7 +43,8 @@ class FooterView(Container):
                     ],
                     alignment=MainAxisAlignment.CENTER,
                     vertical_alignment=CrossAxisAlignment.CENTER,
-                    spacing=20,
+                    spacing=0,
+                    wrap=True,
                 ),
                 Text(
                     value="© 2025 SPADGE",

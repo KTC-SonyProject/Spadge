@@ -63,7 +63,7 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
                     controls=[
                         Image(
                             src="icon.png",
-                            width=150,
+                            # width=150,
                             height=150,
                             fit=ImageFit.COVER,
                         ),
@@ -84,6 +84,7 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
                     ],
                     alignment=MainAxisAlignment.CENTER,
                     spacing=10,
+                    wrap=True,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
@@ -92,7 +93,6 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
         ),
         alignment=alignment.center,
         padding=40,
-        height=600,
         expand=True,
         gradient=LinearGradient(
             begin=alignment.top_center, end=alignment.bottom_center, colors=[Colors.BLUE, Colors.BLUE_GREY]
@@ -135,13 +135,19 @@ def create_feature_section():
                 Row(
                     controls=feature_contents,
                     alignment=MainAxisAlignment.CENTER,
+                    vertical_alignment=CrossAxisAlignment.START,
                     spacing=40,
+                    wrap=True,
+                    expand=True,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
             horizontal_alignment=CrossAxisAlignment.CENTER,
+            expand=True,
         ),
         padding=20,
+        expand=True,
+        alignment=alignment.center,
     )
 
 
@@ -181,12 +187,15 @@ def create_usage_section():
                     controls=usage_cards,
                     alignment=MainAxisAlignment.CENTER,
                     spacing=20,
+                    wrap=True,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
             horizontal_alignment=CrossAxisAlignment.CENTER,
         ),
         padding=20,
+        expand=True,
+        alignment=alignment.center,
     )
 
 
@@ -217,7 +226,7 @@ def create_step_widget(step_number: int, description: str):
 def create_step_section():
     """使い方（ステップ表示）"""
     step_widgets = [
-        create_step_widget(1, "動画をアップロード or 外部アプリからインポート"),
+        create_step_widget(1, "動画をアップロード\nor\n外部アプリからインポート"),
         create_step_widget(2, "3Dモデルを管理"),
         create_step_widget(3, "SRDで展示開始！"),
         create_step_widget(4, "AIで解説"),
@@ -229,7 +238,9 @@ def create_step_section():
                 Row(
                     controls=step_widgets,
                     alignment=MainAxisAlignment.CENTER,
+                    vertical_alignment=CrossAxisAlignment.START,
                     spacing=20,
+                    wrap=True,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
@@ -237,6 +248,8 @@ def create_step_section():
         ),
         padding=20,
         key="step_section",
+        expand=True,
+        alignment=alignment.center,
     )
 
 
@@ -273,12 +286,15 @@ def create_achievement_section():
                     controls=achievement_cards,
                     alignment=MainAxisAlignment.CENTER,
                     spacing=20,
+                    wrap=True,
                 ),
             ],
             alignment=MainAxisAlignment.CENTER,
             horizontal_alignment=CrossAxisAlignment.CENTER,
         ),
         padding=20,
+        expand=True,
+        alignment=alignment.center,
     )
 
 

@@ -162,17 +162,18 @@ class HeaderView(AppBar):
             on_click=lambda _: self.page.go("/"),
         )
         self.leading_width = 75
-        self.title = Text(value=self.page_title, size=30, text_align="center")
+        self.title = Text(value=self.page_title, size=30, font_family="icon-stentiga", no_wrap=True)
         self.center_title = False
         self.toolbar_height = 75
         self.bgcolor = Colors.SURFACE_CONTAINER_HIGHEST
         self.actions = [
             Container(
-                margin=margin.only(left=50, right=25),
+                # margin=margin.only(left=50, right=25),
                 content=Row(
-                    alignment=MainAxisAlignment.SPACE_BETWEEN,
+                    alignment=MainAxisAlignment.END,
+                    spacing=0,
                     controls=[
-                        Text("IP: " + self.get_opc_ip(), size=10),
+                        # Text("IP: " + self.get_opc_ip(), size=10),
                         self.chat_icon,
                         self.toggle_dark_light_icon,
                         PopupMenuButton(items=self.appbar_items),
