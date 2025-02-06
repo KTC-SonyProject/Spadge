@@ -1,6 +1,7 @@
 import logging
 
 from flet import (
+    Column,
     Page,
     TemplateRoute,
     View,
@@ -121,7 +122,15 @@ class MyLayout(View):
 
         self.routing_handler = RoutingHandler(page)
         title, layout = self.routing_handler.resolve_view(self.route)
-        layout.controls.append(FooterView(page))
+        # layoutにFooterViewを追加
+        # layoutにcontrols属性がない場合はColumnにする
+        if not hasattr(layout, "controls"):
+            layout = Column(
+                controls=[layout, FooterView(page)],
+                expand=True,
+            )
+        else:
+            layout.controls.append(FooterView(page))
 
         self.controls = [
             HeaderView(page, title.upper()),

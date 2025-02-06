@@ -181,18 +181,40 @@ class DocumentBody(Container):
         )
 
 
-class DocumentsView(Row):
+# class DocumentsView(Row):
+#     def __init__(self, page: Page, sidebar: Sidebar, content: str):
+#         super().__init__(
+#             expand=True,
+#             vertical_alignment=CrossAxisAlignment.START,
+#         )
+#         self.sidebar = sidebar
+#         self.content = content
+
+#         self.controls = [
+#             self.sidebar,
+#             DocumentBody(page, self.content),
+#         ]
+
+
+class DocumentsView(Column):
     def __init__(self, page: Page, sidebar: Sidebar, content: str):
         super().__init__(
             expand=True,
-            vertical_alignment=CrossAxisAlignment.START,
+            # horizontal_alignment=CrossAxisAlignment.START,
+            spacing=10,
         )
         self.sidebar = sidebar
         self.content = content
 
         self.controls = [
-            self.sidebar,
-            DocumentBody(page, self.content),
+            Row(
+                controls=[
+                    self.sidebar,
+                    DocumentBody(page, self.content),
+                ],
+                expand=True,
+                vertical_alignment=CrossAxisAlignment.START,
+            ),
         ]
 
 
