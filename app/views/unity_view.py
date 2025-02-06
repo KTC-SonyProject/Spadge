@@ -6,10 +6,10 @@ from flet import (
     ElevatedButton,
     FilePicker,
     ListView,
+    MainAxisAlignment,
     Row,
     Text,
     alignment,
-    MainAxisAlignment,
 )
 
 from app.views.core import BaseTabBodyView, TabView, create_tabs

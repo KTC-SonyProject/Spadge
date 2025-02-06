@@ -2,10 +2,12 @@ import atexit
 import logging
 import os
 
-import flet as ft
 from flet import (
+    Colors,
     Page,
+    PageTransitionTheme,
     ScrollMode,
+    Theme,
     app,
 )
 
@@ -48,9 +50,8 @@ def initialize_services(page: Page) -> Container:
 
 
 def main(page: Page):
-    page.title = "Spadge"
+    page.title = "SPADGE"
     page.scroll = ScrollMode.AUTO
-    page.padding = 10
 
     initialize_services(page)
 
@@ -61,6 +62,9 @@ def main(page: Page):
     page.fonts = {
         "default": "/fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf",
         "bold": "/fonts/Noto_Sans_JP/static/NotoSansJP-Black.ttf",
+        "icon-camar": "/fonts/camar/Camar.otf",
+        "icon-term": "/fonts/term/Term.ttf",
+        "icon-stentiga": "/fonts/stentiga/Stentiga.ttf",
     }
 
     page.window.width = 1000
@@ -68,13 +72,13 @@ def main(page: Page):
     page.window.min_width = 800
     page.window.min_height = 600
 
-    theme = ft.Theme()
+    theme = Theme(color_scheme_seed=Colors.GREY)
     theme.font_family = "default"
-    theme.page_transitions.android = ft.PageTransitionTheme.NONE
-    theme.page_transitions.ios = ft.PageTransitionTheme.NONE
-    theme.page_transitions.macos = ft.PageTransitionTheme.NONE
-    theme.page_transitions.linux = ft.PageTransitionTheme.NONE
-    theme.page_transitions.windows = ft.PageTransitionTheme.NONE
+    theme.page_transitions.android = PageTransitionTheme.NONE
+    theme.page_transitions.ios = PageTransitionTheme.NONE
+    theme.page_transitions.macos = PageTransitionTheme.NONE
+    theme.page_transitions.linux = PageTransitionTheme.NONE
+    theme.page_transitions.windows = PageTransitionTheme.NONE
     page.theme = theme
     page.update()
 

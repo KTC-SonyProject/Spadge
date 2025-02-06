@@ -1,6 +1,7 @@
 import logging
 
 from flet import (
+    Column,
     Page,
     TemplateRoute,
     View,
@@ -15,6 +16,7 @@ from app.controller import (
 )
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
+from app.views.footer_view import FooterView
 from app.views.header_view import HeaderView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
@@ -56,7 +58,7 @@ ROUTES = {
         [
             RouteParam(RouteParamKey.FILE_MANAGER, RouteParamValue.FILE_MANAGER),
             RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
-        ]
+        ],
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }
@@ -114,12 +116,24 @@ class MyLayout(View):
         super().__init__(
             route=route,
             scroll=None,
+            spacing=0,
+            padding=0,
         )
 
         self.routing_handler = RoutingHandler(page)
         title, layout = self.routing_handler.resolve_view(self.route)
+        # layoutにFooterViewを追加
+        # layoutにcontrols属性がない場合はColumnにする
+        if not hasattr(layout, "controls"):
+            layout = Column(
+                controls=[layout, FooterView(page)],
+                expand=True,
+            )
+        else:
+            layout.controls.append(FooterView(page))
 
         self.controls = [
             HeaderView(page, title.upper()),
             layout,
+            # FooterView(page),
         ]

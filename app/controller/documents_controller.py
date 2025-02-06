@@ -96,6 +96,9 @@ class DocumentsSidebarController(AbstractController):
             self._tap_nav_icon,
             self._toggle_nav_rail,
         )
+        wrap_width = 800
+        if self.page.window.width < wrap_width:
+            self.sidebar.nav_rail.visible = False
         return self.sidebar
 
 
