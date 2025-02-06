@@ -4,7 +4,6 @@ from flet import (
     Page,
     TemplateRoute,
     View,
-    Column,
 )
 
 from app.controller import (
