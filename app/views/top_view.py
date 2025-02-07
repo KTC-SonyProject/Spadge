@@ -69,12 +69,12 @@ def create_hero_section(page: Page, scroll_to_step_section: callable):
                         ),
                         Column(
                             controls=[
-                                Text("Spatial × Bridge", size=20, color=Colors.GREY, font_family="icon-stentiga"),
+                                Text("Spatial × Bridge", size=20, color=Colors.GREY, font_family="icon-camar"),
                                 Text(
-                                    "SPADGE",
+                                    "spadge",
                                     size=75,
                                     color=Colors.WHITE,
-                                    font_family="icon-stentiga",
+                                    font_family="icon-camar",
                                 ),
                             ],
                             alignment=MainAxisAlignment.CENTER,
