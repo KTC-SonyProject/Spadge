@@ -31,18 +31,27 @@ ROUTES = {
     "/home": RouteItem("Home", HomeController),
     "/voice": RouteItem("Voice", VoiceView),
     "/documents": RouteItem(
-        "Documents", DocumentsController, [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
+        "Documents",
+        DocumentsController,
+        [
+            RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
     ),
     "/documents/:document_id": RouteItem(
         "Document",
         DocumentsController,
-        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)],
+        [
+            RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
     ),
     "/documents/:document_id/edit": RouteItem(
         "Edit Document",
         DocumentsController,
         [
             RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
             RouteParam("is_edit", True),
         ],
     ),
