@@ -5,6 +5,7 @@ from flet import (
     Divider,
     Page,
     Text,
+    ElevatedButton,
 )
 
 from app.controller.core import AbstractController
@@ -66,6 +67,10 @@ class SettingsController(AbstractController):
                     label="App Description",
                     value=self.manager.get_setting(f"{nested_key}.app_description"),
                     on_change=self._change_settings_value("app_description"),
+                ),
+                ElevatedButton(
+                    text="認証アカウントのIDとパスワードを変更する",
+                    on_click=lambda _: self.page.go("/settings/auth/update"),
                 ),
             ],
         )

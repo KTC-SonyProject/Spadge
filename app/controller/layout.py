@@ -15,6 +15,7 @@ from app.controller import (
     UnityController,
     AuthController,
     LogoutController,
+    UpdateController,
 )
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
@@ -74,6 +75,11 @@ ROUTES = {
             RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
         ],
     ),
+    "/settings/auth/update": RouteItem(
+        "Update Password",
+        UpdateController,
+        [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)],
+    ),
     "/chat": RouteItem(
         "Chat",
         ChatController,
@@ -109,6 +115,7 @@ class RoutingHandler:
             ChatController,
             AuthController,
             LogoutController,
+            UpdateController,
         }:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
