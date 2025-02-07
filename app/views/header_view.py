@@ -161,7 +161,7 @@ class HeaderView(AppBar):
             on_click=lambda _: self.page.go("/"),
         )
         self.leading_width = 75
-        self.title = Text(value=self.page_title, size=30, font_family="icon-stentiga", no_wrap=True)
+        self.title = Text(value=self.page_title, size=30, font_family="icon-camar", no_wrap=True, color=Colors.BLUE_GREY)
         self.center_title = False
         self.toolbar_height = 75
         self.bgcolor = Colors.SURFACE_CONTAINER_HIGHEST
