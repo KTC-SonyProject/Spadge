@@ -8,13 +8,13 @@ from flet import (
 )
 
 from app.controller import (
+    AuthController,
     ChatController,
     DocumentsController,
     HomeController,
+    LogoutController,
     SettingsController,
     UnityController,
-    AuthController,
-    LogoutController,
     UpdateController,
 )
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue

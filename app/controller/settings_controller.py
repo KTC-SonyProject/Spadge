@@ -3,9 +3,9 @@ import logging
 from flet import (
     Column,
     Divider,
+    ElevatedButton,
     Page,
     Text,
-    ElevatedButton,
 )
 
 from app.controller.core import AbstractController

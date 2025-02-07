@@ -15,6 +15,7 @@ from flet import (
     Row,
     Text,
 )
+
 from app.controller.manager.auth_manager import AuthManager
 
 

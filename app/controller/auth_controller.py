@@ -45,6 +45,7 @@ class LogoutController(AbstractController):
         self.view = LogoutView(self.page, self._logout)
         return self.view
 
+
 class UpdateController(AbstractController):
     def __init__(self, page: Page, auth_manager: AuthManager):
         self.page = page
