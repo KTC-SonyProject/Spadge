@@ -48,6 +48,11 @@ ROUTES = {
     "/login": RouteItem(
         "Login", AuthController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]
     ),
+    "/login/error": RouteItem(
+        "Login Error",
+        AuthController,
+        [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER), RouteParam("is_errored", True)],
+    ),
     "/settings": RouteItem(
         "Settings",
         SettingsController,

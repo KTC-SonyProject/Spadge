@@ -27,10 +27,6 @@ class SettingsController(AbstractController):
         super().__init__(page)
         self.manager = settings_manager
         self.auth_manager = auth_manager
-        if not self.auth_manager.check_is_authenticated():
-            self.page.go("/login")
-            return
-
         self.banner = BannerView(page)
 
     def _change_settings_value(self, key: str, update_ui: callable = None):
@@ -210,6 +206,12 @@ class SettingsController(AbstractController):
         )
 
     def get_view(self) -> SettingsView:
+        # Check if user is authenticated
+        if not self.auth_manager.check_is_authenticated():
+            # self.banner.show_banner("error", "You need to login first.")
+            self.page.go("/login/error")
+            return
+
         tabs = [
             TabView("General", self._create_general_tab()),
             TabView("Database", self._create_database_tab()),

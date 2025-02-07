@@ -11,18 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 class AuthController(AbstractController):
-    def __init__(self, page: Page, auth_manager: AuthManager):
+    def __init__(self, page: Page, auth_manager: AuthManager, is_errored=False):
         self.page = page
         self.auth_manager = auth_manager
         self.banner = BannerView(page)
+        self.is_errored = is_errored  # corrected assignment
 
     def _login(self, _, user_id="", password=""):
         if self.auth_manager.check_credentials(user_id, password):
             self.page.session.set("is_authenticated", True)
             self.page.go("/settings")
         else:
-            self.banner.show_banner("error", "Invalid credentials")
+            self.banner.show_banner("error", "IDまたはパスワードが間違っています")
 
     def get_view(self):
-        self.view = AuthView(self.page, self._login)
+        self.view = AuthView(self.page, self._login, self.is_errored)
         return self.view
