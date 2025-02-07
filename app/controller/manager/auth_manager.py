@@ -1,8 +1,10 @@
 import json
+import logging
 import os
 
 import bcrypt
 
+logger = logging.getLogger(__name__)
 
 class AuthManager:
     """
@@ -30,6 +32,7 @@ class AuthManager:
         初期値はユーザーID: admin, パスワード: admin
         """
         if not os.path.exists(self.CREDENTIALS_FILE):
+            logger.info("Credentials file not found. Creating default credentials.")
             DEFAULT_ID = "admin"
             DEFAULT_PASSWORD = "admin"
             hashed = bcrypt.hashpw(DEFAULT_PASSWORD.encode(), bcrypt.gensalt()).decode()
@@ -46,6 +49,7 @@ class AuthManager:
         """
         with open(self.CREDENTIALS_FILE, "w", encoding="utf-8") as f:
             json.dump(self.credentials, f, ensure_ascii=False, indent=4)
+        logger.info("Credentials saved.")
 
     def check_credentials(self, user_id, password):
         """
@@ -54,7 +58,9 @@ class AuthManager:
         stored_id = self.credentials.get("id")
         stored_hashed = self.credentials.get("password")
         if user_id != stored_id:
+            logger.debug("User ID does not match.")
             return False
+        logger.debug("Password check in progress.")
         return bcrypt.checkpw(password.encode(), stored_hashed.encode())
 
     def update_credentials(self, new_id, new_password):
@@ -63,21 +69,24 @@ class AuthManager:
         """
         hashed_password = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
         self.credentials = {"id": new_id, "password": hashed_password}
+        logger.debug(f"Credentials updated. {self.credentials=}")
         self._save_credentials()
 
 
 if __name__ == "__main__":
+    from app.logging_config import setup_logging
+    setup_logging()
     auth_manager = AuthManager()
 
     # ユーザーIDとパスワードをチェック
+    auth_manager.update_credentials("admin", "password")
+    print(auth_manager.check_credentials("admin", "admin"))  # False
+    print(auth_manager.check_credentials("admin", "password"))  # True
+
+    # 認証情報を更新して保存
     auth_manager.update_credentials("admin", "admin")
     print(auth_manager.check_credentials("admin", "admin"))  # True
     print(auth_manager.check_credentials("admin", "password"))  # False
-
-    # 認証情報を更新して保存
-    auth_manager.update_credentials("admin", "password")
-    print(auth_manager.check_credentials("admin", "password"))  # True
-    print(auth_manager.check_credentials("admin", "admin"))  # False
 
 
 
