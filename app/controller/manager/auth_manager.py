@@ -3,8 +3,10 @@ import logging
 import os
 
 import bcrypt
+from flet import Page
 
 logger = logging.getLogger(__name__)
+
 
 class AuthManager:
     """
@@ -23,8 +25,9 @@ class AuthManager:
     STORAGE_FOLDER = os.environ["FLET_APP_STORAGE_DATA"]
     CREDENTIALS_FILE = f"{STORAGE_FOLDER}/credentials.json"
 
-    def __init__(self):
+    def __init__(self, page: Page):
         self.credentials = self._load_credentials()
+        self.page = page
 
     def _load_credentials(self):
         """
@@ -72,9 +75,20 @@ class AuthManager:
         logger.debug(f"Credentials updated. {self.credentials=}")
         self._save_credentials()
 
+    def check_is_authenticated(self) -> bool:
+        """
+        ユーザーが認証されているかどうかをチェックする関数
+        """
+        if not self.page.session.contains_key("is_authenticated"):
+            # 認証情報がセッションに保存されていない場合はFalseを返す
+            self.page.session.set("is_authenticated", False)
+            return False
+        return self.page.session.get("is_authenticated")
+
 
 if __name__ == "__main__":
     from app.logging_config import setup_logging
+
     setup_logging()
     auth_manager = AuthManager()
 
@@ -87,6 +101,3 @@ if __name__ == "__main__":
     auth_manager.update_credentials("admin", "admin")
     print(auth_manager.check_credentials("admin", "admin"))  # True
     print(auth_manager.check_credentials("admin", "password"))  # False
-
-
-

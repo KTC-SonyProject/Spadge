@@ -8,6 +8,7 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
+from app.controller.manager.auth_manager import AuthManager
 from app.controller.manager.settings_manager import SettingsManager
 from app.models.settings_models import LlmProvider
 from app.views.core import BannerView, create_dropdown, create_switch, create_text_field
@@ -22,21 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 class SettingsController(AbstractController):
-    def __init__(self, page: Page, settings_manager: SettingsManager):
+    def __init__(self, page: Page, settings_manager: SettingsManager, auth_manager: AuthManager):
         super().__init__(page)
         self.manager = settings_manager
+        self.auth_manager = auth_manager
+        if not self.auth_manager.check_is_authenticated():
+            self.page.go("/login")
+            return
+
         self.banner = BannerView(page)
-
-    # def _show_banner(self, event, status, message):
-    #     self.page.overlay.append(self.banner)
-    #     self.banner.open = True
-    #     self.page.update()
-    #     time.sleep(2)
-    #     self._close_banner(event)
-
-    # def _close_banner(self, _):
-    #     self.banner.open = False
-    #     self.page.update()
 
     def _change_settings_value(self, key: str, update_ui: callable = None):
         def handler(event):

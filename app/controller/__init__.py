@@ -21,4 +21,5 @@ from .manager import (
     ServerManager,
     SettingsManager,
     FileManager,
+    AuthManager,
 )

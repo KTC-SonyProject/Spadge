@@ -14,6 +14,7 @@ from app.controller import (
     SettingsController,
     UnityController,
 )
+from app.controller.auth_controller import AuthController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
 from app.views.footer_view import FooterView
@@ -44,8 +45,16 @@ ROUTES = {
             RouteParam("is_edit", True),
         ],
     ),
+    "/login": RouteItem(
+        "Login", AuthController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]
+    ),
     "/settings": RouteItem(
-        "Settings", SettingsController, [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
+        "Settings",
+        SettingsController,
+        [
+            RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
     ),
     "/chat": RouteItem(
         "Chat",
@@ -80,6 +89,7 @@ class RoutingHandler:
             DocumentsController,
             UnityController,
             ChatController,
+            AuthController,
         }:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
