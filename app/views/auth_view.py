@@ -69,3 +69,40 @@ class AuthView(Column):
                 expand=True,
             )
         ]
+
+
+class LogoutView(Column):
+    def __init__(self, page: Page, logout: callable):
+        super().__init__(
+            alignment=MainAxisAlignment.CENTER,
+            horizontal_alignment=CrossAxisAlignment.CENTER,
+            expand=True,
+        )
+
+        self.logout_button = ElevatedButton(
+            text="Logout",
+            on_click=lambda e: logout(e),
+            bgcolor=Colors.RED,
+            color=Colors.WHITE,
+            width=300,
+            height=50,
+        )
+
+        self.controls = [
+            Container(
+                content=Column(
+                    controls=[
+                        Text("Logout", size=30, weight="bold", color=Colors.RED),
+                        self.logout_button,
+                    ],
+                    spacing=20,
+                    alignment=MainAxisAlignment.CENTER,
+                    horizontal_alignment=CrossAxisAlignment.CENTER,
+                ),
+                padding=20,
+                border_radius=10,
+                width=350,
+                alignment=alignment.center,
+                expand=True,
+            )
+        ]

@@ -13,8 +13,9 @@ from app.controller import (
     HomeController,
     SettingsController,
     UnityController,
+    AuthController,
+    LogoutController,
 )
-from app.controller.auth_controller import AuthController
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
 from app.views.footer_view import FooterView
@@ -52,6 +53,9 @@ ROUTES = {
         "Login Error",
         AuthController,
         [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER), RouteParam("is_errored", True)],
+    ),
+    "/logout": RouteItem(
+        "Logout", LogoutController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]
     ),
     "/settings": RouteItem(
         "Settings",
@@ -95,6 +99,7 @@ class RoutingHandler:
             UnityController,
             ChatController,
             AuthController,
+            LogoutController,
         }:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")

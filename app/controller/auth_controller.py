@@ -4,7 +4,7 @@ from flet import Page
 
 from app.controller.core import AbstractController
 from app.controller.manager.auth_manager import AuthManager
-from app.views.auth_view import AuthView
+from app.views.auth_view import AuthView, LogoutView
 from app.views.core import BannerView
 
 logger = logging.getLogger(__name__)
@@ -26,4 +26,18 @@ class AuthController(AbstractController):
 
     def get_view(self):
         self.view = AuthView(self.page, self._login, self.is_errored)
+        return self.view
+
+
+class LogoutController(AbstractController):
+    def __init__(self, page: Page, auth_manager: AuthManager):
+        self.page = page
+        self.auth_manager = auth_manager
+
+    def _logout(self, _):
+        self.page.session.set("is_authenticated", False)
+        self.page.go("/")
+
+    def get_view(self):
+        self.view = LogoutView(self.page, self._logout)
         return self.view
