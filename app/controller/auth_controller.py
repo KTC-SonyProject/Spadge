@@ -21,7 +21,7 @@ class AuthController(AbstractController):
         if self.auth_manager.check_credentials(user_id, password):
             self.page.session.set("is_authenticated", True)
             self.banner.show_banner("success", "ログインしました")
-            self.page.go("/settings")
+            self.page.go("/home")
         else:
             self.banner.show_banner("error", "IDまたはパスワードが間違っています")
 

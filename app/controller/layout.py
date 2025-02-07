@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 ROUTES = {
     "/": RouteItem("Top", TopView),
-    "/home": RouteItem("Home", HomeController),
+    "/home": RouteItem("Home", HomeController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]),
     "/voice": RouteItem("Voice", VoiceView),
     "/documents": RouteItem(
         "Documents",
