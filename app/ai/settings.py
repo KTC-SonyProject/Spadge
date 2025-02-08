@@ -56,7 +56,7 @@ def embedding_model_settings():
         raise ValueError(f"Invalid embedding model type: {settings.get("embedding_provider")}")
 
 
-def langsmith_settigns():
+def langsmith_settings():
     settings = load_settings("llm_settings")
     if settings.get("use_langsmith"):
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
