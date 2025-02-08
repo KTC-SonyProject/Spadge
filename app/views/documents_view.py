@@ -37,7 +37,15 @@ from flet import (
 logger = logging.getLogger(__name__)
 
 
-def create_rail_description(page: Page, title: str, id: int):
+def create_rail_description(page: Page, title: str, id: int, is_authenticated: bool = False):
+    if not is_authenticated:
+        return Row(
+            expand=True,
+            alignment=MainAxisAlignment.SPACE_BETWEEN,
+            controls=[
+                Text(title, width=150, max_lines=1, overflow=TextOverflow.ELLIPSIS),
+            ],
+        )
     return Row(
         expand=True,
         alignment=MainAxisAlignment.SPACE_BETWEEN,
@@ -52,9 +60,9 @@ def create_rail_description(page: Page, title: str, id: int):
     )
 
 
-def create_nav_rail_item(page: Page, title: str, id: int):
+def create_nav_rail_item(page: Page, title: str, id: int, is_authenticated: bool = False):
     return NavigationRailDestination(
-        label_content=create_rail_description(page, title, id),
+        label_content=create_rail_description(page, title, id, is_authenticated),
         label=title,
         selected_icon=Icons.CHEVRON_RIGHT_ROUNDED,
         icon=Icons.CHEVRON_RIGHT_OUTLINED,
@@ -115,6 +123,7 @@ class Sidebar(Container):
         open_modal: callable,
         tap_nav_icon: callable,
         toggle_nav_rail: callable,
+        is_authenticated: bool = False,
     ):
         super().__init__(
             # expand=True,
@@ -127,13 +136,20 @@ class Sidebar(Container):
             # min_width=20,
             selected_index=None,
             label_type=NavigationRailLabelType.ALL,
-            leading=FloatingActionButton(icon=Icons.CREATE, text="ADD DOCUMENT", on_click=open_modal),
+            # leading=FloatingActionButton(icon=Icons.CREATE, text="ADD DOCUMENT", on_click=open_modal),
             group_alignment=-0.9,
             destinations=self.nav_rail_items,
             on_change=tap_nav_icon,
             expand=True,
             extended=True,
         )
+        if is_authenticated:  # もし認証されていたらnav_railにドキュメント追加ボタンを表示
+            self.nav_rail.leading = FloatingActionButton(
+                icon=Icons.CREATE,
+                text="ADD DOCUMENT",
+                on_click=open_modal,
+                tooltip="Add Document",
+            )
         self.toggle_nav_rail_button = IconButton(
             icon=Icons.ARROW_CIRCLE_LEFT,
             icon_color=Colors.BLUE_GREY_400,

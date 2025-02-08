@@ -3,6 +3,7 @@ from .documents_controller import DocumentsController
 from .home_controller import HomeController
 from .settings_controller import SettingsController
 from .unity_controller import UnityController
+from .auth_controller import AuthController, LogoutController, UpdateController
 
 from .core import (
     AbstractController,
@@ -21,4 +22,5 @@ from .manager import (
     ServerManager,
     SettingsManager,
     FileManager,
+    AuthManager,
 )
