@@ -1,8 +1,8 @@
 import logging
 import os
-from typing import Any
 
 from langchain.globals import set_verbose
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 from app.controller.manager.settings_manager import load_settings
@@ -11,7 +11,7 @@ from app.models.settings_models import EmbeddingProvider, LlmProvider
 logger = logging.getLogger(__name__)
 
 
-def llm_settings(verbose: bool = False) -> Any:
+def llm_settings(verbose: bool = False, tags: str = None) -> BaseChatModel:
     set_verbose(verbose)
     settings = load_settings("llm_settings")
     if settings.get("llm_provider") == LlmProvider.AZURE.value:
@@ -30,6 +30,7 @@ def llm_settings(verbose: bool = False) -> Any:
             timeout=None,
             max_retries=2,
             streaming=True,
+            tags=tags,
         )
     elif settings.get("llm_provider") == LlmProvider.GEMINI.value:
         print("Gemini is not implemented yet.")

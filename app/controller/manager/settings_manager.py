@@ -28,7 +28,7 @@ class SettingsManager:
     def __init__(self):
         self.settings = self.load_settings()
 
-    def load_settings(self) -> Any:
+    def load_settings(self) -> AppSettings:
         """
         設定をファイルからロードする。
         ファイルが存在しない場合はデフォルト設定を使用する。
