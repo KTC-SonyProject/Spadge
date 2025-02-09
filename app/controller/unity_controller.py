@@ -133,8 +133,8 @@ if __name__ == "__main__":
         server = ServerManager()
         settings = SettingsManager()
         db_handler = DatabaseHandler(settings)
-        file_manager = FileManager(page, server)
         obj_manager = ObjectManager(db_handler)
+        file_manager = FileManager(page, server, obj_manager)
         unity_controller = UnityController(page, file_manager, server, obj_manager)
         page.add(unity_controller.get_view())
 

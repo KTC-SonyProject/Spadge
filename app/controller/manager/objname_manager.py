@@ -39,13 +39,27 @@ class ObjectManager:
     def get_last_id(self) -> int:
         """
         テーブルの最後のIDを取得する。
-        :return: 最後のオブジェクトID
+        :return: 最後のオブジェクトID（オブジェクトがない場合は0）
         """
         query = "SELECT object_id FROM objects ORDER BY object_id DESC LIMIT 1;"
         results = self.db_handler.fetch_query(query)
         if results:
             return results[0][0]
-        return -1  # オブジェクトがない場合
+        return 0  # オブジェクトがない場合は0から開始
+
+    def new_object(self, object_name: str) -> int:
+        """
+        新しいオブジェクトを追加する。
+        :param object_name: オブジェクト名
+        :return: 追加されたオブジェクトのID
+        """
+        query = "INSERT INTO objects (object_name) VALUES (%s) RETURNING object_id;"
+        results = self.db_handler.fetch_query(query, (object_name,))
+        if results:
+            return results[0][0]
+        else:
+            raise RuntimeError("Failed to insert new object.")
+
 
     def update_name(self, object_id: int, new_name: str):
         """

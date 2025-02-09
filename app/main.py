@@ -38,19 +38,19 @@ def initialize_services(page: Page) -> Container:
     # 各サービスの初期化
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
-    docs_manager = DocumentsManager(db_handler)
-    file_manager = FileManager(page, server)
-    auth_manager = AuthManager(page)
     obj_manager = ObjectManager(db_handler)
+    docs_manager = DocumentsManager(db_handler)
+    file_manager = FileManager(page, server, obj_manager)
+    auth_manager = AuthManager(page)
 
     # コンテナに登録
     container.register("settings_manager", settings_manager)
     container.register("db_handler", db_handler)
+    container.register("obj_manager", obj_manager)
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
     container.register("file_manager", file_manager)
     container.register("auth_manager", auth_manager)
-    container.register("obj_manager", obj_manager)
 
     return container
 
