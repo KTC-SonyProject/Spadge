@@ -88,6 +88,43 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
 
     return body
 
+class ChatMessageCard(Container):
+    def __init__(self, message: Message, tap_link: callable):
+        super().__init__(
+            padding=padding.symmetric(horizontal=30, vertical=10),
+        )
+        self.body = Markdown(
+            value=message.content,
+            selectable=True,
+            extension_set=MarkdownExtensionSet.GITHUB_WEB,
+            on_tap_link=tap_link,
+        )
+        self.content = Row(
+            vertical_alignment=CrossAxisAlignment.START,
+            alignment=MainAxisAlignment.END if message.message_type == MessageType.USER else MainAxisAlignment.START,
+            controls=[
+                Column(
+                    tight=True,
+                    spacing=5,
+                    expand=True,
+                    horizontal_alignment=CrossAxisAlignment.END if message.message_type == MessageType.USER else None,
+                    controls=[
+                        Text(message.name, weight="bold"),
+                        self.body,
+                    ],
+                )
+            ],
+        )
+
+        if message.message_type in {MessageType.AI, MessageType.TOOL}:
+            self.content.controls.insert(
+                0,
+                CircleAvatar(
+                    content=Text(get_initials(message.name)),
+                    color=Colors.WHITE,
+                    bgcolor=Colors.BLUE,
+                ),
+            )
 
 def create_chat_header(session_id: str, init_chat_button: callable) -> Container:
     return Container(

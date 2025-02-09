@@ -83,7 +83,10 @@ ROUTES = {
     "/chat": RouteItem(
         "Chat",
         ChatController,
-        [RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER)],
+        [
+            RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
+            RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS),
+        ],
     ),
     "/unity": RouteItem(
         "Unity",

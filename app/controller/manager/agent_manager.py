@@ -16,7 +16,7 @@ from typing_extensions import TypedDict
 
 from app.ai.settings import llm_settings
 from app.ai.vector_db import get_vector_store
-from app.controller import SettingsManager
+from app.controller.manager.settings_manager import SettingsManager
 from app.models.agent_models import State
 
 logger = logging.getLogger(__name__)

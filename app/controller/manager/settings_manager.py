@@ -37,7 +37,6 @@ class SettingsManager:
             try:
                 with open(self.SETTINGS_FILE, encoding="utf-8") as file:
                     data = json.load(file)
-                    logger.debug(f"ロードした設定: {data}")
                 logger.info("設定ファイルを正常にロードしました。")
                 return self._dict_to_app_settings(data)
             except (json.JSONDecodeError, KeyError):
@@ -66,7 +65,6 @@ class SettingsManager:
                 value = getattr(value, key, None)
                 if value is None:
                     raise AttributeError(f"キーが見つかりません: {path}")
-            logger.debug(f"取得した設定: {path} = {value}")
             return value
         except AttributeError as e:
             logger.error(f"設定の取得中にエラーが発生しました: {e}")
