@@ -88,6 +88,7 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
 
     return body
 
+
 class ChatMessageCard(Container):
     def __init__(self, message: Message, tap_link: callable):
         super().__init__(
@@ -125,6 +126,7 @@ class ChatMessageCard(Container):
                     bgcolor=Colors.BLUE,
                 ),
             )
+
 
 def create_chat_header(session_id: str, init_chat_button: callable) -> Container:
     return Container(

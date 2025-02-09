@@ -5,12 +5,12 @@ from flet import (
     Page,
 )
 
+from app.controller.core import AbstractController
+from app.controller.manager.agent_manager import SupervisorAgent, sub_agents_with_generic
 from app.controller.manager.server_manager import ServerManager
 from app.controller.manager.settings_manager import SettingsManager
-from app.controller.manager.agent_manager import SupervisorAgent, sub_agents_with_generic
-from app.controller.core import AbstractController
 from app.models.chat_models import Message, MessageType
-from app.views.chat_view import ChatView, ChatMessageCard
+from app.views.chat_view import ChatMessageCard, ChatView
 
 logger = logging.getLogger(__name__)
 
@@ -118,14 +118,14 @@ class ChatController(AbstractController):
                 #             )
                 #         )
                 # まず今回のメッセージ用UIを作成
-                self.add_message( # ユーザーのメッセージ
+                self.add_message(  # ユーザーのメッセージ
                     Message(
                         name="USER",
                         content=message,
                         message_type=MessageType.USER,
                     )
                 )
-                self.add_message( # AIのメッセージ
+                self.add_message(  # AIのメッセージ
                     Message(
                         name="AI",
                         content="thinking...",
