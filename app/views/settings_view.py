@@ -113,6 +113,7 @@ class SettingsView(Column):
         super().__init__(
             spacing=10,
             expand=True,
+            # scroll=True,
         )
 
         title = Container(

@@ -1,20 +1,25 @@
 import logging
 
 from flet import (
+    Column,
     Page,
     TemplateRoute,
     View,
 )
 
 from app.controller import (
+    AuthController,
     ChatController,
     DocumentsController,
     HomeController,
+    LogoutController,
     SettingsController,
     UnityController,
+    UpdateController,
 )
 from app.models.route_models import RouteItem, RouteParam, RouteParamKey, RouteParamValue
 from app.service_container import Container
+from app.views.footer_view import FooterView
 from app.views.header_view import HeaderView
 from app.views.template_view import TemplateView
 from app.views.top_view import TopView
@@ -24,26 +29,56 @@ logger = logging.getLogger(__name__)
 
 ROUTES = {
     "/": RouteItem("Top", TopView),
-    "/home": RouteItem("Home", HomeController),
+    "/home": RouteItem("Home", HomeController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]),
     "/voice": RouteItem("Voice", VoiceView),
     "/documents": RouteItem(
-        "Documents", DocumentsController, [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)]
+        "Documents",
+        DocumentsController,
+        [
+            RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
     ),
     "/documents/:document_id": RouteItem(
         "Document",
         DocumentsController,
-        [RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER)],
+        [
+            RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
     ),
     "/documents/:document_id/edit": RouteItem(
         "Edit Document",
         DocumentsController,
         [
             RouteParam(RouteParamKey.DOCS_MANAGER, RouteParamValue.DOCS_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
             RouteParam("is_edit", True),
         ],
     ),
+    "/login": RouteItem(
+        "Login", AuthController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]
+    ),
+    "/login/error": RouteItem(
+        "Login Error",
+        AuthController,
+        [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER), RouteParam("is_errored", True)],
+    ),
+    "/logout": RouteItem(
+        "Logout", LogoutController, [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)]
+    ),
     "/settings": RouteItem(
-        "Settings", SettingsController, [RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS)]
+        "Settings",
+        SettingsController,
+        [
+            RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
+        ],
+    ),
+    "/settings/auth/update": RouteItem(
+        "Update Password",
+        UpdateController,
+        [RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER)],
     ),
     "/chat": RouteItem(
         "Chat",
@@ -79,6 +114,9 @@ class RoutingHandler:
             DocumentsController,
             UnityController,
             ChatController,
+            AuthController,
+            LogoutController,
+            UpdateController,
         }:
             return route_info.title, route_info.layout(self.page, **params).get_view()
         logger.debug(f"Route: {route}")
@@ -115,12 +153,24 @@ class MyLayout(View):
         super().__init__(
             route=route,
             scroll=None,
+            spacing=0,
+            padding=0,
         )
 
         self.routing_handler = RoutingHandler(page)
         title, layout = self.routing_handler.resolve_view(self.route)
+        # layoutにFooterViewを追加
+        # layoutにcontrols属性がない場合はColumnにする
+        if not hasattr(layout, "controls"):
+            layout = Column(
+                controls=[layout, FooterView(page)],
+                expand=True,
+            )
+        else:
+            layout.controls.append(FooterView(page))
 
         self.controls = [
             HeaderView(page, title.upper()),
             layout,
+            # FooterView(page),
         ]

@@ -170,3 +170,4 @@ local.*
 db/postgres/data/
 chroma_db/
 **/uploads/
+credentials.json

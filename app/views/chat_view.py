@@ -96,6 +96,7 @@ def create_chat_header(session_id: str, init_chat_button: callable) -> Container
         content=Row(
             spacing=20,
             alignment=MainAxisAlignment.SPACE_BETWEEN,
+            wrap=True,
             controls=[
                 Text(f"現在のセッションID: {session_id}", size=10),
                 ElevatedButton("会話を初期化する", on_click=init_chat_button),

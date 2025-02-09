@@ -2,14 +2,17 @@ import atexit
 import logging
 import os
 
-import flet as ft
 from flet import (
+    Colors,
     Page,
+    PageTransitionTheme,
     ScrollMode,
+    Theme,
     app,
 )
 
 from app.controller import (
+    AuthManager,
     DocumentsManager,
     FileManager,
     ServerManager,
@@ -37,6 +40,7 @@ def initialize_services(page: Page) -> Container:
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
     file_manager = FileManager(page, server)
+    auth_manager = AuthManager(page)
     obj_manager = ObjectManager(db_handler)
 
     # コンテナに登録
@@ -45,15 +49,15 @@ def initialize_services(page: Page) -> Container:
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
     container.register("file_manager", file_manager)
+    container.register("auth_manager", auth_manager)
     container.register("obj_manager", obj_manager)
 
     return container
 
 
 def main(page: Page):
-    page.title = "Spadge"
+    page.title = "SPADGE"
     page.scroll = ScrollMode.AUTO
-    page.padding = 10
 
     initialize_services(page)
 
@@ -64,6 +68,9 @@ def main(page: Page):
     page.fonts = {
         "default": "/fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf",
         "bold": "/fonts/Noto_Sans_JP/static/NotoSansJP-Black.ttf",
+        "icon-camar": "/fonts/camar/Camar.otf",
+        "icon-term": "/fonts/term/Term.ttf",
+        "icon-stentiga": "/fonts/stentiga/Stentiga.ttf",
     }
 
     page.window.width = 1000
@@ -71,13 +78,13 @@ def main(page: Page):
     page.window.min_width = 800
     page.window.min_height = 600
 
-    theme = ft.Theme()
+    theme = Theme(color_scheme_seed=Colors.GREY)
     theme.font_family = "default"
-    theme.page_transitions.android = ft.PageTransitionTheme.NONE
-    theme.page_transitions.ios = ft.PageTransitionTheme.NONE
-    theme.page_transitions.macos = ft.PageTransitionTheme.NONE
-    theme.page_transitions.linux = ft.PageTransitionTheme.NONE
-    theme.page_transitions.windows = ft.PageTransitionTheme.NONE
+    theme.page_transitions.android = PageTransitionTheme.NONE
+    theme.page_transitions.ios = PageTransitionTheme.NONE
+    theme.page_transitions.macos = PageTransitionTheme.NONE
+    theme.page_transitions.linux = PageTransitionTheme.NONE
+    theme.page_transitions.windows = PageTransitionTheme.NONE
     page.theme = theme
     page.update()
 

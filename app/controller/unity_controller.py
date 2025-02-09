@@ -17,10 +17,9 @@ from app.controller.manager import (
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
-    UnityView,
-    create_display_settings_body,
-    create_file_settings_body,
     ObjListView,
+    UnityView,
+    create_file_settings_body,
 )
 from app.models.database_models import DatabaseHandler
 
