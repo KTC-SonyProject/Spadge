@@ -94,6 +94,7 @@ class ChatMessageCard(Container):
         super().__init__(
             padding=padding.symmetric(horizontal=30, vertical=10),
         )
+        self.name = Text(message.name, weight="bold")
         self.body = Markdown(
             value=message.content,
             selectable=True,
@@ -110,7 +111,7 @@ class ChatMessageCard(Container):
                     expand=True,
                     horizontal_alignment=CrossAxisAlignment.END if message.message_type == MessageType.USER else None,
                     controls=[
-                        Text(message.name, weight="bold"),
+                        self.name,
                         self.body,
                     ],
                 )

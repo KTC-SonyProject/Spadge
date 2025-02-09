@@ -58,9 +58,9 @@ class ChatController(AbstractController):
                 if message.content == "":
                     continue
 
-                if not message.name:
+                if message.name:
                     logger.debug(f"Message name: {message.name}, from {message}")
-                    sender = "AI"
+                    sender = f"AI ({message.name})"
                 else:
                     logger.debug(f"Message name: user, from {message}")
                     sender = "USER"
@@ -136,11 +136,12 @@ class ChatController(AbstractController):
                 for res, metadata in self.agent.stream(message):
                     if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
                         if self.view.chat_list.controls[-1].body.value == "thinking...":
+                            logger.debug(f"AI response: {res}, metadata: {metadata.get('tags')[0]}")
+                            self.view.chat_list.controls[-1].name.value = f"AI ({metadata.get('tags')[0]})"
                             self.view.chat_list.controls[-1].body.value = res.content
                         else:
                             self.view.chat_list.controls[-1].body.value += res.content
                         self.view.chat_list.update()
-                        # self.page.update()
             except Exception as err:
                 logger.error(f"Error sending message: {err}")
                 self.add_message(Message(name="AI", content=ERROR_MESSAGE, message_type=MessageType.AI))

@@ -4,7 +4,7 @@ import sqlite3
 from typing import Annotated, Literal
 
 from IPython.display import Image, display
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -69,7 +69,7 @@ class SubAgent:
     def node(self, state):
         result = self.invoke(state)
         return Command(
-            update={"messages": [HumanMessage(content=result["messages"][-1].content, name=self.name)]},
+            update={"messages": [AIMessage(content=result["messages"][-1].content, name=self.name)]},
             goto="supervisor",
         )
 
@@ -89,10 +89,11 @@ def display_info_tool() -> str:
     )
 
 
-def model_change_tool(model_name: Annotated[str, "The model name to change to."]) -> str:
+def model_change_tool(model_name: Annotated[str, "変更したいモデルの名前"]) -> str:
     """
     モデルを変更する関数
     model_nameに基づいて、モデルを変更する
+    もしmodel_nameがわからなければユーザーにたずねる必要がある
     """
     # TODO:モデルを変更する処理を追加する
     logger.debug(f"\n\nmodel_change_tool called with model_name={model_name}\n\n")
@@ -106,6 +107,7 @@ display_agent_prompt = """
 # あなたに与えられた役割
 - ディスプレイ情報を提供する
 - ディスプレイの制御を行う
+- 変更した内容や取得して情報をユーザーにわかりやすいようにまとめて返す
 
 与えられた役割以外は行わず、他のエージェントに任せてください。
 """
@@ -134,6 +136,7 @@ def document_search_tool(query: Annotated[str, "The query to search documents fo
         res = get_vector_store().similarity_search(query=query)
         if not res:
             return "類似ドキュメントは見つかりませんでした。"
+        logger.debug(f"document_search_tool result: {res}")
         return res
     except Exception as e:
         logger.error(e)
@@ -148,14 +151,22 @@ document_agent_prompt = """
 - ドキュメントの検索を行う
 - ドキュメントの要約を行う
 - 要約する際はMarkdown形式で返すこと
+- ユーザーにわかりやすく丁寧な説明を行い、特に指示がない場合は簡潔にまとめること
 - 参考にしたドキュメントを返す場合は"[参考にしたドキュメント](metadataのsourceに格納されている数値)"のような形で返すこと
+
+# 注意
+基本的には検索をおこなってそれをまとめるのがあなたの役割ですが、検索結果が見つからなかった場合やエラーが発生した場合は、その旨をユーザーに伝えてください。
+また、検索結果がユーザーが求めているものと異なる場合は、その旨をユーザーに伝えて、再度検索を行うかどうかを確認してください。
+嘘をついたり、不適切な情報を提供することは厳禁です。
+できるだけ正確な情報を提供するように心がけてください。
 
 与えられた役割以外は行わず、他のエージェントに任せてください。
 """
 document_agent_description = """
-ドキュメント全般を扱うエージェントです。
+3Dモデルのドキュメント全般を扱うエージェントです。
 このエージェントは、ドキュメントの検索や要約を行います。
 ドキュメントに関することや解説、要約に関することはこのエージェントが適切です。
+説明を求められたり、「教えて」や「解説して」などの要求があった場合はこのエージェントを選択してください。
 """
 document_agent = SubAgent(
     tools=[document_search_tool],
@@ -221,6 +232,37 @@ system_prompt = f"""
 各ワーカーはタスクを実行し、その結果とステータスを返信します。
 適切なワーカーがいない場合はGenericAgentを選択してください。
 終了したら、FINISH で応答してください。
+
+# 例
+以下のような例を参考にしてユーザーと会話してください。
+この例は複数回のやり取りを想定しているものもあります。
+
+- 例1:
+    - ユーザー: "今映っている奴について教えて"
+    - あなた: DisplayControlAgent
+    - DisplayControlAgent: "現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: 'NAO'"
+    - 次のアクション: FINISH
+- 例2:
+    - ユーザー: "今表示されているモデルの解説を教えて"
+    - あなた: DisplayControlAgent
+    - DisplayControlAgent: "現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: 'NAO'"
+    - あなた: DocumentSearchAgent
+    - DocumentSearchAgent: "NAOの解説は以下の通りです: ..."
+    - あなた: FINISH
+- 例3:
+    - ユーザー: "モデルを変更して"
+    - あなた: DisplayControlAgent
+    - DisplayControlAgent: "どんなモデルに変更しますか？"
+    - あなた: FINISH
+    - ユーザーから再度の入力: "NAOに変更して"
+    - あなた: DisplayControlAgent
+    - DisplayControlAgent: "モデルをNAOに変更しました。"
+    - あなた: FINISH
+
+# 注意
+あなたはワーカーの指示を行うだけで、ユーザーとの直接のやり取りは行いません。
+同じワーカーを何度も指定しないでください。
+完璧を求めず、適切なワーカーを指定してください。
 """
 
 
@@ -288,18 +330,22 @@ class SupervisorAgent:
 
         return Command(goto=goto, update={"next": goto})
 
-    def stream(self, user_message: str, thread_id: str = None):
+    def stream(self, user_message: str, thread_id: str = None, debug: bool = False):
         if not thread_id and not self.thread_id:
             raise ValueError("thread_id is required.")
         if thread_id:
             self.thread_id = thread_id
 
         send_message = {"messages": [("user", user_message)]}
+        stream_mode = ["messages"] if not debug else ["updates", "messages"]
 
         try:
             # ここでLLMによる応答を生成、ストリーミングで返す
-            for _, message in self.graph.stream(send_message, config=self.memory_config, stream_mode=["messages"]):
-                yield message
+            if debug:
+                yield from self.graph.stream(send_message, config=self.memory_config, stream_mode=stream_mode)
+            else:
+                for _, message in self.graph.stream(send_message, config=self.memory_config, stream_mode=stream_mode):
+                    yield message
 
             # yield from self.graph.stream(
             #     send_message,
@@ -318,11 +364,11 @@ if __name__ == "__main__":
 
     setup_logging()
 
-    thread_id = "test_thread_id3"
+    thread_id = "test_thread_id4"
     settings_manager = SettingsManager()
     supervisor = SupervisorAgent(sub_agents_with_generic, settings_manager=settings_manager, thread_id=thread_id)
     print("----" * 30 + "\n")
-    for res, metadata in supervisor.stream("もう一度お願いします"):
+    for res, metadata in supervisor.stream("今映っている奴について教えて", debug=True):
         # print(res)
         if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
             print(res.content, end="", flush=True)
