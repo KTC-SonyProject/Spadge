@@ -12,10 +12,14 @@ CREATE TABLE documents (
 );
 
 --オブジェクトの名前とファイル名を保存するテーブル
-DROP TABLE IF EXISTS object;
-CREATE TABLE object (
+DROP TABLE IF EXISTS objects;
+CREATE TABLE objects (
 	object_id SERIAL PRIMARY KEY,
 	object_name VARCHAR(100) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- データベースののぞき方
+-- docker container exec -it spadge-main_db bash
+-- psql -U postgres -d postgres

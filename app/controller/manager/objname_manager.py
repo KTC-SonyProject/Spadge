@@ -21,18 +21,27 @@ class ObjectManager:
         :param object_id: オブジェクトID
         :return: {"object_name": str}
         """
-        query = "SELECT object_name FROM object WHERE object_id = %s;"
+        query = "SELECT object_name FROM objects WHERE object_id = %s;"
         results = self.db_handler.fetch_query(query, (object_id,))
         if not results:
-            raise ValueError(f"Object with ID {object_id} not found.")
+            raise ValueError(f"Objects with ID {object_id} not found.")
         return results[0][0]
+
+    def get_all_objects(self) -> list[dict]:
+        """
+        全てのオブジェクトを取得する。
+        :return: {"object_id": int, "object_name": str}のリスト
+        """
+        query = "SELECT object_id, object_name FROM objects;"
+        results = self.db_handler.fetch_query(query)
+        return [{"object_id": row[0], "object_name": row[1]} for row in results] if results else []
 
     def get_last_id(self) -> int:
         """
         テーブルの最後のIDを取得する。
         :return: 最後のオブジェクトID
         """
-        query = "SELECT object_id FROM object ORDER BY object_id DESC LIMIT 1;"
+        query = "SELECT object_id FROM objects ORDER BY object_id DESC LIMIT 1;"
         results = self.db_handler.fetch_query(query)
         if results:
             return results[0][0]
@@ -44,7 +53,7 @@ class ObjectManager:
         :param object_id: オブジェクトID
         :param new_name: 新しい名前
         """
-        query = "UPDATE object SET object_name = %s WHERE object_id = %s;"
+        query = "UPDATE objects SET object_name = %s WHERE object_id = %s;"
         self.db_handler.execute_query(query, (new_name, object_id))
 
 
@@ -66,9 +75,13 @@ if __name__ == "__main__":
             name = manager.get_name_by_id(last_id)
             print(f"Object Name with ID {last_id}: {name}")
 
+        # 全てのオブジェクトを取得
+        all_objects = manager.get_all_objects()
+        print("All Objects:")
+
         # 名前を変更
         if last_id != -1:
-            new_name = "Updated Object Name"
+            new_name = "Updated Objects Name"
             manager.update_name(last_id, new_name)
             updated_name = manager.get_name_by_id(last_id)
             print(f"Updated Object Name with ID {last_id}: {updated_name}")

@@ -14,6 +14,7 @@ from app.controller import (
     FileManager,
     ServerManager,
     SettingsManager,
+    ObjectManager,
 )
 from app.logging_config import setup_logging
 from app.models.database_models import DatabaseHandler
@@ -36,6 +37,7 @@ def initialize_services(page: Page) -> Container:
     db_handler = DatabaseHandler(settings_manager)
     docs_manager = DocumentsManager(db_handler)
     file_manager = FileManager(page, server)
+    obj_manager = ObjectManager(db_handler)
 
     # コンテナに登録
     container.register("settings_manager", settings_manager)
@@ -43,6 +45,7 @@ def initialize_services(page: Page) -> Container:
     container.register("docs_manager", docs_manager)
     container.register("socket_server", server)
     container.register("file_manager", file_manager)
+    container.register("obj_manager", obj_manager)
 
     return container
 

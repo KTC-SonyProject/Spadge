@@ -10,9 +10,10 @@ from flet import (
 from app.controller.core import AbstractController
 from app.controller.manager import (
     FileManager,
+    ObjectManager,
     ServerManager,
+    SettingsManager,
 )
-from app.models.command_models import ListCommand
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
@@ -21,27 +22,24 @@ from app.views.unity_view import (
     create_file_settings_body,
     ObjListView,
 )
+from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
 
 
 class UnityController(AbstractController):
-    def __init__(self, page: Page, file_manager: FileManager, socket_server: ServerManager):
+    def __init__(self, page: Page, file_manager: FileManager, socket_server: ServerManager, obj_manager: ObjectManager):
         super().__init__(page)
         self.file_manager = file_manager
         self.server = socket_server
+        self.obj_manager = obj_manager
 
     def _get_list(self):
-        command = ListCommand()
-        res_json = self.server.send_command(command)
-        logger.debug(f"Response: {res_json}")
-        # jsonの中からresultの値を取得
-        # resultがない場合は空のリストを返す
         try:
-            # "example.obj, example2.obj"のような文字列をリストに変換
-            obj_list = res_json["result"].split(", ")
+            objects = self.obj_manager.get_all_objects()  # ObjectManagerのget_all_objectsを利用
+            obj_list = [obj["object_name"] for obj in objects]  # オブジェクト名のリストを生成
         except KeyError:
-            obj_list = None
+            obj_list = []
         logger.debug(f"Object list: {obj_list}")
         return obj_list
 
@@ -134,8 +132,11 @@ if __name__ == "__main__":
 
     def main(page):
         server = ServerManager()
+        settings = SettingsManager()
+        db_handler = DatabaseHandler(settings)
         file_manager = FileManager(page, server)
-        unity_controller = UnityController(page, file_manager)
+        obj_manager = ObjectManager(db_handler)
+        unity_controller = UnityController(page, file_manager, server, obj_manager)
         page.add(unity_controller.get_view())
 
     ft.app(target=main)

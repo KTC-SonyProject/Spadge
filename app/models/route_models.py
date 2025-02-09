@@ -13,6 +13,7 @@ class RouteParamKey(Enum):
     SERVER = "socket_server"
     SERVER_THREAD = "server_thread"
     FILE_MANAGER = "file_manager"
+    OBJ_MANAGER = "obj_manager"
 
 
 class RouteParamValue(Enum):
@@ -22,6 +23,7 @@ class RouteParamValue(Enum):
     SERVER = "data:socket_server"
     SERVER_THREAD = "data:server_thread"
     FILE_MANAGER = "data:file_manager"
+    OBJ_MANAGER = "data:obj_manager"
 
 
 @dataclass
