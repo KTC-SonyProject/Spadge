@@ -4,7 +4,7 @@ import sqlite3
 from typing import Annotated, Literal
 
 from IPython.display import Image, display
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage
 from langchain_core.tools import tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
