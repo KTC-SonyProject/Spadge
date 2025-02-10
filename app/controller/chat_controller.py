@@ -6,7 +6,12 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
-from app.controller.manager.agent_manager import SupervisorAgent, sub_agents_with_generic
+from app.controller.manager.agent_manager import (
+    SupervisorAgent,
+    DisplayInfoTool,
+    ModelChangeTool,
+    sub_agents_with_generic,
+)
 from app.controller.manager.server_manager import ServerManager
 from app.controller.manager.settings_manager import SettingsManager
 from app.models.chat_models import Message, MessageType
@@ -41,11 +46,14 @@ class ChatController(AbstractController):
         return self.session_id
 
     def _initialize_agent(self):
-        return SupervisorAgent(
+        agent = SupervisorAgent(
             sub_agents_with_generic,
             settings_manager=self.settings_manager,
             thread_id=self.session_id,
         )
+        # ここにDisplayAgentに全てのツールを登録しなおす
+        agent.sub_agents[0].rebind_tools([DisplayInfoTool(dammy_model="NAO"), ModelChangeTool()])
+        return agent
 
     def get_chat_history(self) -> list[Message]:
         # chat_history = self.chatbot.graph.get_state(self.chatbot.memory_config)
