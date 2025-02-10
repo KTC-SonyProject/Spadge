@@ -43,6 +43,8 @@ class SettingsManager:
                 logger.error("設定ファイルの読み込み中にエラーが発生しました。デフォルト設定を使用します。")
         else:
             logger.warning("設定ファイルが存在しません。デフォルト設定を使用します。")
+            self.settings = DEFAULT_SETTINGS
+            self.save_settings()
             return DEFAULT_SETTINGS
 
     def save_settings(self):
