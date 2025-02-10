@@ -70,8 +70,11 @@ class FileManager:
             if self._is_zip_file(command.file_path):
                 # zipファイルの場合は解凍
                 extracted_files = self._unzip_file(command.file_path)
-                for extracted_file in extracted_files:
-                    file_path = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads/{extracted_file}"
+                # 送信前にファイル名を連番にリネーム
+                folder_path = os.path.dirname(command.file_path)
+                renamed_files = self.rename_files_in_folder(folder_path, extracted_files)
+                for renamed_file in renamed_files:
+                    file_path = os.path.join(folder_path, renamed_file)
                     command = TransferCommand(file_path)
                     self._send_file(command)
                 result = {"status_message": "OK", "message": "zipファイル送信完了"}
@@ -126,26 +129,27 @@ class FileManager:
             logger.error(f"ZIPファイル解凍エラー: {e}")
             raise e
 
-    def rename_files_in_folder(self, folder_path: str):
-        """フォルダー内のファイルを連番にリネーム"""
+    def rename_files_in_folder(self, folder_path: str, files: list[str]) -> list[str]:
+        """フォルダー内のファイルを連番にリネームし、新しいファイル名のリストを返す"""
+        renamed_files = []
         try:
             last_id = self.obj_manager.get_last_id()
             new_id = last_id + 1
 
-            for root, _, files in os.walk(folder_path):
-                for file in files:
-                    file_extension = os.path.splitext(file)[1]
-                    new_name = f"{new_id}{file_extension}"
-                    old_file_path = os.path.join(root, file)
-                    new_file_path = os.path.join(root, new_name)
-                    os.rename(old_file_path, new_file_path)
-                    self.obj_manager.new_object(new_name)
-                    new_id += 1
-
+            for file in files:
+                file_extension = os.path.splitext(file)[1]
+                new_name = f"{new_id}{file_extension}"
+                old_file_path = os.path.join(folder_path, file)
+                new_file_path = os.path.join(folder_path, new_name)
+                os.rename(old_file_path, new_file_path)
+                renamed_files.append(new_name)
+            # データベースには一度だけ送信
+            self.obj_manager.new_object(f"{new_id}")
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
             logger.error(f"ファイルリネーム中にエラー: {e}")
             raise e
+        return renamed_files
 
 
 if __name__ == "__main__":
@@ -165,4 +169,4 @@ if __name__ == "__main__":
     print(file_controller.model.get_file_path("test1.txt"))  # /tmp/uploads/test1.txt
 
     # フォルダー内のファイルを連番にリネーム
-    file_controller.rename_files_in_folder("/path/to/folder")
+    file_controller.rename_files_in_folder(os.path.join(os.environ['FLET_APP_STORAGE_TEMP'], 'uploads'))
