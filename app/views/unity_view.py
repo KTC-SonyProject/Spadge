@@ -1,12 +1,17 @@
 import logging
 
 from flet import (
+    Card,
+    Colors,
     Column,
     Container,
+    CrossAxisAlignment,
     ElevatedButton,
     FilePicker,
+    Icon,
     ListView,
     MainAxisAlignment,
+    Page,
     Row,
     Text,
     alignment,
@@ -121,7 +126,7 @@ def create_file_settings_body(
     )
 
 
-class UnityView(Column):
+class OldUnityView(Column):
     def __init__(self, tabs: list[TabView]):
         super().__init__(
             spacing=10,
@@ -143,3 +148,201 @@ class UnityView(Column):
             title,
             create_tabs(tabs),
         ]
+
+
+
+def create_btn(text: str, on_click: callable, icon: Icon | None = None):
+    if icon:
+        return ElevatedButton(text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click, icon=icon)
+    else:
+        return ElevatedButton(text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click)
+
+
+class ModelView(Card):
+    """
+    3DモデルのView
+
+    Args:
+        model_name (str): モデル名
+        show_obj (callable): モデル表示関数
+        update_obj_name (callable): モデル名変更関数
+        delete_obj (callable): モデル削除関数
+
+    ## Attributes:
+        model_name (Text): モデル名
+        btn_show (ElevatedButton): モデル表示ボタン
+        btn_rename (ElevatedButton): モデル名変更ボタン
+        btn_delete (ElevatedButton): モデル削除ボタン
+        model_row (Row): モデル操作ボタンのRow
+
+    Examples:
+        >>> model_view = ModelView("Model A")
+        >>> model_view.model_name.value = "Model B" # モデル名を変更
+    """
+    def __init__(self, model_name: str, show_obj: callable, update_obj_name: callable, delete_obj: callable):
+        super().__init__(
+        )
+        self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
+        self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
+        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name))
+        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(model_name))
+        self.model_row = Row(
+            controls=[self.btn_show, self.btn_rename, self.btn_delete],
+            spacing=10,
+            alignment=MainAxisAlignment.CENTER,
+            wrap=True,
+            expand=True,
+        )
+
+        self.content = Container(
+            content=Column(
+                controls=[
+                    self.model_name,
+                    self.model_row,
+                ],
+                spacing=10,
+            ),
+            padding=15,
+            bgcolor=Colors.GREY_300,
+            border_radius=10,
+        )
+
+class UnityView(Container):
+    """
+    Unity操作画面のView
+
+    Args:
+        page (Page): ページ
+        model_list (list[ModelView]): モデルリスト
+        add_model (callable): モデル追加関数
+        refresh_list (callable): リスト更新関数
+        refresh_status (callable): 接続状況更新関数
+        show_current_obj (callable): 現在のオブジェクト表示関数
+        rotate_start (callable): モデル回転開始関数
+        rotate_stop (callable): モデル回転停止関数
+
+    ## Attributes:
+        page_title (Container): ページタイトル
+        status_controls (Row): 接続状況コントロール
+        model_list_view (Row): モデルリスト
+        global_controls (Row): グローバルコントロール
+        content (Column): コンテンツ
+
+    Examples:
+        >>> import flet as ft
+        >>>
+        >>> def dammy_func():
+        ...     pass
+        >>>
+        >>> def main(page: Page):
+        ...     page.add(UnityView(
+        ...         page,
+        ...         [
+        ...             ModelView("Model A", dammy_func, dammy_func, dammy_func),
+        ...             ModelView("Model B", dammy_func, dammy_func, dammy_func),
+        ...             ModelView("Model C", dammy_func, dammy_func, dammy_func),
+        ...         ],
+        ...         dammy_func,
+        ...         dammy_func,
+        ...         dammy_func,
+        ...         dammy_func,
+        ...         dammy_func,
+        ...         dammy_func,
+        ...     ))
+        >>>
+        >>> ft.app(target=main)
+    """
+    def __init__( # noqa
+            self,
+            page: Page,
+            model_list: list[ModelView],
+            add_model: callable,
+            refresh_list: callable,
+            refresh_status: callable,
+            show_current_obj: callable,
+            rotate_start: callable,
+            rotate_stop: callable,
+        ):
+        super().__init__(
+            # expand=True,
+            padding=20,
+        )
+        self.page = page
+        self.model_list = model_list
+        self.unity_status = Text("Unity 接続状況: ✅ 接続中", size=16, color=Colors.GREEN_700)
+        btn_add_model = create_btn("＋ モデル追加", lambda _: add_model())
+        btn_ask_model = create_btn("❓ モデルについて質問する", lambda _: self.page.go("/chat"))
+        btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list())
+        btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status())
+        btn_show_current_object = create_btn("📌 現在のオブジェクト", lambda _: show_current_obj())
+        btn_rotate_start = create_btn("🔄 モデル回転スタート", lambda _: rotate_start())
+        btn_rotate_stop = create_btn("⏹ モデル回転ストップ", lambda _: rotate_stop())
+        rotation_buttons = Row(
+            controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER
+        )
+
+        self.page_title = Container(
+            content=Text("Unity 操作ページ", size=32, weight="bold", color=Colors.BLACK),
+            alignment=alignment.center,
+            padding=20,
+        )
+        self.status_controls = Row(
+            controls=[self.unity_status, btn_refresh_status],
+            spacing=15,
+            alignment=MainAxisAlignment.END,
+        )
+        self.model_list_view = Row(
+            controls=self.model_list,
+            spacing=10,
+            alignment=MainAxisAlignment.START,
+            vertical_alignment=CrossAxisAlignment.CENTER,
+            wrap=True,
+        )
+        self.global_controls = Row(
+            controls=[btn_refresh_list, btn_show_current_object],
+            spacing=15,
+            alignment=MainAxisAlignment.CENTER,
+        )
+        self.content = Column(
+            controls=[
+                self.page_title,
+                self.status_controls,
+                btn_ask_model,
+                self.model_list_view,
+                btn_add_model,
+                self.global_controls,
+                rotation_buttons,
+            ],
+            spacing=30,
+            scroll=True,
+        )
+
+
+
+if __name__ == "__main__":
+    import flet as ft
+
+    def dammy_func():
+        pass
+
+    def main(page: Page):
+        page.add(UnityView(
+            page,
+            [
+                ModelView("Model A", dammy_func, dammy_func, dammy_func),
+                ModelView("Model B", dammy_func, dammy_func, dammy_func),
+                ModelView("Model C", dammy_func, dammy_func, dammy_func),
+            ],
+            dammy_func,
+            dammy_func,
+            dammy_func,
+            dammy_func,
+            dammy_func,
+            dammy_func,
+        ))
+
+    ft.app(target=main)
+
+
+
+

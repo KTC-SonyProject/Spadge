@@ -3,21 +3,22 @@ import os
 import sqlite3
 from typing import Annotated, Literal
 
-# from IPython.display import Image, display
-from langchain_core.messages import AIMessage
-from langchain_core.tools import BaseTool, tool
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
+
+# from IPython.display import Image, display
+from langchain_core.messages import AIMessage
+from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import create_react_agent
 from langgraph.types import Command
 from psycopg_pool import ConnectionPool
-from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
+from typing_extensions import TypedDict
 
 from app.ai.settings import llm_settings
 from app.ai.vector_db import get_vector_store

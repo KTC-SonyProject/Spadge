@@ -4,8 +4,7 @@ import zipfile
 
 from flet import FilePickerUploadFile, Page
 
-from app.controller.manager.obj_manager import ObjectDatabaseManager
-from app.controller.manager.obj_manager import ObjectManager
+from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
 from app.controller.manager.server_manager import ServerManager
 from app.controller.manager.settings_manager import SettingsManager
 from app.models.command_models import TransferCommand

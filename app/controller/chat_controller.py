@@ -7,10 +7,10 @@ from flet import (
 
 from app.controller.core import AbstractController
 from app.controller.manager.agent_manager import (
-    SupervisorAgent,
     DisplayInfoTool,
     ModelChangeTool,
     ModelListTool,
+    SupervisorAgent,
     sub_agents_with_generic,
 )
 from app.models.chat_models import Message, MessageType
