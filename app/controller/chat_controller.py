@@ -10,12 +10,19 @@ from app.controller.manager.agent_manager import (
     SupervisorAgent,
     DisplayInfoTool,
     ModelChangeTool,
+    ModelListTool,
     sub_agents_with_generic,
 )
-from app.controller.manager.server_manager import ServerManager
-from app.controller.manager.settings_manager import SettingsManager
 from app.models.chat_models import Message, MessageType
 from app.views.chat_view import ChatMessageCard, ChatView
+
+from app.models.database_models import DatabaseHandler
+from app.controller.manager import (
+    ObjectDatabaseManager,
+    ObjectManager,
+    ServerManager,
+    SettingsManager,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +36,13 @@ ERROR_MESSAGE = """
 
 
 class ChatController(AbstractController):
-    def __init__(self, page: Page, socket_server: ServerManager, settings_manager: SettingsManager):
+    def __init__(self, page: Page, socket_server: ServerManager, settings_manager: SettingsManager,
+                obj_manager: ObjectManager, obj_database_manager: ObjectDatabaseManager):
         super().__init__(page)
         self.server = socket_server
         self.settings_manager = settings_manager
+        self.obj_manager = obj_manager
+        self.obj_database_manager = obj_database_manager
         if not self.page.session.contains_key("session_id"):
             self._init_session()
         else:
@@ -52,7 +62,7 @@ class ChatController(AbstractController):
             thread_id=self.session_id,
         )
         # ここにDisplayAgentに全てのツールを登録しなおす
-        agent.sub_agents[0].rebind_tools([DisplayInfoTool(dammy_model="NAO"), ModelChangeTool()])
+        agent.sub_agents[0].rebind_tools([DisplayInfoTool(dammy_model="NAO"), ModelChangeTool(obj_manager = self.obj_manager), ModelListTool(obj_database_manager = self.obj_database_manager)])
         return agent
 
     def get_chat_history(self) -> list[Message]:
@@ -181,7 +191,12 @@ if __name__ == "__main__":
     def main(page: Page) -> None:
         page.title = "AI Chat"
         server = ServerManager()
-        chat_page = ChatController(page, server)
+        settings_manager = SettingsManager()
+        db_handler = DatabaseHandler(settings_manager)
+        server = ServerManager()
+        obj_database_manager = ObjectDatabaseManager(db_handler)
+        obj_manager = ObjectManager(obj_database_manager, server)
+        chat_page = ChatController(page, server, settings_manager, obj_manager, obj_database_manager)
         page.add(chat_page.get_view())
 
     ft.app(main)

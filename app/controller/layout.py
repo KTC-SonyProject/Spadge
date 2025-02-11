@@ -86,6 +86,8 @@ ROUTES = {
         [
             RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
             RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS),
+            RouteParam(RouteParamKey.OBJ_DATABASE_MANAGER, RouteParamValue.OBJ_DATABASE_MANAGER),
+            RouteParam(RouteParamKey.OBJ_MANAGER, RouteParamValue.OBJ_MANAGER),
         ],
     ),
     "/unity": RouteItem(
@@ -94,8 +96,9 @@ ROUTES = {
         [
             RouteParam(RouteParamKey.FILE_MANAGER, RouteParamValue.FILE_MANAGER),
             RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
+            RouteParam(RouteParamKey.OBJ_DATABASE_MANAGER, RouteParamValue.OBJ_DATABASE_MANAGER),
             RouteParam(RouteParamKey.OBJ_MANAGER, RouteParamValue.OBJ_MANAGER),
-        ]
+        ],
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),
 }

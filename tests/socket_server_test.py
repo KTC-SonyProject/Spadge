@@ -11,11 +11,12 @@ from app.models.command_models import (
     PingCommand,
     PreviousCommand,
     TransferCommand,
+    UpdateCommand,
 )
 
 logging.basicConfig(level=logging.DEBUG)
 
-server = ServerManager()
+server = ServerManager(port=5000)
 server_thread = Thread(target=server.start, daemon=True)
 server_thread.start()
 
@@ -60,6 +61,7 @@ def display_menu():
     print("4: previousコマンドを送信")
     print("5: listコマンドを送信")
     print("6: pingコマンドを送信")
+    print("7: updateコマンドを送信")
     print("q: サーバーを停止")
     print("----------------")
 
@@ -84,6 +86,9 @@ def choose_command(command_num: str):
             command_obj = ListCommand()
         case "6":
             command_obj = PingCommand()
+        case "7":
+            action = get_input("変更したいオブジェクト名を入力してください")
+            command_obj = UpdateCommand(file_name=action)
         case "q":  # サーバーを停止
             server.stop()
             return

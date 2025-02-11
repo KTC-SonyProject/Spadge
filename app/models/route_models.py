@@ -14,7 +14,11 @@ class RouteParamKey(Enum):
     SERVER_THREAD = "server_thread"
     FILE_MANAGER = "file_manager"
     AUTH_MANAGER = "auth_manager"
+    OBJ_DATABASE_MANAGER = "obj_database_manager"
     OBJ_MANAGER = "obj_manager"
+    DisplayInfoTool = "DisplayInfoTool"
+    ModelChangeTool = "ModelChangeTool"
+    ModelListTool = "ModelListTool"
 
 
 class RouteParamValue(Enum):
@@ -25,7 +29,11 @@ class RouteParamValue(Enum):
     SERVER_THREAD = "data:server_thread"
     FILE_MANAGER = "data:file_manager"
     AUTH_MANAGER = "data:auth_manager"
+    OBJ_DATABASE_MANAGER = "data:obj_database_manager"
     OBJ_MANAGER = "data:obj_manager"
+    DisplayInfoTool = "data:DisplayInfoTool"
+    ModelChangeTool = "data:ModelChangeTool"
+    ModelListTool = "data:ModelListTool"
 
 
 @dataclass

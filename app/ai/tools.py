@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from app.ai.vector_db import get_vector_store
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import ControlCommand
+from app.models.command_models import ControlCommand ,UpdateCommand
 
 
 class SearchDocumentInput(BaseModel):
@@ -36,6 +36,7 @@ class OperationCommand(Enum):
     next = "次のシーン"
     previous = "前のシーン"
     rotate = "シーンを回転"
+
 
 
 class DisplayOperationInput(BaseModel):
@@ -86,6 +87,9 @@ class DisplayOperationTool(BaseTool):
         elif OperationCommand.rotate.value == operation:
             # シーンを回転する
             self.send_command("rotate")
+        elif OperationCommand.update.value == operation:
+            # 特定の名前のオブジェクトに変更する
+            self.send_command("update")
         else:
             raise ValueError(f"Invalid operation: {operation}")
 
@@ -108,6 +112,74 @@ class DisplayOperationTool(BaseTool):
         """
         return self._run(operation, run_manager=run_manager.get_sync())
 
+class DisplayUpdateInput(BaseModel):
+    operation: str = Field(
+        description=(
+            "操作内容 操作は特定の名前のオブジェクトに変更する。"
+        )
+    )
+    object_name: str = Field(description="変更するオブジェクトの名前")
+
+
+class DisplayUpdateTool(BaseTool):
+    name: str = "display_update_tool"
+    description: str = "Displayの操作を行う"
+    args_schema: type[BaseModel] = DisplayUpdateInput
+
+    server: ServerManager
+
+    def send_command(self, action: str, object_name: str) -> None:
+        """
+        クライアントにコマンドを送信
+
+        Args:
+            action (str): 送信するアクション
+            object_name (str): 変更するオブジェクトの名前
+        """
+        command = UpdateCommand(object_id="123", action=action, action_parameters={"operation": action, "object_name": object_name})
+        try:
+            self.server.send_command(command)
+        except Exception as e:
+            raise e
+
+    def _run(self, operation: str, object_name: str, run_manager: CallbackManagerForToolRun | None = None) -> str:
+        """
+        Displayの操作を行う関数
+
+        Args:
+            operation (str): 操作内容
+            object_name (str): 変更するオブジェクトの名前
+            run_manager (CallbackManagerForToolRun | None): Callback manager for tool run. Defaults to None.
+
+        Returns:
+            str: 操作結果
+        """
+        if OperationCommand.update.value == operation:
+            # 特定の名前のオブジェクトに変更する
+            self.send_command("update", object_name)
+        else:
+            raise ValueError(f"Invalid operation: {operation}")
+
+        return f"次の操作を行いました: {operation} オブジェクト名: {object_name}"
+
+    async def _arun(
+        self,
+        operation: str,
+        object_name: str,
+        run_manager: AsyncCallbackManagerForToolRun | None = None,
+    ) -> str:
+        """
+        Displayの操作を行う関数
+
+        Args:
+            operation (str): 操作内容
+            object_name (str): 変更するオブジェクトの名前
+            run_manager (AsyncCallbackManagerForToolRun | None): Callback manager for tool run. Defaults to None.
+
+        Returns:
+            str: 操作結果
+        """
+        return self._run(operation, object_name, run_manager=run_manager.get_sync())
 
 tools = [search_documents_tool]
 

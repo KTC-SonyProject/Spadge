@@ -4,17 +4,25 @@ import zipfile
 
 from flet import FilePickerUploadFile, Page
 
+from app.controller.manager.obj_manager import ObjectDatabaseManager
+from app.controller.manager.obj_manager import ObjectManager
 from app.controller.manager.server_manager import ServerManager
+from app.controller.manager.settings_manager import SettingsManager
 from app.models.command_models import TransferCommand
+from app.models.database_models import DatabaseHandler
 from app.models.file_models import FileModel
 
 logger = logging.getLogger(__name__)
 
 
 class FileManager:
-    def __init__(self, page: Page, socket_server: ServerManager):
+    def __init__(
+        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
+        self.obj_database_manager = obj_database_manager  # obj_managerを初期化
+        self.obj_manager = obj_manager  # obj_managerを初期化
 
     def handle_file_selection(self, files: list[FilePickerUploadFile]) -> list[FilePickerUploadFile] | None:
         """ファイル選択時にモデルを更新"""
@@ -65,8 +73,11 @@ class FileManager:
             if self._is_zip_file(command.file_path):
                 # zipファイルの場合は解凍
                 extracted_files = self._unzip_file(command.file_path)
-                for extracted_file in extracted_files:
-                    file_path = f"{os.environ['FLET_APP_STORAGE_TEMP']}/uploads/{extracted_file}"
+                # 送信前にファイル名を連番にリネーム
+                folder_path = os.path.dirname(command.file_path)
+                renamed_files = self.rename_files_in_folder(folder_path, extracted_files)
+                for renamed_file in renamed_files:
+                    file_path = os.path.join(folder_path, renamed_file)
                     command = TransferCommand(file_path)
                     self._send_file(command)
                 result = {"status_message": "OK", "message": "zipファイル送信完了"}
@@ -121,9 +132,41 @@ class FileManager:
             logger.error(f"ZIPファイル解凍エラー: {e}")
             raise e
 
+    def rename_files_in_folder(self, folder_path: str, files: list[str]) -> list[str]:
+        """フォルダー内のファイルを連番にリネームし、新しいファイル名のリストを返す"""
+        renamed_files = []
+        try:
+            last_id = self.obj_database_manager.get_last_id()
+            new_id = last_id + 1
+
+            # データベースには一度だけ送信
+            self.obj_database_manager.new_object(f"{new_id}")
+
+            for file in files:
+                file_extension = os.path.splitext(file)[1]
+                new_name = f"{new_id}{file_extension}"
+                old_file_path = os.path.join(folder_path, file)
+                new_file_path = os.path.join(folder_path, new_name)
+                os.rename(old_file_path, new_file_path)
+                renamed_files.append(new_name)
+                self.obj_database_manager.new_object(f"{old_file_path}")
+                # self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
+            logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
+        except Exception as e:
+            logger.error(f"ファイルリネーム中にエラー: {e}")
+            raise e
+        return renamed_files
+
 
 if __name__ == "__main__":
-    file_controller = FileManager(ServerManager())
+    from app.controller.manager.settings_manager import SettingsManager
+
+    settings_manager = SettingsManager()
+    db_handler = DatabaseHandler(settings_manager)
+    server = ServerManager()
+    obj_database_manager = ObjectDatabaseManager(db_handler)
+    obj_manager = ObjectManager(obj_database_manager, server)
+    file_controller = FileManager(Page(), ServerManager(), obj_database_manager)
     file_controller.handle_file_selection(["test1.txt", "test2.txt"])
     print(file_controller.model.selected_files)
 
@@ -132,3 +175,6 @@ if __name__ == "__main__":
         with open(f"{file_controller.model.upload_url}/test1.txt", "w") as f:
             f.write("test1.txt")
     print(file_controller.model.get_file_path("test1.txt"))  # /tmp/uploads/test1.txt
+
+    # フォルダー内のファイルを連番にリネーム
+    file_controller.rename_files_in_folder(os.path.join(os.environ["FLET_APP_STORAGE_TEMP"], "uploads"))

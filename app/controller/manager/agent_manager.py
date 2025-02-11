@@ -21,8 +21,12 @@ from pydantic import BaseModel, Field
 
 from app.ai.settings import llm_settings
 from app.ai.vector_db import get_vector_store
-from app.controller.manager.settings_manager import SettingsManager
 from app.models.agent_models import State
+from app.models.database_models import DatabaseHandler
+from app.controller.manager.settings_manager import SettingsManager
+from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
+from app.controller.manager.server_manager import ServerManager
+
 
 logger = logging.getLogger(__name__)
 
@@ -113,11 +117,28 @@ class DisplayInfoTool(BaseTool):
         現在ディスプレイに表示されている3Dモデルの情報を返す関数
         """
         # TODO:ディスプレイに表示されている3Dモデルの情報を返す処理を追加する
+        print("DisplayInfoTool")
         logger.debug("\n\ndisplay_info_tool called\n\n")
         return f"現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: '{self.dammy_model}'"
 
     def _arun(self, run_manager: AsyncCallbackManagerForToolRun | None = None) -> str:
         return self._run(run_manager=run_manager.get_sync())
+
+# 現在表示することができるモデルの情報を返すtool
+class ModelListTool(BaseTool):
+    """
+    現在表示することができるモデルの情報を返すツール
+    """
+    name: str = "model_list_tool"
+    description: str = "現在表示することができるモデルの情報を返すツール"
+
+    obj_database_manager : ObjectDatabaseManager
+
+    def _run(self, run_manager: CallbackManagerForToolRun | None = None) -> str:
+        print("ModelListTool")
+        dammy_model_list = self.obj_database_manager.get_all_objects()
+        print(dammy_model_list)
+        return f"現在表示することができるモデルのリスト: {dammy_model_list}"
 
 
 # def model_change_tool(model_name: Annotated[str, "変更したいモデルの名前"]) -> str:
@@ -141,13 +162,17 @@ class ModelChangeTool(BaseTool):
     description: str = "モデルを変更するツール"
     args_schema: type[BaseModel] = ModelChangeInput
 
+    obj_manager: ObjectManager
+
     def _run(self, model_name: str, run_manager: CallbackManagerForToolRun | None = None) -> str:
         """
         モデルを変更する関数
         model_nameに基づいて、モデルを変更する
         もしmodel_nameがわからなければユーザーにたずねる必要がある
         """
-        # TODO:モデルを変更する処理を追加する
+        print("ModelChangeTool")
+        print(model_name)
+        self.obj_manager.change_obj_by_id(object_name = model_name)
         logger.debug(f"\n\nmodel_change_tool called with model_name={model_name}\n\n")
         return f"モデルを{model_name}に変更しました。"
 
@@ -429,6 +454,10 @@ if __name__ == "__main__":
 
     thread_id = "test_thread_id4"
     settings_manager = SettingsManager()
+    db_handler = DatabaseHandler(settings_manager)
+    server = ServerManager()
+    obj_database_manager = ObjectDatabaseManager(db_handler)
+    obj_manager = ObjectManager(obj_database_manager, server)
     supervisor = SupervisorAgent(sub_agents_with_generic, settings_manager=settings_manager, thread_id=thread_id)
     display_agent.rebind_tools([DisplayInfoTool(), ModelChangeTool()])
     print("----" * 30 + "\n")

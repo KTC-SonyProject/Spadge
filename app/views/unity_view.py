@@ -55,7 +55,7 @@ def create_obj_list_view(show_obj: callable, delete_obj: callable, obj_list: lis
 
 
 class ObjListView(Column):
-    def __init__(self, get_obj_list: callable):
+    def __init__(self, get_obj_list: callable, show_obj: callable,):
         super().__init__(
             controls=[
                 Row(
@@ -68,17 +68,16 @@ class ObjListView(Column):
                     ],
                     alignment=MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                create_obj_list_view(self.show_obj, self.delete_obj, get_obj_list()),
+                create_obj_list_view(show_obj, self.delete_obj, get_obj_list()),
             ],
             expand=True,
         )
         self.get_obj_list = get_obj_list
+        self.show_obj = show_obj
 
     def update_obj_list(self):
         self.controls[1] = create_obj_list_view(self.show_obj, self.delete_obj, self.get_obj_list())
 
-    def show_obj(self, obj: str):
-        logger.info(f"Show {obj}")
 
     def delete_obj(self, obj: str):
         logger.info(f"Delete {obj}")
