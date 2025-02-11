@@ -132,7 +132,6 @@ class ObjectManager:
             self.server.send_command(UpdateCommand(object_id))
 
 
-
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
     from app.controller.manager.settings_manager import SettingsManager

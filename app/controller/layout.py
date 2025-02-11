@@ -5,7 +5,6 @@ from flet import (
     Page,
     TemplateRoute,
     View,
-    Colors,
 )
 
 from app.controller import (

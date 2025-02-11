@@ -1,32 +1,32 @@
 import logging
 
 from flet import (
+    Colors,
     ElevatedButton,
     FilePicker,
     Page,
     Text,
-    Colors,
 )
 
 from app.controller.core import AbstractController
 from app.controller.manager import (
+    AuthManager,
     FileManager,
     ObjectDatabaseManager,
     ObjectManager,
     ServerManager,
     SettingsManager,
-    AuthManager,
 )
 from app.models.database_models import DatabaseHandler
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
+    ModelUploadView,
+    ModelView,
     ObjListView,
+    OldUnityView,
     UnityView,
     create_file_settings_body,
-    ModelView,
-    ModelUploadView,
-    OldUnityView,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,12 @@ logger = logging.getLogger(__name__)
 
 class OldUnityController(AbstractController):
     def __init__(
-        self, page: Page, file_manager: FileManager, socket_server: ServerManager,
-        obj_database_manager: ObjectDatabaseManager, obj_manager: ObjectManager,
+        self,
+        page: Page,
+        file_manager: FileManager,
+        socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
     ):
         super().__init__(page)
         self.file_manager = file_manager
@@ -251,11 +255,13 @@ class UnityController(AbstractController):
                 ModelView(
                     model_name=obj["object_name"],
                     show_obj=lambda id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
-                    update_obj_name=lambda id=obj["object_id"], name=obj["object_name"]:
-                        self.obj_database_manager.update_name(id, name),
-                    delete_obj=lambda id=obj["object_id"]: print(f"Delete object: {id}"), # TODO: modelの削除処理を追加
+                    update_obj_name=lambda id=obj["object_id"],
+                    name=obj["object_name"]: self.obj_database_manager.update_name(id, name),
+                    delete_obj=lambda id=obj["object_id"]: print(f"Delete object: {id}"),  # TODO: modelの削除処理を追加
                     is_authenticated=self.auth_manager.check_is_authenticated(),
-                ) for obj in objects]
+                )
+                for obj in objects
+            ]
             return model_list
         else:
             return [Text("まだオブジェクトが登録されていません", size=20, color=Colors.YELLOW_700)]
@@ -293,13 +299,10 @@ class UnityController(AbstractController):
             unity_status=self.get_unity_status(),
             refresh_status=self.refresh_unity_status,
             show_current_obj_name=self._get_current_obj_name(),
-            rotate_start=lambda: print("Rotate start"), # TODO: rotate_startの処理を追加
-            rotate_stop=lambda: print("Rotate stop"), # TODO: rotate_stopの処理を追加
+            rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
+            rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
         )
         return self.view
-
-
-
 
 
 if __name__ == "__main__":

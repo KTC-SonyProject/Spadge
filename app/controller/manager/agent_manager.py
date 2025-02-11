@@ -22,12 +22,11 @@ from typing_extensions import TypedDict
 
 from app.ai.settings import llm_settings
 from app.ai.vector_db import get_vector_store
-from app.models.agent_models import State
-from app.models.database_models import DatabaseHandler
-from app.controller.manager.settings_manager import SettingsManager
 from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
 from app.controller.manager.server_manager import ServerManager
-
+from app.controller.manager.settings_manager import SettingsManager
+from app.models.agent_models import State
+from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ class SubAgent:
         self.llm = llm_settings(tags=[self.name])
         self.agent = self.initialize_agent(tools=self.tools)
 
-    def initialize_agent(self, tools = None):
+    def initialize_agent(self, tools=None):
         return create_react_agent(self.llm, tools=tools, prompt=self.prompt, name=self.name)
 
     def get_full_prompts(self):
@@ -104,10 +103,12 @@ class SubAgent:
 #         f"3Dモデル ID: {current_display_object['id']}, タイトル: '{current_display_object['title']}'"
 #     )
 
+
 class DisplayInfoTool(BaseTool):
     """
     現在ディスプレイに表示されている3Dモデルの情報を返すツール
     """
+
     name: str = "display_info_tool"
     description: str = "現在ディスプレイに表示されている3Dモデルの情報を返すツール"
 
@@ -125,15 +126,17 @@ class DisplayInfoTool(BaseTool):
     def _arun(self, run_manager: AsyncCallbackManagerForToolRun | None = None) -> str:
         return self._run(run_manager=run_manager.get_sync())
 
+
 # 現在表示することができるモデルの情報を返すtool
 class ModelListTool(BaseTool):
     """
     現在表示することができるモデルの情報を返すツール
     """
+
     name: str = "model_list_tool"
     description: str = "現在表示することができるモデルの情報を返すツール"
 
-    obj_database_manager : ObjectDatabaseManager
+    obj_database_manager: ObjectDatabaseManager
 
     def _run(self, run_manager: CallbackManagerForToolRun | None = None) -> str:
         print("ModelListTool")
@@ -152,13 +155,16 @@ class ModelListTool(BaseTool):
 #     logger.debug(f"\n\nmodel_change_tool called with model_name={model_name}\n\n")
 #     return f"モデルを{model_name}に変更しました。"
 
+
 class ModelChangeInput(BaseModel):
     model_name: str = Field(description="変更したいモデルの名前")
+
 
 class ModelChangeTool(BaseTool):
     """
     モデルを変更するツール
     """
+
     name: str = "model_change_tool"
     description: str = "モデルを変更するツール"
     args_schema: type[BaseModel] = ModelChangeInput
@@ -173,7 +179,7 @@ class ModelChangeTool(BaseTool):
         """
         print("ModelChangeTool")
         print(model_name)
-        self.obj_manager.change_obj_by_id(object_name = model_name)
+        self.obj_manager.change_obj_by_id(object_name=model_name)
         logger.debug(f"\n\nmodel_change_tool called with model_name={model_name}\n\n")
         return f"モデルを{model_name}に変更しました。"
 
@@ -295,8 +301,6 @@ sub_agents_with_generic = sub_agents + [generic_agent]
 sub_agents_with_generic_description_prompt = "\n".join(
     [f"{agent.name}: {agent.description}" for agent in sub_agents_with_generic]
 )
-
-
 
 
 # -----------------------------

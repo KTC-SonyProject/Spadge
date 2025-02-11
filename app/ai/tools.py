@@ -38,7 +38,6 @@ class OperationCommand(Enum):
     rotate = "シーンを回転"
 
 
-
 class DisplayOperationInput(BaseModel):
     operation: str = Field(
         description=(
@@ -112,12 +111,9 @@ class DisplayOperationTool(BaseTool):
         """
         return self._run(operation, run_manager=run_manager.get_sync())
 
+
 class DisplayUpdateInput(BaseModel):
-    operation: str = Field(
-        description=(
-            "操作内容 操作は特定の名前のオブジェクトに変更する。"
-        )
-    )
+    operation: str = Field(description=("操作内容 操作は特定の名前のオブジェクトに変更する。"))
     object_name: str = Field(description="変更するオブジェクトの名前")
 
 
@@ -136,7 +132,9 @@ class DisplayUpdateTool(BaseTool):
             action (str): 送信するアクション
             object_name (str): 変更するオブジェクトの名前
         """
-        command = UpdateCommand(object_id="123", action=action, action_parameters={"operation": action, "object_name": object_name})
+        command = UpdateCommand(
+            object_id="123", action=action, action_parameters={"operation": action, "object_name": object_name}
+        )
         try:
             self.server.send_command(command)
         except Exception as e:
@@ -180,6 +178,7 @@ class DisplayUpdateTool(BaseTool):
             str: 操作結果
         """
         return self._run(operation, object_name, run_manager=run_manager.get_sync())
+
 
 tools = [search_documents_tool]
 

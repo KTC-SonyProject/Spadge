@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 
 class FileManager:
     def __init__(
-        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager,
-        obj_manager: ObjectManager,):  # obj_managerを追加
+        self,
+        page: Page,
+        socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
+    ):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
         self.obj_database_manager = obj_database_manager  # obj_managerを初期化

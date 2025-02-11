@@ -6,6 +6,7 @@ from flet import (
     Column,
     Container,
     CrossAxisAlignment,
+    Divider,
     ElevatedButton,
     FilePicker,
     Icon,
@@ -16,7 +17,6 @@ from flet import (
     Text,
     TextField,
     alignment,
-    Divider,
 )
 
 from app.views.core import BaseTabBodyView, TabView, create_tabs
@@ -62,7 +62,11 @@ def create_obj_list_view(show_obj: callable, delete_obj: callable, obj_list: lis
 
 
 class ObjListView(Column):
-    def __init__(self, get_obj_list: callable, show_obj: callable,):
+    def __init__(
+        self,
+        get_obj_list: callable,
+        show_obj: callable,
+    ):
         super().__init__(
             controls=[
                 Row(
@@ -84,7 +88,6 @@ class ObjListView(Column):
 
     def update_obj_list(self):
         self.controls[1] = create_obj_list_view(self.show_obj, self.delete_obj, self.get_obj_list())
-
 
     def delete_obj(self, obj: str):
         logger.info(f"Delete {obj}")
@@ -152,7 +155,6 @@ class OldUnityView(Column):
         ]
 
 
-
 def create_btn(text: str, on_click: callable, icon: Icon | None = None, visible: bool = True) -> ElevatedButton:
     return ElevatedButton(
         text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click, icon=icon, visible=visible
@@ -180,16 +182,16 @@ class ModelView(Card):
         >>> model_view = ModelView("Model A")
         >>> model_view.model_name.value = "Model B" # モデル名を変更
     """
+
     def __init__(
-            self,
-            model_name: str,
-            show_obj: callable,
-            update_obj_name: callable,
-            delete_obj: callable,
-            is_authenticated: bool = False,
-        ):
-        super().__init__(
-        )
+        self,
+        model_name: str,
+        show_obj: callable,
+        update_obj_name: callable,
+        delete_obj: callable,
+        is_authenticated: bool = False,
+    ):
+        super().__init__()
         self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
         self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
         self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name), visible=is_authenticated)
@@ -215,15 +217,17 @@ class ModelView(Card):
             border_radius=10,
         )
 
+
 class ModelUploadView(Container):
     """モデルアップロードをおこなうボタンのView"""
+
     def __init__(self, upload_model: callable, file_picker: FilePicker, is_authenticated: bool = False):
         super().__init__(visible=is_authenticated)
         self.file_picker = file_picker
         self.add_model_file_name = Text("", size=16)
-        btn_select_model = create_btn("＋ モデル追加", lambda _: self.file_picker.pick_files(
-            allow_multiple=False, allowed_extensions=["zip"]
-        ))
+        btn_select_model = create_btn(
+            "＋ モデル追加", lambda _: self.file_picker.pick_files(allow_multiple=False, allowed_extensions=["zip"])
+        )
         self.add_model_name = TextField(hint_text="モデル名を入力", visible=False)
         self.btn_upload_model = create_btn("📤 モデルアップロード", on_click=upload_model, visible=False)
         self.content = Column(
@@ -233,6 +237,7 @@ class ModelUploadView(Container):
                 self.btn_upload_model,
             ],
         )
+
 
 class UnityView(Container):
     """
@@ -280,19 +285,20 @@ class UnityView(Container):
         >>>
         >>> ft.app(target=main)
     """
-    def __init__( # noqa
-            self,
-            page: Page,
-            model_list: list[ModelView | Text],
-            model_upload_view: ModelUploadView,
-            refresh_list: callable,
-            unity_status: Text,
-            refresh_status: callable,
-            show_current_obj_name: str,
-            rotate_start: callable,
-            rotate_stop: callable,
-            is_authenticated: bool = False,
-        ):
+
+    def __init__(  # noqa
+        self,
+        page: Page,
+        model_list: list[ModelView | Text],
+        model_upload_view: ModelUploadView,
+        refresh_list: callable,
+        unity_status: Text,
+        refresh_status: callable,
+        show_current_obj_name: str,
+        rotate_start: callable,
+        rotate_stop: callable,
+        is_authenticated: bool = False,
+    ):
         super().__init__(
             expand=True,
             padding=20,
@@ -311,9 +317,7 @@ class UnityView(Container):
                 controls=[
                     Divider(),
                     btn_show_current_object,
-                    Row(
-                        controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER
-                    ),
+                    Row(controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER),
                 ],
                 spacing=20,
                 alignment=MainAxisAlignment.CENTER,
@@ -358,14 +362,13 @@ class UnityView(Container):
                     controls=[btn_refresh_list, model_upload_view],
                     alignment=MainAxisAlignment.START,
                     vertical_alignment=CrossAxisAlignment.START,
-                )
+                ),
                 # btn_refresh_list,
                 # model_upload_view,
             ],
             spacing=30,
             scroll=True,
         )
-
 
 
 if __name__ == "__main__":
@@ -375,23 +378,21 @@ if __name__ == "__main__":
         pass
 
     def main(page: Page):
-        page.add(UnityView(
-            page,
-            [
-                ModelView("Model A", dammy_func, dammy_func, dammy_func),
-                ModelView("Model B", dammy_func, dammy_func, dammy_func),
-                ModelView("Model C", dammy_func, dammy_func, dammy_func),
-            ],
-            dammy_func,
-            dammy_func,
-            dammy_func,
-            dammy_func,
-            dammy_func,
-            dammy_func,
-        ))
+        page.add(
+            UnityView(
+                page,
+                [
+                    ModelView("Model A", dammy_func, dammy_func, dammy_func),
+                    ModelView("Model B", dammy_func, dammy_func, dammy_func),
+                    ModelView("Model C", dammy_func, dammy_func, dammy_func),
+                ],
+                dammy_func,
+                dammy_func,
+                dammy_func,
+                dammy_func,
+                dammy_func,
+                dammy_func,
+            )
+        )
 
     ft.app(target=main)
-
-
-
-
