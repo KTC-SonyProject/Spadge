@@ -11,6 +11,7 @@ from app.controller.core import AbstractController
 from app.controller.manager import (
     FileManager,
     ObjectDatabaseManager,
+    ObjectManager,
     ServerManager,
     SettingsManager,
 )
@@ -28,7 +29,8 @@ logger = logging.getLogger(__name__)
 
 class UnityController(AbstractController):
     def __init__(
-        self, page: Page, file_manager: FileManager, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager
+        self, page: Page, file_manager: FileManager, socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
     ):
         super().__init__(page)
         self.file_manager = file_manager
@@ -38,7 +40,7 @@ class UnityController(AbstractController):
     # リストを取得
     def _get_list(self):
         try:
-            objects = self.obj_database_manager.get_all_objects()  # ObjectManagerのget_all_objectsを利用
+            objects = self.obj_database_manager.get_all_objects()  # ObjectDatabaseManagerのget_all_objectsを利用
             obj_list = [obj["object_name"] for obj in objects]  # オブジェクト名のリストを生成
         except KeyError:
             obj_list = []
@@ -146,7 +148,8 @@ if __name__ == "__main__":
         settings = SettingsManager()
         db_handler = DatabaseHandler(settings)
         obj_database_manager = ObjectDatabaseManager(db_handler)
-        file_manager = FileManager(page, server, obj_database_manager)
+        obj_manager = ObjectManager(obj_database_manager, server)
+        file_manager = FileManager(page, server, obj_database_manager, obj_manager)
         unity_controller = UnityController(page, file_manager, server, obj_database_manager)
         page.add(unity_controller.get_view())
 

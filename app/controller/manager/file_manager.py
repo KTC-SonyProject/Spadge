@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 class FileManager:
     def __init__(
-        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager, obj_manager: ObjectManager,
+        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
     ):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
@@ -162,8 +163,9 @@ if __name__ == "__main__":
 
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
+    server = ServerManager()
     obj_database_manager = ObjectDatabaseManager(db_handler)
-    obj_manager = ObjectManager(obj_database_manager)
+    obj_manager = ObjectManager(obj_database_manager, server)
     file_controller = FileManager(Page(), ServerManager(), obj_database_manager)
     file_controller.handle_file_selection(["test1.txt", "test2.txt"])
     print(file_controller.model.selected_files)

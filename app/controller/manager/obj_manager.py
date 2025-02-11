@@ -2,7 +2,7 @@ import logging
 
 from app.models.database_models import DatabaseHandler
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import TransferCommand
+from app.models.command_models import TransferCommand, UpdateCommand
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +116,17 @@ class ObjectManager:
         command = TransferCommand(file_path)
         self.server.send_file(object_id, command)
         pass
+
+    def change_obj_by_id(self, object_id: int, object_name: str = None):
+        """
+        IDのオブジェクトに変更する。
+        :param object_id: オブジェクトID
+        :param object_name: オブジェクト名（オプション）
+        """
+        # もしobject_nameが存在する場合
+        if object_name:
+            object_id = self.obj_database_manager.get_id_by_name(object_name)
+        self.server.send_command(UpdateCommand(object_id))
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ def initialize_services(page: Page) -> Container:
     obj_database_manager = ObjectDatabaseManager(db_handler)
     obj_manager = ObjectManager(obj_database_manager, server)
     docs_manager = DocumentsManager(db_handler)
-    file_manager = FileManager(page, server, obj_database_manager)
+    file_manager = FileManager(page, server, obj_database_manager, obj_manager)
     auth_manager = AuthManager(page)
 
     # コンテナに登録
