@@ -86,6 +86,8 @@ ROUTES = {
         [
             RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
             RouteParam(RouteParamKey.SETTINGS, RouteParamValue.SETTINGS),
+            RouteParam(RouteParamKey.OBJ_DATABASE_MANAGER, RouteParamValue.OBJ_DATABASE_MANAGER),
+            RouteParam(RouteParamKey.OBJ_MANAGER, RouteParamValue.OBJ_MANAGER),
         ],
     ),
     "/unity": RouteItem(
