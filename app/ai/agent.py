@@ -13,7 +13,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from psycopg_pool import ConnectionPool
 from typing_extensions import TypedDict
 
-from app.ai.settings import langsmith_settigns, llm_settings
+from app.ai.settings import langsmith_settings, llm_settings
 from app.ai.tools import DisplayOperationTool, tools
 from app.controller.manager.server_manager import ServerManager
 from app.controller.manager.settings_manager import load_settings
@@ -26,7 +26,7 @@ class State(TypedDict):
 class ChatbotGraph:
     def __init__(self, server: ServerManager, verbose: bool = False):
         self.graph_builder = StateGraph(State)
-        langsmith_settigns()
+        langsmith_settings()
         try:
             self.llm = llm_settings(verbose=verbose)
             self.tools = tools

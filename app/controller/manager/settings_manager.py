@@ -28,7 +28,7 @@ class SettingsManager:
     def __init__(self):
         self.settings = self.load_settings()
 
-    def load_settings(self) -> Any:
+    def load_settings(self) -> AppSettings:
         """
         設定をファイルからロードする。
         ファイルが存在しない場合はデフォルト設定を使用する。
@@ -37,13 +37,14 @@ class SettingsManager:
             try:
                 with open(self.SETTINGS_FILE, encoding="utf-8") as file:
                     data = json.load(file)
-                    logger.debug(f"ロードした設定: {data}")
                 logger.info("設定ファイルを正常にロードしました。")
                 return self._dict_to_app_settings(data)
             except (json.JSONDecodeError, KeyError):
                 logger.error("設定ファイルの読み込み中にエラーが発生しました。デフォルト設定を使用します。")
         else:
             logger.warning("設定ファイルが存在しません。デフォルト設定を使用します。")
+            self.settings = DEFAULT_SETTINGS
+            self.save_settings()
             return DEFAULT_SETTINGS
 
     def save_settings(self):
@@ -66,7 +67,6 @@ class SettingsManager:
                 value = getattr(value, key, None)
                 if value is None:
                     raise AttributeError(f"キーが見つかりません: {path}")
-            logger.debug(f"取得した設定: {path} = {value}")
             return value
         except AttributeError as e:
             logger.error(f"設定の取得中にエラーが発生しました: {e}")
