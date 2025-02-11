@@ -1,10 +1,13 @@
 import logging
 
 from app.models.database_models import DatabaseHandler
+from app.controller.manager.server_manager import ServerManager
+from app.models.command_models import TransferCommand
 
 logger = logging.getLogger(__name__)
 
-class ObjectManager:
+
+class ObjectDatabaseManager:
     """
     オブジェクト関連のデータ操作を提供するViewModel。
     """
@@ -25,6 +28,18 @@ class ObjectManager:
         results = self.db_handler.fetch_query(query, (object_id,))
         if not results:
             raise ValueError(f"Objects with ID {object_id} not found.")
+        return results[0][0]
+
+    def get_id_by_name(self, object_name: str) -> int:
+        """
+        指定された名前のオブジェクトIDを取得する。
+        :param object_name: オブジェクト名
+        :return: {"object_id": int}
+        """
+        query = "SELECT object_id FROM objects WHERE object_name = %s;"
+        results = self.db_handler.fetch_query(query, (object_name,))
+        if not results:
+            raise ValueError(f"Objects with Name {object_name} not found.")
         return results[0][0]
 
     def get_all_objects(self) -> list[dict]:
@@ -60,7 +75,6 @@ class ObjectManager:
         else:
             raise RuntimeError("Failed to insert new object.")
 
-
     def update_name(self, object_id: int, new_name: str):
         """
         指定されたIDのオブジェクト名を更新する。
@@ -71,13 +85,47 @@ class ObjectManager:
         self.db_handler.execute_query(query, (new_name, object_id))
 
 
+class ObjectManager:
+    """
+    ファイル操作を提供するViewModel。
+    """
+
+    def __init__(self, obj_database_manager: ObjectDatabaseManager, server_manager: ServerManager):
+        """
+        :param obj_database_manager: ObjectDatabaseManagerのインスタンス
+        """
+        self.obj_database_manager = obj_database_manager
+        self.server = server_manager
+
+    def name_txt_create(self, object_id: int, object_name: str):
+        """
+        IDの名前のファイルに名前をテキストファイルに書き込む。
+        :param object_id: オブジェクトID
+        :param object_name: オブジェクト名
+        """
+        with open(f"{object_id}.txt", "w") as f:
+            f.write(object_name)
+        self.send_file(object_id, f"{object_id}.txt")
+
+    def send_file(self, object_id: int, file_path: str):
+        """
+        ファイルを送信する。
+        :param object_id: オブジェクトID
+        :param file_path: ファイルパス
+        """
+        command = TransferCommand(file_path)
+        self.server.send_file(object_id, command)
+        pass
+
+
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
     from app.controller.manager.settings_manager import SettingsManager
 
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
-    manager = ObjectManager(db_handler)
+    manager = ObjectDatabaseManager(db_handler)
+    server_manager = ServerManager()
 
     try:
         # 最後のIDを取得

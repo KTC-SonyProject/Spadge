@@ -4,21 +4,24 @@ import zipfile
 
 from flet import FilePickerUploadFile, Page
 
+from app.controller.manager.obj_manager import ObjectDatabaseManager
+from app.controller.manager.obj_manager import ObjectManager
 from app.controller.manager.server_manager import ServerManager
-from app.controller.manager.objname_manager import ObjectManager  # 追加
 from app.controller.manager.settings_manager import SettingsManager
 from app.models.command_models import TransferCommand
-from app.models.file_models import FileModel
 from app.models.database_models import DatabaseHandler
-
+from app.models.file_models import FileModel
 
 logger = logging.getLogger(__name__)
 
 
 class FileManager:
-    def __init__(self, page: Page, socket_server: ServerManager, obj_manager: ObjectManager):  # obj_managerを追加
+    def __init__(
+        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager, obj_manager: ObjectManager,
+    ):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
+        self.obj_database_manager = obj_database_manager  # obj_managerを初期化
         self.obj_manager = obj_manager  # obj_managerを初期化
 
     def handle_file_selection(self, files: list[FilePickerUploadFile]) -> list[FilePickerUploadFile] | None:
@@ -133,8 +136,11 @@ class FileManager:
         """フォルダー内のファイルを連番にリネームし、新しいファイル名のリストを返す"""
         renamed_files = []
         try:
-            last_id = self.obj_manager.get_last_id()
+            last_id = self.obj_database_manager.get_last_id()
             new_id = last_id + 1
+
+            # データベースには一度だけ送信
+            self.obj_database_manager.new_object(f"{new_id}")
 
             for file in files:
                 file_extension = os.path.splitext(file)[1]
@@ -143,8 +149,7 @@ class FileManager:
                 new_file_path = os.path.join(folder_path, new_name)
                 os.rename(old_file_path, new_file_path)
                 renamed_files.append(new_name)
-            # データベースには一度だけ送信
-            self.obj_manager.new_object(f"{new_id}")
+                self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
             logger.error(f"ファイルリネーム中にエラー: {e}")
@@ -157,8 +162,9 @@ if __name__ == "__main__":
 
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
-    obj_manager = ObjectManager(db_handler)
-    file_controller = FileManager(Page(), ServerManager(), obj_manager)
+    obj_database_manager = ObjectDatabaseManager(db_handler)
+    obj_manager = ObjectManager(obj_database_manager)
+    file_controller = FileManager(Page(), ServerManager(), obj_database_manager)
     file_controller.handle_file_selection(["test1.txt", "test2.txt"])
     print(file_controller.model.selected_files)
 
@@ -169,4 +175,4 @@ if __name__ == "__main__":
     print(file_controller.model.get_file_path("test1.txt"))  # /tmp/uploads/test1.txt
 
     # フォルダー内のファイルを連番にリネーム
-    file_controller.rename_files_in_folder(os.path.join(os.environ['FLET_APP_STORAGE_TEMP'], 'uploads'))
+    file_controller.rename_files_in_folder(os.path.join(os.environ["FLET_APP_STORAGE_TEMP"], "uploads"))

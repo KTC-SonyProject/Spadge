@@ -3,4 +3,5 @@ from .server_manager import ServerManager
 from .settings_manager import SettingsManager
 from .file_manager import FileManager
 from .auth_manager import AuthManager
-from .objname_manager import ObjectManager
+from .obj_manager import ObjectDatabaseManager
+from .obj_manager import ObjectManager

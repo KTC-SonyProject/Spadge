@@ -23,6 +23,6 @@ from .manager import (
     SettingsManager,
     FileManager,
     AuthManager,
-
+    ObjectDatabaseManager,
     ObjectManager,
 )
