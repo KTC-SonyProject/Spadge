@@ -7,9 +7,9 @@ from flet import (
 
 from app.controller.core import AbstractController
 from app.controller.manager.agent_manager import (
-    SupervisorAgent,
     DisplayInfoTool,
     ModelChangeTool,
+    SupervisorAgent,
     sub_agents_with_generic,
 )
 from app.controller.manager.server_manager import ServerManager

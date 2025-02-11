@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from app.ai.vector_db import get_vector_store
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import ControlCommand ,UpdateCommand
+from app.models.command_models import ControlCommand, UpdateCommand
 
 
 class SearchDocumentInput(BaseModel):
