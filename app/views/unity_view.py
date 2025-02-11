@@ -14,7 +14,9 @@ from flet import (
     Page,
     Row,
     Text,
+    TextField,
     alignment,
+    Divider,
 )
 
 from app.views.core import BaseTabBodyView, TabView, create_tabs
@@ -151,11 +153,10 @@ class OldUnityView(Column):
 
 
 
-def create_btn(text: str, on_click: callable, icon: Icon | None = None):
-    if icon:
-        return ElevatedButton(text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click, icon=icon)
-    else:
-        return ElevatedButton(text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click)
+def create_btn(text: str, on_click: callable, icon: Icon | None = None, visible: bool = True) -> ElevatedButton:
+    return ElevatedButton(
+        text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click, icon=icon, visible=visible
+    )
 
 
 class ModelView(Card):
@@ -179,13 +180,20 @@ class ModelView(Card):
         >>> model_view = ModelView("Model A")
         >>> model_view.model_name.value = "Model B" # モデル名を変更
     """
-    def __init__(self, model_name: str, show_obj: callable, update_obj_name: callable, delete_obj: callable):
+    def __init__(
+            self,
+            model_name: str,
+            show_obj: callable,
+            update_obj_name: callable,
+            delete_obj: callable,
+            is_authenticated: bool = False,
+        ):
         super().__init__(
         )
         self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
         self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
-        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name))
-        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(model_name))
+        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name), visible=is_authenticated)
+        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(model_name), visible=is_authenticated)
         self.model_row = Row(
             controls=[self.btn_show, self.btn_rename, self.btn_delete],
             spacing=10,
@@ -207,6 +215,25 @@ class ModelView(Card):
             border_radius=10,
         )
 
+class ModelUploadView(Container):
+    """モデルアップロードをおこなうボタンのView"""
+    def __init__(self, upload_model: callable, file_picker: FilePicker, is_authenticated: bool = False):
+        super().__init__(visible=is_authenticated)
+        self.file_picker = file_picker
+        self.add_model_file_name = Text("", size=16)
+        btn_select_model = create_btn("＋ モデル追加", lambda _: self.file_picker.pick_files(
+            allow_multiple=False, allowed_extensions=["zip"]
+        ))
+        self.add_model_name = TextField(hint_text="モデル名を入力", visible=False)
+        self.btn_upload_model = create_btn("📤 モデルアップロード", on_click=upload_model, visible=False)
+        self.content = Column(
+            controls=[
+                btn_select_model,
+                Row([self.add_model_file_name, self.add_model_name], spacing=10),
+                self.btn_upload_model,
+            ],
+        )
+
 class UnityView(Container):
     """
     Unity操作画面のView
@@ -214,7 +241,8 @@ class UnityView(Container):
     Args:
         page (Page): ページ
         model_list (list[ModelView]): モデルリスト
-        add_model (callable): モデル追加関数
+        select_model (callable): モデルセレクト関数
+        upload_model (callable): モデルアップロード関数
         refresh_list (callable): リスト更新関数
         refresh_status (callable): 接続状況更新関数
         show_current_obj (callable): 現在のオブジェクト表示関数
@@ -255,34 +283,47 @@ class UnityView(Container):
     def __init__( # noqa
             self,
             page: Page,
-            model_list: list[ModelView],
-            add_model: callable,
+            model_list: list[ModelView | Text],
+            model_upload_view: ModelUploadView,
             refresh_list: callable,
+            unity_status: Text,
             refresh_status: callable,
-            show_current_obj: callable,
+            show_current_obj_name: str,
             rotate_start: callable,
             rotate_stop: callable,
+            is_authenticated: bool = False,
         ):
         super().__init__(
-            # expand=True,
+            expand=True,
             padding=20,
         )
         self.page = page
         self.model_list = model_list
-        self.unity_status = Text("Unity 接続状況: ✅ 接続中", size=16, color=Colors.GREEN_700)
-        btn_add_model = create_btn("＋ モデル追加", lambda _: add_model())
+        self.unity_status = unity_status
+        btn_show_current_object = Text(f"現在のオブジェクト: {show_current_obj_name}", size=25)
         btn_ask_model = create_btn("❓ モデルについて質問する", lambda _: self.page.go("/chat"))
         btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list())
         btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status())
-        btn_show_current_object = create_btn("📌 現在のオブジェクト", lambda _: show_current_obj())
         btn_rotate_start = create_btn("🔄 モデル回転スタート", lambda _: rotate_start())
         btn_rotate_stop = create_btn("⏹ モデル回転ストップ", lambda _: rotate_stop())
-        rotation_buttons = Row(
-            controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER
+        rotation_buttons = Container(
+            content=Column(
+                controls=[
+                    Divider(),
+                    btn_show_current_object,
+                    Row(
+                        controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER
+                    ),
+                ],
+                spacing=20,
+                alignment=MainAxisAlignment.CENTER,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+            ),
+            padding=50,
         )
 
         self.page_title = Container(
-            content=Text("Unity 操作ページ", size=32, weight="bold", color=Colors.BLACK),
+            content=Text("ディスプレイ 操作ページ", size=35, weight="bold"),
             alignment=alignment.center,
             padding=20,
         )
@@ -298,20 +339,28 @@ class UnityView(Container):
             vertical_alignment=CrossAxisAlignment.CENTER,
             wrap=True,
         )
-        self.global_controls = Row(
-            controls=[btn_refresh_list, btn_show_current_object],
+        self.global_controls = Column(
+            controls=[
+                self.status_controls,
+                btn_ask_model,
+                rotation_buttons,
+            ],
             spacing=15,
-            alignment=MainAxisAlignment.CENTER,
+            alignment=MainAxisAlignment.END,
+            horizontal_alignment=CrossAxisAlignment.END,
         )
         self.content = Column(
             controls=[
                 self.page_title,
-                self.status_controls,
-                btn_ask_model,
-                self.model_list_view,
-                btn_add_model,
                 self.global_controls,
-                rotation_buttons,
+                self.model_list_view,
+                Row(
+                    controls=[btn_refresh_list, model_upload_view],
+                    alignment=MainAxisAlignment.START,
+                    vertical_alignment=CrossAxisAlignment.START,
+                )
+                # btn_refresh_list,
+                # model_upload_view,
             ],
             spacing=30,
             scroll=True,
