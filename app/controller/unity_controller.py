@@ -30,12 +30,13 @@ logger = logging.getLogger(__name__)
 class UnityController(AbstractController):
     def __init__(
         self, page: Page, file_manager: FileManager, socket_server: ServerManager,
-        obj_database_manager: ObjectDatabaseManager,
+        obj_database_manager: ObjectDatabaseManager,obj_manager: ObjectManager,
     ):
         super().__init__(page)
         self.file_manager = file_manager
         self.server = socket_server
         self.obj_database_manager = obj_database_manager
+        self.obj_manager = obj_manager
 
     # リストを取得
     def _get_list(self):
@@ -108,7 +109,7 @@ class UnityController(AbstractController):
     def _create_display_settings_tab(self):
         return BaseUnityTabView(
             "Display",
-            [ObjListView(self._get_list)],
+            [ObjListView(self._get_list, self._change_obj_by_id)],
         )
 
     # ファイルタブ作成
@@ -128,6 +129,9 @@ class UnityController(AbstractController):
                 ),
             ],
         )
+
+    def _change_obj_by_id(self, obj):
+        self.obj_manager.change_obj_by_id(obj)
 
     # ビュー取得
     def get_view(self) -> UnityView:

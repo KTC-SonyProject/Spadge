@@ -150,7 +150,7 @@ class FileManager:
                 new_file_path = os.path.join(folder_path, new_name)
                 os.rename(old_file_path, new_file_path)
                 renamed_files.append(new_name)
-                self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
+                # self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
             logger.error(f"ファイルリネーム中にエラー: {e}")

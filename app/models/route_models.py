@@ -15,7 +15,7 @@ class RouteParamKey(Enum):
     FILE_MANAGER = "file_manager"
     AUTH_MANAGER = "auth_manager"
     OBJ_DATABASE_MANAGER = "obj_database_manager"
-    OBJ_MANAJER = "obj_manager"
+    OBJ_MANAGER = "obj_manager"
 
 
 class RouteParamValue(Enum):
