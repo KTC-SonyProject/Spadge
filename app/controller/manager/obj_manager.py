@@ -117,16 +117,20 @@ class ObjectManager:
         self.server.send_file(object_id, command)
         pass
 
-    def change_obj_by_id(self, object_id: int, object_name: str = None):
+    def change_obj_by_id(self, object_id: int = None, object_name: str = None):
         """
         IDのオブジェクトに変更する。
         :param object_id: オブジェクトID
         :param object_name: オブジェクト名（オプション）
         """
+        if object_id is None and object_name is None:
+            raise ValueError("object_id か object_name のどちらかを指定してください。")
         # もしobject_nameが存在する場合
-        if object_name:
-            object_id = self.obj_database_manager.get_id_by_name(object_name)
-        self.server.send_command(UpdateCommand(object_id))
+        else:
+            if object_name:
+                object_id = self.obj_database_manager.get_id_by_name(object_name)
+            self.server.send_command(UpdateCommand(object_id))
+
 
 
 if __name__ == "__main__":

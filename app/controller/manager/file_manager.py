@@ -18,8 +18,7 @@ logger = logging.getLogger(__name__)
 class FileManager:
     def __init__(
         self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager,
-        obj_manager: ObjectManager,
-    ):  # obj_managerを追加
+        obj_manager: ObjectManager,):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
         self.obj_database_manager = obj_database_manager  # obj_managerを初期化
@@ -150,6 +149,7 @@ class FileManager:
                 new_file_path = os.path.join(folder_path, new_name)
                 os.rename(old_file_path, new_file_path)
                 renamed_files.append(new_name)
+                self.obj_database_manager.new_object(f"{old_file_path}")
                 # self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
