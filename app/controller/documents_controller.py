@@ -4,7 +4,10 @@ from flet import InputBorder, Page, TextField
 
 from app.ai.vector_db import delete_document_from_vectorstore, indexing_document
 from app.controller.core import AbstractController
-from app.controller.manager.documents_manager import DocumentsManager
+from app.controller.manager import (
+    AuthManager,
+    DocumentsManager,
+)
 from app.views.core import BannerView
 from app.views.documents_view import (
     DocumentsView,
@@ -20,9 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentsSidebarController(AbstractController):
-    def __init__(self, page: Page, docs_manager: DocumentsManager):
+    def __init__(self, page: Page, docs_manager: DocumentsManager, is_authenticated: bool = False):
         super().__init__(page)
         self.manager = docs_manager
+        self.is_authenticated = is_authenticated
         self.banner = BannerView(page)
         self.add_doc_modal = None
 
@@ -49,6 +53,7 @@ class DocumentsSidebarController(AbstractController):
                     self.page,
                     doc["title"],
                     doc["id"],
+                    self.is_authenticated,
                 )
             )
         return items
@@ -95,23 +100,34 @@ class DocumentsSidebarController(AbstractController):
             self._open_modal,
             self._tap_nav_icon,
             self._toggle_nav_rail,
+            self.is_authenticated,
         )
+        wrap_width = 800
+        if self.page.window.width < wrap_width:
+            self.sidebar.nav_rail.visible = False
         return self.sidebar
 
 
 class DocumentsController(AbstractController):
     def __init__(
-        self, page: Page, docs_manager: DocumentsManager, document_id: int | None = None, is_edit: bool = False
+        self,
+        page: Page,
+        docs_manager: DocumentsManager,
+        auth_manager: AuthManager,
+        document_id: int | None = None,
+        is_edit: bool = False,
     ):
         super().__init__(page)
         self.manager = docs_manager
+        self.auth_manager = auth_manager
+        self.is_authenticated = self.auth_manager.check_is_authenticated()
         self.docs_view = None
         self.edit_body = None
         self.edit_view = None
         self.sidebar = None
         self.edit_doc_modal = None
         self.banner = BannerView(page)
-        self.docs_sidebar_controller = DocumentsSidebarController(page, docs_manager)
+        self.docs_sidebar_controller = DocumentsSidebarController(page, docs_manager, self.is_authenticated)
         self.document_id = document_id
         self.is_edit = is_edit
 
@@ -181,7 +197,7 @@ class DocumentsController(AbstractController):
             return self.docs_view
 
         doc = self.manager.get_document_by_id(self.document_id)
-        if self.is_edit:
+        if self.is_edit and self.is_authenticated:
             self.edit_body = EditBody(
                 self.page,
                 self._update_preview,

@@ -43,6 +43,7 @@ class HomeCardList(Column):
             expand=True,
             alignment=MainAxisAlignment.CENTER,
             controls=card_list,
+            scroll=True,
         )
 
 
