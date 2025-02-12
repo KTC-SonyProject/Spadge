@@ -7,6 +7,7 @@ from flet import (
     Container,
     CrossAxisAlignment,
     ElevatedButton,
+    ExpansionTile,
     IconButton,
     Icons,
     ListView,
@@ -17,6 +18,7 @@ from flet import (
     Row,
     Text,
     TextField,
+    TileAffinity,
     alignment,
     border,
     padding,
@@ -88,7 +90,8 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
 
     return body
 
-from flet import ExpansionTile, TileAffinity
+
+
 
 def create_chat_message_tile(name: str, content: str, tap_link: callable) -> ExpansionTile:
     return ExpansionTile(
@@ -104,6 +107,7 @@ def create_chat_message_tile(name: str, content: str, tap_link: callable) -> Exp
             )
         ],
     )
+
 
 class ChatMessageCard(Container):
     def __init__(self, message: Message, tap_link: callable):

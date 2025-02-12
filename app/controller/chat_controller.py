@@ -171,7 +171,8 @@ class ChatController(AbstractController):
                         elif self.view.chat_list.controls[-1].name.value != f"AI ({metadata.get('tags')[0]})":
                             history_tile = create_chat_message_tile(
                                 self.view.chat_list.controls[-1].name.value,
-                                self.view.chat_list.controls[-1].body.value, self.tap_link,
+                                self.view.chat_list.controls[-1].body.value,
+                                self.tap_link,
                             )
                             self.view.chat_list.controls[-1].thinking_chat.controls.append(history_tile)
                             self.view.chat_list.controls[-1].thinking_chat.visible = True
