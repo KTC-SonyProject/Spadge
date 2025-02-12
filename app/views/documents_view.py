@@ -69,9 +69,6 @@ def create_nav_rail_item(page: Page, title: str, id: int, is_authenticated: bool
     )
 
 
-
-
-
 def create_add_doc_modal(content: TextField, modal_yes_action: callable, modal_no_action: callable):
     return create_modal(
         title=Text("新規追加"),

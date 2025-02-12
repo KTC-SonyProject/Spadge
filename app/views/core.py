@@ -133,6 +133,7 @@ class BannerView:
         time.sleep(2)
         self.close_banner(None)
 
+
 def create_modal(
     title: Control,
     content: Control,
