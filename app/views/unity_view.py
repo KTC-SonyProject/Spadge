@@ -19,7 +19,7 @@ from flet import (
     alignment,
 )
 
-from app.views.core import BaseTabBodyView, TabView, create_tabs
+from app.views.core import BaseTabBodyView, TabView, create_tabs, create_modal
 
 logger = logging.getLogger(__name__)
 
@@ -155,11 +155,34 @@ class OldUnityView(Column):
         ]
 
 
+
+
+
+
 def create_btn(text: str, on_click: callable, icon: Icon | None = None, visible: bool = True) -> ElevatedButton:
     return ElevatedButton(
         text=text, bgcolor=Colors.BLUE, color=Colors.WHITE, on_click=on_click, icon=icon, visible=visible
     )
 
+def create_update_model_modal(content: TextField, yes_func: callable, no_func: callable) -> Container:
+    return create_modal(
+        title="モデル名変更",
+        content=content,
+        actions=[
+            create_btn("変更", yes_func),
+            create_btn("キャンセル", no_func),
+        ],
+    )
+
+def create_add_model_modal(content: TextField, yes_func: callable, no_func: callable) -> Container:
+    return create_modal(
+        title="モデル追加",
+        content=content,
+        actions=[
+            create_btn("追加", yes_func),
+            create_btn("キャンセル", no_func),
+        ],
+    )
 
 class ModelView(Card):
     """
