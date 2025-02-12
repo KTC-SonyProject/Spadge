@@ -82,8 +82,21 @@ class ObjectDatabaseManager:
         :param new_name: 新しい名前
         """
         query = "UPDATE objects SET object_name = %s WHERE object_id = %s;"
-        self.db_handler.execute_query(query, (new_name, object_id))
+        results =self.db_handler.execute_query(query, (new_name, object_id,))
+        if results:
+            return results[0][0]
+        else:
+            raise RuntimeError("Failed to update object name.")
 
+    def delete_object(self, object_id: int):
+        """
+        指定されたIDのオブジェクトを削除する。
+        :param object_id: オブジェクトID
+        """
+        query = "DELETE FROM objects WHERE object_id = %s;"
+        logger.info(f"Deleting object with ID {object_id}")
+        results = self.db_handler.execute_query(query, (object_id,))
+        logger.info(f"{results} objects deleted.")
 
 class ObjectManager:
     """
@@ -130,6 +143,14 @@ class ObjectManager:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
             self.server.send_command(UpdateCommand(object_id))
+
+    def delete_obj_by_id(self, object_id: int):
+        """
+        IDのオブジェクトを削除する。
+        :param object_id: オブジェクトID
+        """
+        self.obj_database_manager.delete_object(object_id)
+        # サーバーに削除コマンドを送信
 
 
 if __name__ == "__main__":

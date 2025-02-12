@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flet import (
     Colors,
@@ -227,11 +228,15 @@ class UnityController(AbstractController):
 
     def _on_upload_complete(self, e):
         """アップロード完了"""
-        logger.debug(f"Temporary upload complete: {e.file_name}")
         # TODO: モデルの名前をアップロード時に選択できるようにしたので、それに対応させる
-        # self.model_upload_view.add_model_name.valueで入力された名前を取得できる
         success, result = self.file_manager.send_file_to_unity(e.file_name)
         if success:
+            if self.model_upload_view.add_model_name.value:
+                new_name = self.model_upload_view.add_model_name.value
+                self.obj_database_manager.new_object(new_name)
+            else:
+                new_name = os.path.splitext(e.file_name)[0]
+                self.obj_database_manager.new_object(new_name)
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
         else:
             logger.error(f"Error sending file to Unity: {result}")
@@ -255,9 +260,8 @@ class UnityController(AbstractController):
                 ModelView(
                     model_name=obj["object_name"],
                     show_obj=lambda id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
-                    update_obj_name=lambda id=obj["object_id"],
-                    name=obj["object_name"]: self.obj_database_manager.update_name(id, name),
-                    delete_obj=lambda id=obj["object_id"]: print(f"Delete object: {id}"),  # TODO: modelの削除処理を追加
+                    update_obj_name=lambda id=obj["object_id"], name=obj["object_name"]: self.obj_database_manager.update_name(id, name), # NOQA
+                    delete_obj=lambda id=obj["object_id"]: self.obj_manager.delete_obj_by_id(id),  # TODO: modelの削除処理を追加
                     is_authenticated=self.auth_manager.check_is_authenticated(),
                 )
                 for obj in objects

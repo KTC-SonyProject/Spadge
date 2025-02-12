@@ -140,20 +140,14 @@ class FileManager:
         renamed_files = []
         try:
             last_id = self.obj_database_manager.get_last_id()
-            new_id = last_id + 1
-
-            # データベースには一度だけ送信
-            self.obj_database_manager.new_object(f"{new_id}")
+            last_id += 1
 
             for file in files:
                 file_extension = os.path.splitext(file)[1]
-                new_name = f"{new_id}{file_extension}"
                 old_file_path = os.path.join(folder_path, file)
-                new_file_path = os.path.join(folder_path, new_name)
+                new_file_path = os.path.join(folder_path, f"{last_id}{file_extension}")
                 os.rename(old_file_path, new_file_path)
-                renamed_files.append(new_name)
-                self.obj_database_manager.new_object(f"{old_file_path}")
-                # self.obj_manager.name_txt_create(object_id=new_id, object_name=f"{old_file_path}")
+                renamed_files.append(f"{last_id}{file_extension}")
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
             logger.error(f"ファイルリネーム中にエラー: {e}")
