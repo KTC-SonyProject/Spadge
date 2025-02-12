@@ -1,6 +1,7 @@
 import logging
 
 from flet import (
+    Colors,
     ElevatedButton,
     FilePicker,
     Page,
@@ -9,6 +10,7 @@ from flet import (
 
 from app.controller.core import AbstractController
 from app.controller.manager import (
+    AuthManager,
     FileManager,
     ObjectDatabaseManager,
     ObjectManager,
@@ -19,7 +21,10 @@ from app.models.database_models import DatabaseHandler
 from app.views.core import TabView
 from app.views.unity_view import (
     BaseUnityTabView,
+    ModelUploadView,
+    ModelView,
     ObjListView,
+    OldUnityView,
     UnityView,
     create_file_settings_body,
 )
@@ -27,10 +32,14 @@ from app.views.unity_view import (
 logger = logging.getLogger(__name__)
 
 
-class UnityController(AbstractController):
+class OldUnityController(AbstractController):
     def __init__(
-        self, page: Page, file_manager: FileManager, socket_server: ServerManager,
-        obj_database_manager: ObjectDatabaseManager,obj_manager: ObjectManager,
+        self,
+        page: Page,
+        file_manager: FileManager,
+        socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
     ):
         super().__init__(page)
         self.file_manager = file_manager
@@ -139,7 +148,161 @@ class UnityController(AbstractController):
             TabView("Display", self._create_display_settings_tab()),
             TabView("File", self._create_file_settings_tab()),
         ]
-        return UnityView(tabs=tabs)
+        return OldUnityView(tabs=tabs)
+
+
+class UnityController(AbstractController):
+    def __init__(
+        self,
+        page: Page,
+        file_manager: FileManager,
+        socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
+        auth_manager: AuthManager,
+    ):
+        super().__init__(page)
+        self.file_manager = file_manager
+        self.server = socket_server
+        self.obj_database_manager = obj_database_manager
+        self.obj_manager = obj_manager
+        self.auth_manager = auth_manager
+        self._initialize_model_upload_view()
+
+    def _initialize_model_upload_view(self):
+        self.file_picker = FilePicker(on_result=self.on_file_selected, on_upload=self.on_upload)
+        self.page.overlay.append(self.file_picker)
+        self.model_upload_view = ModelUploadView(
+            upload_model=self.upload_files,
+            file_picker=self.file_picker,
+            is_authenticated=self.auth_manager.check_is_authenticated(),
+        )
+
+    def on_file_selected(self, e):
+        """ファイルを選択したときの処理"""
+        logger.debug(f"Selected files: {e.files}")
+        file_list = self.file_manager.handle_file_selection(e.files)
+        if file_list:
+            self.model_upload_view.add_model_file_name.value = ", ".join(map(lambda f: f.name, file_list))
+            self.model_upload_view.btn_upload_model.visible = True
+            self.model_upload_view.add_model_name.visible = True
+        else:
+            self.model_upload_view.add_model_file_name.value = "ファイルが選択されていません"
+            self.model_upload_view.btn_upload_model.visible = False
+            self.model_upload_view.add_model_name.visible = False
+        self.page.update()
+
+    def _upload_file(self, file_name):
+        """ファイルをアップロードするときの処理"""
+        logger.debug(f"Uploading: {file_name}")
+        upload_file = self.file_manager.prepare_upload_single_file(file_name)
+        self.file_picker.upload([upload_file])
+
+    def upload_files(self, _):
+        """複数のファイルアップロード処理"""
+        try:
+            for f in self.file_manager.model.selected_files:
+                self._upload_file(f.name)
+        except Exception as err:
+            logger.error(f"Error uploading files: {err}")
+            self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
+            self.upload_button.visible = False
+            self.page.update()
+
+    def on_upload(self, e):
+        """アップロード処理"""
+        if e.progress is None:
+            logger.error(f"Error uploading files: {e.error}")
+            self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
+            self.model_upload_view.visible = False
+            self.page.update()
+        elif e.progress == 1.0:
+            self._on_upload_complete(e)
+        else:
+            self._on_upload_progress(e)
+
+    def _on_upload_progress(self, e):
+        """アップロード進捗"""
+        logger.debug(f"Uploading: {e.progress}")
+
+    def _on_upload_complete(self, e):
+        """アップロード完了"""
+        logger.debug(f"Temporary upload complete: {e.file_name}")
+        # TODO: モデルの名前をアップロード時に選択できるようにしたので、それに対応させる
+        # self.model_upload_view.add_model_name.valueで入力された名前を取得できる
+        success, result = self.file_manager.send_file_to_unity(e.file_name)
+        if success:
+            self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
+        else:
+            logger.error(f"Error sending file to Unity: {result}")
+            self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
+        self.model_upload_view.btn_upload_model.visible = False
+        self.page.update()
+
+    def _get_list(self):
+        try:
+            objects = self.obj_database_manager.get_all_objects()  # ObjectDatabaseManagerのget_all_objectsを利用
+        except KeyError:
+            objects = []
+        logger.debug(f"Object list: {objects}")
+        return objects
+
+    def _get_model_view_list(self):
+        """モデルビューのリストを取得"""
+        objects = self._get_list()
+        if objects:
+            model_list = [
+                ModelView(
+                    model_name=obj["object_name"],
+                    show_obj=lambda id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
+                    update_obj_name=lambda id=obj["object_id"],
+                    name=obj["object_name"]: self.obj_database_manager.update_name(id, name),
+                    delete_obj=lambda id=obj["object_id"]: print(f"Delete object: {id}"),  # TODO: modelの削除処理を追加
+                    is_authenticated=self.auth_manager.check_is_authenticated(),
+                )
+                for obj in objects
+            ]
+            return model_list
+        else:
+            return [Text("まだオブジェクトが登録されていません", size=20, color=Colors.YELLOW_700)]
+
+    def refresh_list(self):
+        self.view.model_list = self._get_model_view_list()
+        self.page.update()
+
+    def get_unity_status(self):
+        if self.server.is_connected:
+            return Text("ディスプレイアプリ 接続状況: ✅ 接続中", size=16, color=Colors.GREEN_700)
+        else:
+            return Text("ディスプレイアプリ 接続状況: ❌ 未接続", size=16, color=Colors.RED_700)
+
+    def refresh_unity_status(self):
+        self.view.unity_status = self.get_unity_status()
+        self.page.update()
+
+    def _get_current_obj_name(self) -> str:
+        """現在のオブジェクト名を取得"""
+        if self.server.is_connected:
+            # TODO: 現在のオブジェクト名を取得する処理を追加
+            obj = "Nao"
+            return obj
+        else:
+            return "不明"
+
+    def get_view(self) -> UnityView:
+        self.model_list = self._get_model_view_list()
+        self.view = UnityView(
+            page=self.page,
+            model_list=self.model_list,
+            model_upload_view=self.model_upload_view,
+            refresh_list=self.refresh_list,
+            unity_status=self.get_unity_status(),
+            refresh_status=self.refresh_unity_status,
+            show_current_obj_name=self._get_current_obj_name(),
+            rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
+            rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
+        )
+        return self.view
 
 
 if __name__ == "__main__":

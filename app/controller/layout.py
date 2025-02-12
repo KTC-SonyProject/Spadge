@@ -98,6 +98,7 @@ ROUTES = {
             RouteParam(RouteParamKey.SERVER, RouteParamValue.SERVER),
             RouteParam(RouteParamKey.OBJ_DATABASE_MANAGER, RouteParamValue.OBJ_DATABASE_MANAGER),
             RouteParam(RouteParamKey.OBJ_MANAGER, RouteParamValue.OBJ_MANAGER),
+            RouteParam(RouteParamKey.AUTH_MANAGER, RouteParamValue.AUTH_MANAGER),
         ],
     ),
     "/404": RouteItem("404 Page Not Found", TemplateView, [RouteParam("text", "404 Page Not Found")]),

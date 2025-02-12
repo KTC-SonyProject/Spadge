@@ -4,8 +4,7 @@ import zipfile
 
 from flet import FilePickerUploadFile, Page
 
-from app.controller.manager.obj_manager import ObjectDatabaseManager
-from app.controller.manager.obj_manager import ObjectManager
+from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
 from app.controller.manager.server_manager import ServerManager
 from app.controller.manager.settings_manager import SettingsManager
 from app.models.command_models import TransferCommand
@@ -17,8 +16,12 @@ logger = logging.getLogger(__name__)
 
 class FileManager:
     def __init__(
-        self, page: Page, socket_server: ServerManager, obj_database_manager: ObjectDatabaseManager,
-        obj_manager: ObjectManager,):  # obj_managerを追加
+        self,
+        page: Page,
+        socket_server: ServerManager,
+        obj_database_manager: ObjectDatabaseManager,
+        obj_manager: ObjectManager,
+    ):  # obj_managerを追加
         self.model = FileModel(page)
         self.server = socket_server
         self.obj_database_manager = obj_database_manager  # obj_managerを初期化
