@@ -1,8 +1,8 @@
 import logging
 
-from app.models.database_models import DatabaseHandler
 from app.controller.manager.server_manager import ServerManager
 from app.models.command_models import TransferCommand, UpdateCommand
+from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,6 @@ class ObjectManager:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
             self.server.send_command(UpdateCommand(object_id))
-
 
 
 if __name__ == "__main__":

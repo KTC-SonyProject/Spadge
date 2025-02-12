@@ -6,23 +6,22 @@ from flet import (
 )
 
 from app.controller.core import AbstractController
-from app.controller.manager.agent_manager import (
-    SupervisorAgent,
-    DisplayInfoTool,
-    ModelChangeTool,
-    ModelListTool,
-    sub_agents_with_generic,
-)
-from app.models.chat_models import Message, MessageType
-from app.views.chat_view import ChatMessageCard, ChatView
-
-from app.models.database_models import DatabaseHandler
 from app.controller.manager import (
     ObjectDatabaseManager,
     ObjectManager,
     ServerManager,
     SettingsManager,
 )
+from app.controller.manager.agent_manager import (
+    DisplayInfoTool,
+    ModelChangeTool,
+    ModelListTool,
+    SupervisorAgent,
+    sub_agents_with_generic,
+)
+from app.models.chat_models import Message, MessageType
+from app.models.database_models import DatabaseHandler
+from app.views.chat_view import ChatMessageCard, ChatView
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +35,14 @@ ERROR_MESSAGE = """
 
 
 class ChatController(AbstractController):
-    def __init__(self, page: Page, socket_server: ServerManager, settings_manager: SettingsManager,
-                obj_manager: ObjectManager, obj_database_manager: ObjectDatabaseManager):
+    def __init__(
+        self,
+        page: Page,
+        socket_server: ServerManager,
+        settings_manager: SettingsManager,
+        obj_manager: ObjectManager,
+        obj_database_manager: ObjectDatabaseManager,
+    ):
         super().__init__(page)
         self.server = socket_server
         self.settings_manager = settings_manager
@@ -62,7 +67,13 @@ class ChatController(AbstractController):
             thread_id=self.session_id,
         )
         # ここにDisplayAgentに全てのツールを登録しなおす
-        agent.sub_agents[0].rebind_tools([DisplayInfoTool(dammy_model="NAO"), ModelChangeTool(obj_manager = self.obj_manager), ModelListTool(obj_database_manager = self.obj_database_manager)])
+        agent.sub_agents[0].rebind_tools(
+            [
+                DisplayInfoTool(dammy_model="NAO"),
+                ModelChangeTool(obj_manager=self.obj_manager),
+                ModelListTool(obj_database_manager=self.obj_database_manager),
+            ]
+        )
         return agent
 
     def get_chat_history(self) -> list[Message]:
