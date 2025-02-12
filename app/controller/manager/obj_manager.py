@@ -82,7 +82,13 @@ class ObjectDatabaseManager:
         :param new_name: 新しい名前
         """
         query = "UPDATE objects SET object_name = %s WHERE object_id = %s;"
-        results =self.db_handler.execute_query(query, (new_name, object_id,))
+        results = self.db_handler.execute_query(
+            query,
+            (
+                new_name,
+                object_id,
+            ),
+        )
         if results:
             return results[0][0]
         else:
@@ -97,6 +103,7 @@ class ObjectDatabaseManager:
         logger.info(f"Deleting object with ID {object_id}")
         results = self.db_handler.execute_query(query, (object_id,))
         logger.info(f"{results} objects deleted.")
+
 
 class ObjectManager:
     """

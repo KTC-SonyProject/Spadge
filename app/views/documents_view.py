@@ -1,12 +1,10 @@
 import logging
 
 from flet import (
-    AlertDialog,
     ButtonStyle,
     Colors,
     Column,
     Container,
-    Control,
     CrossAxisAlignment,
     Divider,
     ElevatedButton,
@@ -31,8 +29,9 @@ from flet import (
     VerticalDivider,
     alignment,
     border_radius,
-    padding,
 )
+
+from app.views.core import create_modal
 
 logger = logging.getLogger(__name__)
 
@@ -67,22 +66,6 @@ def create_nav_rail_item(page: Page, title: str, id: int, is_authenticated: bool
         selected_icon=Icons.CHEVRON_RIGHT_ROUNDED,
         icon=Icons.CHEVRON_RIGHT_OUTLINED,
         data=id,
-    )
-
-
-def create_modal(
-    title: Control,
-    content: Control,
-    actions: list[Control],
-    actions_alignment: MainAxisAlignment = MainAxisAlignment.END,
-):
-    return AlertDialog(
-        modal=True,
-        inset_padding=padding.symmetric(vertical=40, horizontal=100),
-        title=title,
-        content=content,
-        actions=actions,
-        actions_alignment=actions_alignment,
     )
 
 

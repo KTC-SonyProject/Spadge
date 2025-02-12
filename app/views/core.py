@@ -6,13 +6,16 @@ import logging
 import time
 
 from flet import (
+    AlertDialog,
     Banner,
     Column,
     Container,
+    Control,
     Divider,
     Dropdown,
     IconButton,
     Icons,
+    MainAxisAlignment,
     Page,
     Switch,
     Tab,
@@ -22,6 +25,7 @@ from flet import (
     TextField,
     alignment,
     dropdown,
+    padding,
 )
 
 logger = logging.getLogger(__name__)
@@ -128,3 +132,19 @@ class BannerView:
         self.page.update()
         time.sleep(2)
         self.close_banner(None)
+
+
+def create_modal(
+    title: Control,
+    content: Control,
+    actions: list[Control],
+    actions_alignment: MainAxisAlignment = MainAxisAlignment.END,
+):
+    return AlertDialog(
+        modal=True,
+        inset_padding=padding.symmetric(vertical=40, horizontal=100),
+        title=title,
+        content=content,
+        actions=actions,
+        actions_alignment=actions_alignment,
+    )

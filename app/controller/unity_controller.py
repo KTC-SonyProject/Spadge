@@ -7,6 +7,7 @@ from flet import (
     FilePicker,
     Page,
     Text,
+    TextField,
 )
 
 from app.controller.core import AbstractController
@@ -28,6 +29,7 @@ from app.views.unity_view import (
     OldUnityView,
     UnityView,
     create_file_settings_body,
+    create_update_model_modal,
 )
 
 logger = logging.getLogger(__name__)
@@ -152,6 +154,9 @@ class OldUnityController(AbstractController):
         return OldUnityView(tabs=tabs)
 
 
+# ------------------------新旧の境目------------------------
+
+
 class UnityController(AbstractController):
     def __init__(
         self,
@@ -178,6 +183,37 @@ class UnityController(AbstractController):
             file_picker=self.file_picker,
             is_authenticated=self.auth_manager.check_is_authenticated(),
         )
+
+    def _create_add_modal(self, model_id):
+        """モーダルを作成する処理"""
+
+        def no_func(_):
+            self.add_model_modal.open = False
+            self.page.update()
+
+        def yes_func(_):
+            # TODO: モデル名の更新処理をテストするためにコメントアウト中
+            # self.obj_database_manager.update_name(model_id, self.add_model_modal.content.value)
+            logger.debug(f"Update model name: {model_id} -> {self.add_model_modal.content.value}")
+            self.add_model_modal.open = False
+            self.page.update()
+
+        self.add_model_modal = create_update_model_modal(
+            content=TextField(
+                label="モデル名",
+                hint_text="モデル名を入力",
+                filled=True,
+            ),
+            yes_func=yes_func,
+            no_func=no_func,
+        )
+        return self.add_model_modal
+
+    def open_modal(self, model_id):
+        """モーダルを開く処理"""
+        self.page.overlay.append(self._create_add_modal(model_id))
+        self.add_model_modal.open = True
+        self.page.update()
 
     def on_file_selected(self, e):
         """ファイルを選択したときの処理"""
@@ -259,9 +295,11 @@ class UnityController(AbstractController):
             model_list = [
                 ModelView(
                     model_name=obj["object_name"],
-                    show_obj=lambda id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
-                    update_obj_name=lambda id=obj["object_id"], name=obj["object_name"]: self.obj_database_manager.update_name(id, name), # NOQA
-                    delete_obj=lambda id=obj["object_id"]: self.obj_manager.delete_obj_by_id(id),  # TODO: modelの削除処理を追加
+                    show_obj=lambda _, id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
+                    update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id),
+                    delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(
+                        id
+                    ),  # TODO: modelの削除処理を追加
                     is_authenticated=self.auth_manager.check_is_authenticated(),
                 )
                 for obj in objects
