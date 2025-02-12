@@ -156,6 +156,7 @@ class OldUnityController(AbstractController):
 
 # ------------------------新旧の境目------------------------
 
+
 class UnityController(AbstractController):
     def __init__(
         self,
@@ -185,6 +186,7 @@ class UnityController(AbstractController):
 
     def _create_add_modal(self, model_id):
         """モーダルを作成する処理"""
+
         def no_func(_):
             self.add_model_modal.open = False
             self.page.update()
@@ -295,7 +297,9 @@ class UnityController(AbstractController):
                     model_name=obj["object_name"],
                     show_obj=lambda _, id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
                     update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id),
-                    delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(id),  # TODO: modelの削除処理を追加
+                    delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(
+                        id
+                    ),  # TODO: modelの削除処理を追加
                     is_authenticated=self.auth_manager.check_is_authenticated(),
                 )
                 for obj in objects
