@@ -305,6 +305,23 @@ class UpdateCommand(CommandBase):
         self.command_body = body
         return body
 
+class GetModelCommand(CommandBase):
+    """
+    モデル取得コマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="GET_MODEL",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {}
+        self.command_body = body
+        return body
 
 class ResponseModel:
     """

@@ -1,7 +1,7 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import TransferCommand, UpdateCommand
+from app.models.command_models import TransferCommand, UpdateCommand , GetModelCommand
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class ObjectManager:
     ファイル操作を提供するViewModel。
     """
 
-    def __init__(self, obj_database_manager: ObjectDatabaseManager, server_manager: ServerManager):
+    def __init__(self, obj_database_manager: ObjectDatabaseManager, server_manager: ServerManager ):
         """
         :param obj_database_manager: ObjectDatabaseManagerのインスタンス
         """
@@ -150,8 +150,19 @@ class ObjectManager:
         :param object_id: オブジェクトID
         """
         self.obj_database_manager.delete_object(object_id)
-        # サーバーに削除コマンドを送信
+        # TODO サーバーに削除コマンドを送信
 
+    def get_obj_by_display(self):
+        """
+        ディスプレイからオブジェクトの名前を取得する。
+        """
+        response = self.server.send_command(GetModelCommand())
+        logger.debug(f"Response: {response}")
+        object_id = response["result"]
+        logger.debug(f"Object ID: {object_id}")
+        object_name = self.obj_database_manager.get_name_by_id(int(object_id))
+        logger.info(f"Object Name: {object_name}")
+        return object_name
 
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
@@ -174,7 +185,7 @@ if __name__ == "__main__":
 
         # 全てのオブジェクトを取得
         all_objects = manager.get_all_objects()
-        print("All Objects:")
+        print("All Objects: ", all_objects)
 
         # 名前を変更
         if last_id != -1:
