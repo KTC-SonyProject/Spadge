@@ -3,12 +3,11 @@ import os
 import sqlite3
 from typing import Annotated, Literal
 
+from IPython.display import Image, display
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-
-# from IPython.display import Image, display
 from langchain_core.messages import AIMessage
 from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.postgres import PostgresSaver
