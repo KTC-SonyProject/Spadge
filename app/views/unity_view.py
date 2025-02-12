@@ -216,7 +216,7 @@ class ModelView(Card):
     ):
         super().__init__()
         self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
-        self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
+        self.btn_show = create_btn("👁️ 表示", show_obj)
         self.btn_rename = create_btn("✏️ 名前変更", update_obj_name)  # FIXME: visible=is_authenticatedを一時的に解除中
         self.btn_delete = create_btn("🗑️ 削除", delete_obj) # FIXME: visible=is_authenticatedを一時的に解除中
         self.model_row = Row(
