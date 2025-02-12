@@ -155,7 +155,7 @@ class OldUnityView(Column):
         ]
 
 
-
+# ------------------------新旧の境目------------------------
 
 
 
@@ -166,7 +166,7 @@ def create_btn(text: str, on_click: callable, icon: Icon | None = None, visible:
 
 def create_update_model_modal(content: TextField, yes_func: callable, no_func: callable) -> Container:
     return create_modal(
-        title="モデル名変更",
+        title=Text("モデル変更"),
         content=content,
         actions=[
             create_btn("変更", yes_func),
@@ -176,7 +176,7 @@ def create_update_model_modal(content: TextField, yes_func: callable, no_func: c
 
 def create_add_model_modal(content: TextField, yes_func: callable, no_func: callable) -> Container:
     return create_modal(
-        title="モデル追加",
+        title=Text("モデル追加"),
         content=content,
         actions=[
             create_btn("追加", yes_func),
@@ -217,8 +217,8 @@ class ModelView(Card):
         super().__init__()
         self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
         self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
-        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name), visible=is_authenticated)
-        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(model_name), visible=is_authenticated)
+        self.btn_rename = create_btn("✏️ 名前変更", update_obj_name)  # FIXME: visible=is_authenticatedを一時的に解除中
+        self.btn_delete = create_btn("🗑️ 削除", delete_obj) # FIXME: visible=is_authenticatedを一時的に解除中
         self.model_row = Row(
             controls=[self.btn_show, self.btn_rename, self.btn_delete],
             spacing=10,
