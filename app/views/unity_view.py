@@ -247,7 +247,7 @@ class ModelUploadView(Container):
     """モデルアップロードをおこなうボタンのView"""
 
     def __init__(self, upload_model: callable, file_picker: FilePicker, is_authenticated: bool = False):
-        super().__init__(visible=is_authenticated)
+        super().__init__()  # FIXME: visible=is_authenticatedを一時的に解除中
         self.file_picker = file_picker
         self.add_model_file_name = Text("", size=16)
         btn_select_model = create_btn(
