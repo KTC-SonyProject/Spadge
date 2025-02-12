@@ -193,9 +193,9 @@ class ModelView(Card):
     ):
         super().__init__()
         self.model_name = Text(model_name, size=20, weight="bold", color=Colors.GREY_600)
-        self.btn_show = create_btn("👁️ 表示", lambda _: show_obj(model_name))
-        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(model_name), visible=is_authenticated)
-        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(model_name), visible=is_authenticated)
+        self.btn_show = create_btn("👁️ 表示", lambda _: show_obj())
+        self.btn_rename = create_btn("✏️ 名前変更", lambda _: update_obj_name(), visible=is_authenticated)
+        self.btn_delete = create_btn("🗑️ 削除", lambda _: delete_obj(), visible=is_authenticated)
         self.model_row = Row(
             controls=[self.btn_show, self.btn_rename, self.btn_delete],
             spacing=10,
