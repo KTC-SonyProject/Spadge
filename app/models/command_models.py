@@ -193,6 +193,7 @@ class TransferCommand(CommandBase):
             "file_size": self.file_size,
         }
         self.command_body = body
+        logger.debug(f"ファイル転送コマンドのボディ: {body}")
         return body
 
 

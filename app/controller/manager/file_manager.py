@@ -79,9 +79,12 @@ class FileManager:
                 # 送信前にファイル名を連番にリネーム
                 folder_path = os.path.dirname(command.file_path)
                 renamed_files = self.rename_files_in_folder(folder_path, extracted_files)
+                logger.debug(f"リネームされたファイル: {renamed_files}")
                 for renamed_file in renamed_files:
                     file_path = os.path.join(folder_path, renamed_file)
+                    logger.debug(f"ファイルを送信: {file_path}")
                     command = TransferCommand(file_path)
+                    logger.debug(f"送信ファイル: {command}")
                     self._send_file(command)
                 result = {"status_message": "OK", "message": "zipファイル送信完了"}
             else:

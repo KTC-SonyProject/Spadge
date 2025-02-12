@@ -264,7 +264,6 @@ class UnityController(AbstractController):
 
     def _on_upload_complete(self, e):
         """アップロード完了"""
-        # TODO: モデルの名前をアップロード時に選択できるようにしたので、それに対応させる
         success, result = self.file_manager.send_file_to_unity(e.file_name)
         if success:
             if self.model_upload_view.add_model_name.value:
@@ -274,6 +273,7 @@ class UnityController(AbstractController):
                 new_name = os.path.splitext(e.file_name)[0]
                 self.obj_database_manager.new_object(new_name)
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
+            self._get_current_obj_name(new_name)
         else:
             logger.error(f"Error sending file to Unity: {result}")
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
@@ -322,12 +322,13 @@ class UnityController(AbstractController):
         self.view.unity_status = self.get_unity_status()
         self.page.update()
 
-    def _get_current_obj_name(self) -> str:
+    def _get_current_obj_name(self, new_name=None) -> str:
         """現在のオブジェクト名を取得"""
-        if self.server.is_connected:
-            # TODO: 現在のオブジェクト名を取得する処理を追加
-            obj = "Nao"
-            return obj
+        if new_name:
+            return new_name
+        # if self.server.is_connected:
+        #     obj = self.obj_manager.get_obj_by_display()
+        #     return obj
         else:
             return "不明"
 
