@@ -1,15 +1,15 @@
 import logging
 import os
 import sqlite3
-from typing import Annotated, Literal
 from time import sleep
+from typing import Annotated, Literal
 
 from IPython.display import Image, display
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -20,7 +20,7 @@ from psycopg_pool import ConnectionPool
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
-from app.ai.settings import llm_settings, ChatGoogleGenerativeAI
+from app.ai.settings import ChatGoogleGenerativeAI, llm_settings
 from app.ai.vector_db import get_vector_store
 from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
 from app.controller.manager.server_manager import ServerManager
@@ -337,6 +337,7 @@ class Router(TypedDict):
 
     next: Literal[*options]  # type: ignore
 
+
 class PydanticRouter(BaseModel):
     """Worker to route to next. If no workers needed, route to FINISH."""
 
@@ -500,7 +501,9 @@ if __name__ == "__main__":
     obj_database_manager = ObjectDatabaseManager(db_handler)
     obj_manager = ObjectManager(obj_database_manager, server)
     supervisor = SupervisorAgent(sub_agents_with_generic, settings_manager=settings_manager, thread_id=thread_id)
-    supervisor.sub_agents[0].rebind_tools([DisplayInfoTool(dammy_model="Nao"), ModelChangeTool(obj_manager=obj_manager)])
+    supervisor.sub_agents[0].rebind_tools(
+        [DisplayInfoTool(dammy_model="Nao"), ModelChangeTool(obj_manager=obj_manager)]
+    )
     print("----" * 30 + "\n")
     for res, metadata in supervisor.stream("今映っている奴の説明をして"):
         if res.content:

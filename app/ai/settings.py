@@ -3,8 +3,8 @@ import os
 
 from langchain.globals import set_verbose
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 from app.controller.manager.settings_manager import load_settings
 from app.models.settings_models import EmbeddingProvider, LlmProvider

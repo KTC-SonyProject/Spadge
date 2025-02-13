@@ -48,6 +48,7 @@ class AzureLlmSettings:
     deployment_embedding_name: str = ""
     api_version: str = ""
 
+
 @dataclass
 class GeminiLlmSettings:
     api_key: str = ""

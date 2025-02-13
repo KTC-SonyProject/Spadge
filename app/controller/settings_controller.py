@@ -122,7 +122,7 @@ class SettingsController(AbstractController):
                 self.postgres_body,
             ],
         )
-    
+
     def _get_azure_provider_body(self) -> Column:
         return [
             create_text_field(
@@ -163,7 +163,7 @@ class SettingsController(AbstractController):
                 label="Model",
                 value=self.manager.get_setting("llm_settings.gemini_llm_settings.model"),
                 on_change=self._change_settings_value("llm_settings.gemini_llm_settings.model"),
-            )
+            ),
         ]
 
     def _get_provider_body(self, provider: str) -> Column:
