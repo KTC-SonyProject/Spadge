@@ -357,6 +357,38 @@ class GetModelCommand(CommandBase):
         self.command_body = body
         return body
 
+class RotationalCommand(CommandBase):
+    """
+    回転コマンド
+    """
+
+    def __init__(self, rotation: bool | None = None):
+        super().__init__(
+            command_name="ROTATIONAL",
+        )
+        self._rotation = rotation
+
+    @property
+    def rotation(self) -> bool:
+        if self._rotation is None:
+            raise ValueError("rotationが設定されていません")
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, value: bool):
+        if not isinstance(value, bool):
+            raise ValueError("rotationはブール型で指定してください")
+        self._rotation = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {
+            "state": "ON" if self.rotation else "OFF"
+        }
+        self.command_body = body
+        return body
 
 class ResponseModel:
     """
