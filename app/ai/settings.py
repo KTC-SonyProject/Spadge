@@ -4,6 +4,7 @@ import os
 from langchain.globals import set_verbose
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.controller.manager.settings_manager import load_settings
 from app.models.settings_models import EmbeddingProvider, LlmProvider
@@ -15,6 +16,7 @@ def llm_settings(verbose: bool = False, tags: str = None) -> BaseChatModel:
     set_verbose(verbose)
     settings = load_settings("llm_settings")
     if settings.get("llm_provider") == LlmProvider.AZURE.value:
+        logger.info("Azure OpenAI is configured.")
         settings = settings.get("azure_llm_settings")
         # 変数が空文字の場合はエラーを出す
         for key in settings:
@@ -33,8 +35,17 @@ def llm_settings(verbose: bool = False, tags: str = None) -> BaseChatModel:
             tags=tags,
         )
     elif settings.get("llm_provider") == LlmProvider.GEMINI.value:
-        print("Gemini is not implemented yet.")
-        raise ValueError(f"Invalid LLM type: {settings.get("llm_provider")}")
+        logger.info("Google Generative AI is configured.")
+        settings = settings.get("gemini_llm_settings")
+        os.environ["GOOGLE_API_KEY"] = settings.get("api_key")
+        return ChatGoogleGenerativeAI(
+            model=settings.get("model"),
+            temperature=0,
+            max_tokens=None,
+            timeout=None,
+            max_retries=2,
+            tags=tags,
+        )
     elif settings.get("llm_provider") == LlmProvider.OLLAMA.value:
         print("Ollama is not implemented yet.")
         raise ValueError(f"Invalid LLM type: {settings.get("llm_provider")}")
