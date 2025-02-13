@@ -272,7 +272,7 @@ class UnityController(AbstractController):
                 new_name = os.path.splitext(e.file_name)[0]
                 self.obj_database_manager.new_object(new_name)
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
-            self.view.show_current_object = self._get_current_obj_name(new_name)
+            self.page.pubsub.send_all("current_obj_name")
         else:
             logger.error(f"Error sending file to Unity: {result}")
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
@@ -321,8 +321,7 @@ class UnityController(AbstractController):
         else:
             return "ディスプレイアプリ 接続状況: ❌ 未接続", Colors.RED_700
 
-    def refresh_unity_status(self, pubsub: str | None = None):
-        logger.debug(f"{pubsub=}")
+    def refresh_unity_status(self):
         value, color = self.get_unity_status()
         self.view.unity_status.value = value
         self.view.unity_status.color = color
@@ -334,6 +333,9 @@ class UnityController(AbstractController):
             self.refresh_unity_status()
         elif msg == "model_list":
             self.refresh_list()
+        elif msg == "current_obj_name":
+            self.view.show_current_obj_name = self._get_current_obj_name()
+            self.page.update()
 
     def _get_current_obj_name(self, new_name=None) -> str:
         """現在のオブジェクト名を取得"""
