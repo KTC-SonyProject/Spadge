@@ -29,6 +29,7 @@ from flet import (
     VerticalDivider,
     alignment,
     border_radius,
+    Control,
 )
 
 from app.views.core import create_modal
@@ -99,16 +100,34 @@ def create_edit_doc_modal(save_document: callable, not_save_action: callable, ca
     )
 
 
-def create_markitdown_modal(content: TextField, modal_yes_action: callable, modal_no_action: callable):
+def create_markitdown_url_modal(content: TextField, modal_yes_action: callable, modal_no_action: callable):
     return create_modal(
         title=Text("URLからMarkdownを作成する"),
         content=content,
         actions=[
-            TextButton(text="Yes", on_click=modal_yes_action),
-            TextButton(text="No", on_click=modal_no_action),
+            TextButton(text="作成", on_click=modal_yes_action),
+            TextButton(text="キャンセル", on_click=modal_no_action),
         ],
     )
 
+def create_markitdown_file_modal(content: TextField, select_func: callable, modal_no_action: callable):
+    return create_modal(
+        title=Text("ファイルからMarkdownを作成する"),
+        content=Text(content),
+        actions=[
+            TextButton(text="選択する", on_click=lambda _: select_func()),
+            TextButton(text="キャンセル", on_click=modal_no_action),
+        ],
+    )
+
+
+def create_markitdown_modal(contents: list[Control], modal_no_action: callable):
+    contents.append(TextButton(text="キャンセル", on_click=modal_no_action))
+    return create_modal(
+        title=Text("Markdownを作成する"),
+        content=Text("urlかファイルを選択してください。"),
+        actions=contents,
+    )
 
 class Sidebar(Container):
     def __init__(
@@ -286,7 +305,7 @@ class EditDocumentsView(Column):
                     ),
                     Row(
                         controls=[
-                            TextButton(text="URLから生成(Preview)", on_click=open_markitdown_modal, icon=Icons.LINK),
+                            TextButton(text="ソースから生成(Preview)", on_click=open_markitdown_modal, icon=Icons.LINK),
                             TextButton(text="Save", on_click=save_document, icon=Icons.SAVE),
                             TextButton(text="Delete", on_click=delete_document, icon=Icons.DELETE),
                         ],

@@ -1,6 +1,7 @@
 import logging
+import os
 
-from flet import InputBorder, Page, TextField
+from flet import InputBorder, Page, TextField, TextButton, FilePicker, FilePickerResultEvent, FilePickerUploadFile
 
 from app.ai.vector_db import delete_document_from_vectorstore, indexing_document
 from app.controller.core import AbstractController
@@ -18,6 +19,8 @@ from app.views.documents_view import (
     create_add_doc_modal,
     create_edit_doc_modal,
     create_markitdown_modal,
+    create_markitdown_url_modal,
+    create_markitdown_file_modal,
     create_nav_rail_item,
 )
 
@@ -188,18 +191,22 @@ class DocumentsController(AbstractController):
         self.edit_body.update()
         # self.page.update()
 
-    def _create_markitdown_modal(self):
+    def _create_markitdown_url_modal(self):
         def no_func(_):
-            self.markitdown_modal.open = False
+            self.markitdown_url_modal.open = False
             self.page.update()
 
         def yes_func(_):
             url = markitdown_field.value
             logger.debug(f"URL: {url}")
-            doc = markitdown(url)
+            try:
+                doc = markitdown(url)
+            except Exception as e:
+                logger.error(f"Error converting markdown: {e}")
+                doc = "Error converting markdown."
             self.edit_body.text_field.value = doc
             self.edit_body.document_body.preview_content.value = doc
-            self.markitdown_modal.open = False
+            self.markitdown_url_modal.open = False
             self.edit_body.update()
             self.page.update()
 
@@ -209,7 +216,87 @@ class DocumentsController(AbstractController):
             hint_text="Enter url here",
             filled=True,
         )
-        self.markitdown_modal = create_markitdown_modal(markitdown_field, yes_func, no_func)
+        self.markitdown_url_modal = create_markitdown_url_modal(markitdown_field, yes_func, no_func)
+        self.page.overlay.append(self.markitdown_url_modal)
+        self.markitdown_url_modal.open = True
+        self.page.update()
+        return self.markitdown_url_modal
+
+    def _create_markitdown_file_modal(self):
+        def run_markitdown(name):
+            try:
+                url = f"/app/app/storage/temp/uploads/{name}"
+                doc = markitdown(url)
+                os.remove(url)
+            except Exception as e:
+                logger.error(f"Error converting markdown: {e}")
+                doc = "Error converting markdown."
+            self.edit_body.text_field.value = doc
+            self.edit_body.document_body.preview_content.value = doc
+            self.markitdown_file_modal.open = False
+            self.edit_body.update()
+            self.page.update()
+
+        def on_upload(e):
+            if e.progress == 1.0:
+                run_markitdown(e.file_name)
+
+        def upload_files(e):
+            upload_list = []
+            if file_picker.result is not None and file_picker.result.files is not None:
+                for f in file_picker.result.files:
+                    upload_list.append(
+                        FilePickerUploadFile(
+                            f.name,
+                            upload_url=self.page.get_upload_url(f.name, 600),
+                        )
+                    )
+                file_picker.upload(upload_list)
+
+        def on_dialog_result(e: FilePickerResultEvent):
+            upload_files(e)
+
+        def no_func(_):
+            self.markitdown_file_modal.open = False
+            self.page.update()
+
+        def wrap_pick_files():
+            self.markitdown_file_modal.open = False
+            file_picker.pick_files(allowed_extensions=["pptx", "docx", "pdf"])
+
+        file_picker = FilePicker(on_result=on_dialog_result, on_upload=on_upload)
+        self.page.overlay.append(file_picker)
+        self.page.update()
+
+        self.content = "選択したファイルからマークダウンを生成します"
+        self.markitdown_file_modal = create_markitdown_file_modal(
+            self.content,
+            wrap_pick_files,
+            no_func
+        )
+        self.page.overlay.append(self.markitdown_file_modal)
+        self.markitdown_file_modal.open = True
+        self.page.update()
+
+
+    def _create_markitdown_modal(self):
+        def no_func(_):
+            self.markitdown_modal.open = False
+            self.page.update()
+
+        def url_func(_):
+            self.markitdown_modal.open = False
+            self._create_markitdown_url_modal()
+            self.page.update()
+
+        def file_func(_):
+            self.markitdown_modal.open = False
+            self._create_markitdown_file_modal()
+            self.page.update()
+
+        markitdown_url = TextButton("URLから", on_click=url_func)
+        markitdown_file = TextButton("ファイルから", on_click=file_func)
+        self.markitdown_modal = create_markitdown_modal([markitdown_url, markitdown_file], no_func)
         return self.markitdown_modal
 
     def open_markitdown_modal(self, _):
