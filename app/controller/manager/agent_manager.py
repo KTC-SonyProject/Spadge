@@ -197,7 +197,7 @@ display_agent_prompt = """
 # あなたに与えられた役割
 - ディスプレイ情報を提供する
 - ディスプレイの制御を行う
-- 変更した内容や取得して情報をユーザーにわかりやすいようにまとめて返す
+- 変更した内容や取得た情報は簡潔にまとめること
 """
 display_agent_description = """
 ディスプレイ全般を扱うエージェントです。
@@ -291,35 +291,49 @@ generic_agent = SubAgent(
 
 # 今までの履歴をまとめるエージェント ------------------------------------
 summarize_agent_prompt = """
-あなたはエージェントのまとめを行うエージェントです。
-ユーザーからの要求に対して、複数のエージェントが関わった場合に、そのまとめを行います。
+あなたはエージェントのまとめを行うまとめ役です。
+ユーザーからの要求に対して、今までのエージェントの内容のまとめを行うのが仕事
+エージェントの回答は"GenericAgent: ..."のような形になっている
 
 # あなたに与えられた役割
-- 複数のエージェントが関わった内容のまとめを行う
-- 他のエージェントが担当している内容をわかりやすくユーザーに提供する
+- エージェントが関わった内容のまとめを行う
+- 他のエージェントからの報告をわかりやすくユーザーに提供する
 - 返答はマークダウン形式で行い、ユーザーにわかりやすいように心がけること
-- 他のエージェントが残したメッセージはできるだけ含めるようなまとめ方にすること
+- もし他のエージェントが関わってなかった場合は、ユーザーに要求をもっと具体的にするように促すこと
 
 # 注意
-他のエージェントが担当している内容を理解し、それをユーザーにわかりやすく提供することが重要です。
-他のエージェントが残したメッセージを理解し、それをまとめることが求められます。
-特にDocumentSearchAgentが関わった場合は、最後の参考にしたドキュメントの情報を含めるようにしてください。
-特に、注意点として、ユーザーが求める具体的な情報や文脈を把握することを忘れないでください。
+エージェントについてはユーザーには伝えなくてよい
+ユーザーの要求に対してエージェントたちでは解決できていないと判断した場合はユーザーに要求をもっと具体的にするように促すこと
+特にDocumentSearchAgentが関わった場合は、最後の参考にしたドキュメントリンクは必ず含めるようにしてください
+ユーザーが求める具体的な情報や文脈を把握することを忘れないでください
 """
 summarize_agent_description = """
 会話のまとめを行うエージェントです。
 このエージェントは、複数のエージェントが関わる会話のまとめを行います。
-複数のエージェンが関わった場合はこのエージェントを必ず選択してください。
+複数のエージェントが関わった場合はこのエージェントを必ず選択してください。
 """
-summarize_agent = SubAgent(
-    tools=[],
-    prompt=summarize_agent_prompt,
-    name="SummarizeAgent",
-    description=summarize_agent_description,
-)
+
+class SummarizeAgent(SubAgent):
+    def __init__(self):
+        super().__init__(
+            tools=[],
+            prompt=summarize_agent_prompt,
+            name="SummarizeAgent",
+            description=summarize_agent_description,
+        )
+
+    def node(self, state):
+        result = self.invoke(state)
+        message = result["messages"][-1].content
+        logger.debug(f"SubAgent {self.name} message: {message}")
+        return Command(
+            update={"messages": [HumanMessage(content=message, name=self.name)]},
+            goto=END,
+        )
+summarize_agent = SummarizeAgent()
 
 
-sub_agents_with_generic = sub_agents + [generic_agent, summarize_agent]
+sub_agents_with_generic = sub_agents + [generic_agent]
 sub_agents_with_generic_description_prompt = "\n".join(
     [f"{agent.name}: {agent.description}" for agent in sub_agents_with_generic]
 )
@@ -344,48 +358,48 @@ class PydanticRouter(BaseModel):
     next: Literal[*options]  # type: ignore
 
 
-system_prompt = f"""
-あなたは以下のワーカー間の会話を管理するように指示されたスーパーバイザーです:
+supervisor_prompt = f"""
+あなたは「複数のサブエージェント」を管理するスーパーバイザーエージェントである。
+
+ユーザーからの入力を受け取り、その内容に最も適したサブエージェントを選択せよ。
+サブエージェント一覧は以下のとおりである。
+
 {sub_agents_with_generic_description_prompt}
 
-# あなたがするべきこと
-次のユーザー要求に対して、次にアクションを起こすワーカーを指定してください。
-各ワーカーはタスクを実行し、その結果とステータスを返信します。
-適切なワーカーがいない場合はGenericAgentを選択してください。
-終了したら、FINISH で応答してください。
-
-# 例
-以下のような例を参考にしてユーザーと会話してください。
-この例は複数回のやり取りを想定しているものもあります。
-
-- 例1:
-    - ユーザー: "今映っている奴について教えて"
-    - あなた: DisplayControlAgent
-    - DisplayControlAgent: "現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: 'NAO'"
-    - 次のアクション: FINISH
-- 例2:
-    - ユーザー: "今表示されているモデルの解説を教えて"
-    - あなた: DisplayControlAgent
-    - DisplayControlAgent: "現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: 'NAO'"
-    - あなた: DocumentSearchAgent
-    - DocumentSearchAgent: "NAOの解説は以下の通りです: ..."
-    - あなた: SummarizeAgent
-    - SummarizeAgent: "現在のディスプレイオブジェクトはNAOで、解説は以下の通りです: ..."
-    - あなた: FINISH
-- 例3:
-    - ユーザー: "モデルを変更して"
-    - あなた: DisplayControlAgent
-    - DisplayControlAgent: "どんなモデルに変更しますか？"
-    - あなた: FINISH
-    - ユーザーから再度の入力: "NAOに変更して"
-    - あなた: DisplayControlAgent
-    - DisplayControlAgent: "モデルをNAOに変更しました。"
-    - あなた: FINISH
+# あなたの役割
+1. ユーザーのリクエストを解析し、どのサブエージェントが対応すべきかを判断する
+2. 該当するサブエージェントへタスクを振り分ける
+3. サブエージェントからの結果を受け取り、必要に応じて別のサブエージェントを呼ぶ
+4. ユーザーのリクエストを満たしたらFINISHを呼び出し、結果をユーザーに提示する
 
 # 注意
-あなたはワーカーの指示を行うだけで、ユーザーとの直接のやり取りは行いません。
-同じワーカーを何度も指定しないでください。
-完璧を求めず、適切なワーカーを指定してください。
+- もしどれにも該当しない、もしくは迷う場合はGenericAgentを呼び出すこと
+- 不要なエージェントを呼び出さないようにすること
+- 同じエージェントを何度も呼び出さないようにすること
+- もしユーザーの意図が曖昧な場合は、追加でユーザーの意図を確かめるためにFINISHを呼び出すこと
+- 質問が複合的な場合は、複数のエージェントを段階的に呼び出し、最後にFINISHへ誘導せよ
+- このプロンプトでの推論ステップ(内部の思考や理由付け)はユーザーには見せない
+- 完璧を求めず、ユーザーにわかりやすく、迅速に対応することを心がけよ
+
+# 例
+[例1]
+ユーザー入力: "今画面に表示されているモデルは何？"
+→ あなた: DisplayControlAgent
+
+[例2]
+ユーザー入力: "今表示してるモデルを変更して"
+→ あなた: DisplayControlAgent
+
+[例3]
+ユーザー入力: "今映ってるモデルの解説を詳しく知りたい"
+→ あなた: DisplayControlAgent
+→ DisplayControlAgent: "今映ってるモデルは..."
+→ あなた: DocumentSearchAgent
+
+[例4]
+ユーザー入力: "最近どう？雑談しよう"
+→ あなた: GenericAgent
+
 """
 
 
@@ -425,6 +439,7 @@ class SupervisorAgent:
         builder.add_node("supervisor", self.node)
         for agent in self.sub_agents:
             builder.add_node(agent.name, agent.node)
+        builder.add_node(summarize_agent.name, summarize_agent.node)
         graph = builder.compile(checkpointer=self.memory)
         return graph
 
@@ -443,7 +458,7 @@ class SupervisorAgent:
 
     def node(self, state: State) -> Command[Literal[*members, "__end__"]]:  # type: ignore
         messages = [
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": supervisor_prompt},
         ] + state["messages"]
         if isinstance(self.llm, ChatGoogleGenerativeAI):
             response = self.llm.with_structured_output(PydanticRouter).invoke(messages)
@@ -452,8 +467,8 @@ class SupervisorAgent:
             response = self.llm.with_structured_output(Router).invoke(messages)
             goto = response["next"]
         if goto == "FINISH":
-            logger.debug("Finished conversation")
-            goto = END
+            logger.debug("Finished supervisor. summarizing...")
+            goto = summarize_agent.name
 
         return Command(goto=goto, update={"next": goto})
 

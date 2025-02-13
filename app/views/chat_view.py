@@ -90,22 +90,24 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
 
     return body
 
+class ChatMessageTile(ExpansionTile):
+    def __init__(self, name: str, content: str, tap_link: callable):
+        self.name = Text(name, weight="bold", color=Colors.GREY_500)
+        self.body = Markdown(
+            value=content,
+            selectable=True,
+            extension_set=MarkdownExtensionSet.GITHUB_WEB,
+            on_tap_link=tap_link,
+        )
+        super().__init__(
+            title=self.name,
+            affinity=TileAffinity.LEADING,
+            text_color=Colors.GREY_500,
+            controls=[self.body],
+        )
 
 def create_chat_message_tile(name: str, content: str, tap_link: callable) -> ExpansionTile:
-    return ExpansionTile(
-        title=Text(name, weight="bold", color=Colors.GREY_500),
-        affinity=TileAffinity.LEADING,
-        text_color=Colors.GREY_500,
-        controls=[
-            Markdown(
-                value=content,
-                selectable=True,
-                extension_set=MarkdownExtensionSet.GITHUB_WEB,
-                on_tap_link=tap_link,
-            )
-        ],
-    )
-
+    return ChatMessageTile(name, content, tap_link)
 
 class ChatMessageCard(Container):
     def __init__(self, message: Message, tap_link: callable):
