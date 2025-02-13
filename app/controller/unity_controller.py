@@ -333,7 +333,7 @@ class UnityController(AbstractController):
         elif msg == "model_list":
             self.refresh_list()
         elif msg == "current_obj_name":
-            self.view.show_current_obj_name = self._get_current_obj_name()
+            self.view.show_current_object.value = f"現在のオブジェクト: {self._get_current_obj_name()}"
             self.page.update()
 
     def _get_current_obj_name(self, new_name=None) -> str:
@@ -346,7 +346,7 @@ class UnityController(AbstractController):
             obj = self.obj_manager.get_obj_by_display()
             return obj
         else:
-            return "不明"
+            return "ディスプレイに未接続です"
 
     def get_view(self) -> UnityView:
         self.page.pubsub.subscribe(self.pubsub_send)
@@ -358,7 +358,6 @@ class UnityController(AbstractController):
             refresh_list=self.page.pubsub.send_all,
             unity_status=Text(self.get_unity_status()[0], color=self.get_unity_status()[1]),
             refresh_status=self.page.pubsub.send_all,
-            show_current_obj_name=self._get_current_obj_name(),
             rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
             rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
         )

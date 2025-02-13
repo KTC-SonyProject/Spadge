@@ -319,9 +319,9 @@ class UnityView(Container):
         refresh_list: callable,
         unity_status: Text,
         refresh_status: callable,
-        show_current_obj_name: str,
         rotate_start: callable,
         rotate_stop: callable,
+        show_current_obj_name: str = None,
         is_authenticated: bool = False,
     ):
         super().__init__(
@@ -331,7 +331,13 @@ class UnityView(Container):
         self.page = page
         self.model_list = model_list
         self.unity_status = unity_status
-        self.show_current_object = Text(f"現在のオブジェクト: {show_current_obj_name}", size=25)
+        self.show_current_object = Text('ステータスを更新してください', size=25)
+        self.show_current_object_row = Row(
+            controls=[self.show_current_object, create_btn("🔄 ステータス更新", lambda _: refresh_status("current_obj_name"))],
+            spacing=10,
+            alignment=MainAxisAlignment.CENTER,
+            vertical_alignment=CrossAxisAlignment.CENTER,
+        )
         btn_ask_model = create_btn("❓ モデルについて質問する", lambda _: self.page.go("/chat"))
         btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list("model_list"))
         btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status("unity_status"))
@@ -341,7 +347,7 @@ class UnityView(Container):
             content=Column(
                 controls=[
                     Divider(),
-                    self.show_current_object,
+                    self.show_current_object_row,
                     Row(controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER),
                 ],
                 spacing=20,
