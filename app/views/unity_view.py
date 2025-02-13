@@ -247,7 +247,7 @@ class ModelUploadView(Container):
     """モデルアップロードをおこなうボタンのView"""
 
     def __init__(self, upload_model: callable, file_picker: FilePicker, is_authenticated: bool = False):
-        super().__init__(visible=is_authenticated)
+        super().__init__()  # FIXME: visible=is_authenticatedを一時的に解除中
         self.file_picker = file_picker
         self.add_model_file_name = Text("", size=16)
         btn_select_model = create_btn(
@@ -333,8 +333,8 @@ class UnityView(Container):
         self.unity_status = unity_status
         btn_show_current_object = Text(f"現在のオブジェクト: {show_current_obj_name}", size=25)
         btn_ask_model = create_btn("❓ モデルについて質問する", lambda _: self.page.go("/chat"))
-        btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list())
-        btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status())
+        btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list("model_list"))
+        btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status("unity_status"))
         btn_rotate_start = create_btn("🔄 モデル回転スタート", lambda _: rotate_start())
         btn_rotate_stop = create_btn("⏹ モデル回転ストップ", lambda _: rotate_stop())
         rotation_buttons = Container(

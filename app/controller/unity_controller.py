@@ -308,20 +308,34 @@ class UnityController(AbstractController):
             return [Text("まだオブジェクトが登録されていません", size=20, color=Colors.YELLOW_700)]
 
     def refresh_list(self):
-        self.view.model_list = self._get_model_view_list()
+        """リストを更新"""
+        logger.debug("Refresh list")
+        self.view.model_list_view.controls = self._get_model_view_list()
         self.page.update()
 
     def get_unity_status(self):
+        """Unityの接続状況を取得"""
+        logger.debug(f"Unity status: {self.server.is_connected}")
         if self.server.is_connected:
-            return Text("ディスプレイアプリ 接続状況: ✅ 接続中", size=16, color=Colors.GREEN_700)
+            return "ディスプレイアプリ 接続状況: ✅ 接続中", Colors.GREEN_700
         else:
-            return Text("ディスプレイアプリ 接続状況: ❌ 未接続", size=16, color=Colors.RED_700)
+            return "ディスプレイアプリ 接続状況: ❌ 未接続", Colors.RED_700
 
-    def refresh_unity_status(self):
-        self.view.unity_status = self.get_unity_status()
+    def refresh_unity_status(self, pubsub: str | None = None):
+        logger.debug(f"{pubsub=}")
+        value, color = self.get_unity_status()
+        self.view.unity_status.value = value
+        self.view.unity_status.color = color
         self.page.update()
 
-    def _get_current_obj_name(self, new_name=None) -> str:
+
+    def pubsub_send(self, msg: str):
+        if msg == "unity_status":
+            self.refresh_unity_status()
+        elif msg == "model_list":
+            self.refresh_list()
+
+    def _get_current_obj_name(self, new_name=None) -> str: str:
         """現在のオブジェクト名を取得"""
         if new_name:
             return new_name
@@ -334,14 +348,15 @@ class UnityController(AbstractController):
             return "不明"
 
     def get_view(self) -> UnityView:
+        self.page.pubsub.subscribe(self.pubsub_send)
         self.model_list = self._get_model_view_list()
         self.view = UnityView(
             page=self.page,
             model_list=self.model_list,
             model_upload_view=self.model_upload_view,
-            refresh_list=self.refresh_list,
-            unity_status=self.get_unity_status(),
-            refresh_status=self.refresh_unity_status,
+            refresh_list=self.page.pubsub.send_all,
+            unity_status=Text(self.get_unity_status()[0], color=self.get_unity_status()[1]),
+            refresh_status=self.page.pubsub.send_all,
             show_current_obj_name=self._get_current_obj_name(),
             rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
             rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
