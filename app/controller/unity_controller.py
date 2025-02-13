@@ -311,7 +311,8 @@ class UnityController(AbstractController):
             """オブジェクトを表示"""
             new_obj =self.obj_manager.change_obj_by_id(object_id)
             logger.debug(f"Change object: {new_obj}")
-            self.pubsub_send("change_obj",new_obj)
+            self.pubsub_send("current_obj_name")
+            # self.pubsub_send("current_obj_name", new_obj)
 
 
     def refresh_list(self):
@@ -340,22 +341,19 @@ class UnityController(AbstractController):
         elif msg == "model_list":
             self.refresh_list()
         elif msg == "current_obj_name":
-            self.view.show_current_object.value = f"現在のオブジェクト: {self._get_current_obj_name()}"
-            self.page.update()
-        elif msg == "change_obj":
-            self.view.show_current_object.value = f"現在のオブジェクト: {new_obj}"
+            self.view.show_current_object.value = f"現在のオブジェクト: {self._get_current_obj_name(new_obj)}"
             self.page.update()
 
     def _get_current_obj_name(self, new_name=None) -> str:
         """現在のオブジェクト名を取得"""
-        if new_name:
-            return new_name
-        # TODO: サーバーが接続されている場合の処理を追加
         # これを追加することで、ディスプレイアプリからのオブジェクト名取得が可能になるが、最初うまく表示されない
         if self.server.is_connected:
-            logger.debug("Get current object name")
-            obj = self.obj_manager.get_obj_by_display()
-            return obj
+            if new_name:
+                logger.debug(f"Update object name: {new_name}")
+            else:
+                logger.debug("Get current object name")
+                new_name = self.obj_manager.get_obj_by_display()
+            return new_name
         else:
             return "ディスプレイに未接続です"
 
