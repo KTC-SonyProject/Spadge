@@ -272,7 +272,7 @@ class UnityController(AbstractController):
                 new_name = os.path.splitext(e.file_name)[0]
                 self.obj_database_manager.new_object(new_name)
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
-            self._get_current_obj_name(new_name)
+            self.view.show_current_object = self._get_current_obj_name(new_name)
         else:
             logger.error(f"Error sending file to Unity: {result}")
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
@@ -335,15 +335,15 @@ class UnityController(AbstractController):
         elif msg == "model_list":
             self.refresh_list()
 
-    def _get_current_obj_name(self, new_name=None) -> str: str:
+    def _get_current_obj_name(self, new_name=None) -> str:
         """現在のオブジェクト名を取得"""
         if new_name:
             return new_name
         # TODO: サーバーが接続されている場合の処理を追加
         # これを追加することで、ディスプレイアプリからのオブジェクト名取得が可能になるが、最初うまく表示されない
-        # if self.server.is_connected:
-        #     obj = self.obj_manager.get_obj_by_display()
-        #     return obj
+        if self.server.is_connected:
+            obj = self.obj_manager.get_obj_by_display()
+            return obj
         else:
             return "不明"
 

@@ -331,7 +331,7 @@ class UnityView(Container):
         self.page = page
         self.model_list = model_list
         self.unity_status = unity_status
-        btn_show_current_object = Text(f"現在のオブジェクト: {show_current_obj_name}", size=25)
+        self.show_current_object = Text(f"現在のオブジェクト: {show_current_obj_name}", size=25)
         btn_ask_model = create_btn("❓ モデルについて質問する", lambda _: self.page.go("/chat"))
         btn_refresh_list = create_btn("🔄 リストの更新", lambda _: refresh_list("model_list"))
         btn_refresh_status = create_btn("🔄 接続状況の更新", lambda _: refresh_status("unity_status"))
@@ -341,7 +341,7 @@ class UnityView(Container):
             content=Column(
                 controls=[
                     Divider(),
-                    btn_show_current_object,
+                    self.show_current_object,
                     Row(controls=[btn_rotate_start, btn_rotate_stop], spacing=10, alignment=MainAxisAlignment.CENTER),
                 ],
                 spacing=20,
