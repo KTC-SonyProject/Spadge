@@ -327,7 +327,6 @@ class UnityController(AbstractController):
         self.view.unity_status.color = color
         self.page.update()
 
-
     def pubsub_send(self, msg: str):
         if msg == "unity_status":
             self.refresh_unity_status()

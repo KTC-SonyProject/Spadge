@@ -306,6 +306,7 @@ class UpdateCommand(CommandBase):
         self.command_body = body
         return body
 
+
 class GetModelCommand(CommandBase):
     """
     モデル取得コマンド
@@ -323,6 +324,7 @@ class GetModelCommand(CommandBase):
         body = {}
         self.command_body = body
         return body
+
 
 class ResponseModel:
     """

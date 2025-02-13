@@ -1,7 +1,7 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import TransferCommand, UpdateCommand , GetModelCommand
+from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class ObjectManager:
     ファイル操作を提供するViewModel。
     """
 
-    def __init__(self, obj_database_manager: ObjectDatabaseManager, server_manager: ServerManager ):
+    def __init__(self, obj_database_manager: ObjectDatabaseManager, server_manager: ServerManager):
         """
         :param obj_database_manager: ObjectDatabaseManagerのインスタンス
         """
@@ -167,6 +167,7 @@ class ObjectManager:
         object_name = self.obj_database_manager.get_name_by_id(int(object_id))
         logger.info(f"Object Name: {object_name}")
         return object_name
+
 
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
