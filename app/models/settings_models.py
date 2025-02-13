@@ -50,6 +50,12 @@ class AzureLlmSettings:
 
 
 @dataclass
+class GeminiLlmSettings:
+    api_key: str = ""
+    model: str = ""
+
+
+@dataclass
 class LangsmithSettings:
     endpoint: str = "https://api.smith.langchain.com"
     project_name: str = ""
@@ -61,13 +67,16 @@ class LlmSettings:
     llm_provider: LlmProvider = LlmProvider.AZURE
     embedding_provider: EmbeddingProvider = EmbeddingProvider.AZURE
     azure_llm_settings: AzureLlmSettings = field(default_factory=AzureLlmSettings)
+    gemini_llm_settings: GeminiLlmSettings = field(default_factory=GeminiLlmSettings)
     use_langsmith: bool = False
     langsmith_settings: LangsmithSettings = field(default_factory=LangsmithSettings)
 
     def get_active_provider_settings(self):
         """現在のプロバイダー設定を取得する"""
-        if self.llm_provider == "azure":
+        if self.llm_provider == LlmProvider.AZURE:
             return self.azure_llm_settings
+        elif self.llm_provider == LlmProvider.GEMINI:
+            return self.gemini_llm_settings
         return None
 
 

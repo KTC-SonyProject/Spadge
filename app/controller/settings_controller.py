@@ -123,44 +123,61 @@ class SettingsController(AbstractController):
             ],
         )
 
+    def _get_azure_provider_body(self) -> Column:
+        return [
+            create_text_field(
+                label="Endpoint",
+                value=self.manager.get_setting("llm_settings.azure_llm_settings.endpoint"),
+                on_change=self._change_settings_value("llm_settings.azure_llm_settings.endpoint"),
+            ),
+            create_text_field(
+                label="API Key",
+                value=self.manager.get_setting("llm_settings.azure_llm_settings.api_key"),
+                on_change=self._change_settings_value("llm_settings.azure_llm_settings.api_key"),
+            ),
+            create_text_field(
+                label="Deployment Name",
+                value=self.manager.get_setting("llm_settings.azure_llm_settings.deployment_name"),
+                on_change=self._change_settings_value("llm_settings.azure_llm_settings.deployment_name"),
+            ),
+            create_text_field(
+                label="Deployment Embedding Name",
+                value=self.manager.get_setting("llm_settings.azure_llm_settings.deployment_embedding_name"),
+                on_change=self._change_settings_value("llm_settings.azure_llm_settings.deployment_embedding_name"),
+            ),
+            create_text_field(
+                label="API Version",
+                value=self.manager.get_setting("llm_settings.azure_llm_settings.api_version"),
+                on_change=self._change_settings_value("llm_settings.azure_llm_settings.api_version"),
+            ),
+        ]
+
+    def _get_gemini_provider_body(self) -> Column:
+        return [
+            create_text_field(
+                label="API Key",
+                value=self.manager.get_setting("llm_settings.gemini_llm_settings.api_key"),
+                on_change=self._change_settings_value("llm_settings.gemini_llm_settings.api_key"),
+            ),
+            create_text_field(
+                label="Model",
+                value=self.manager.get_setting("llm_settings.gemini_llm_settings.model"),
+                on_change=self._change_settings_value("llm_settings.gemini_llm_settings.model"),
+            ),
+        ]
+
     def _get_provider_body(self, provider: str) -> Column:
         body = []
         if provider == LlmProvider.AZURE.value:
-            body = [
-                create_text_field(
-                    label="Endpoint",
-                    value=self.manager.get_setting("llm_settings.azure_llm_settings.endpoint"),
-                    on_change=self._change_settings_value("llm_settings.azure_llm_settings.endpoint"),
-                ),
-                create_text_field(
-                    label="API Key",
-                    value=self.manager.get_setting("llm_settings.azure_llm_settings.api_key"),
-                    on_change=self._change_settings_value("llm_settings.azure_llm_settings.api_key"),
-                ),
-                create_text_field(
-                    label="Deployment Name",
-                    value=self.manager.get_setting("llm_settings.azure_llm_settings.deployment_name"),
-                    on_change=self._change_settings_value("llm_settings.azure_llm_settings.deployment_name"),
-                ),
-                create_text_field(
-                    label="Deployment Embedding Name",
-                    value=self.manager.get_setting("llm_settings.azure_llm_settings.deployment_embedding_name"),
-                    on_change=self._change_settings_value("llm_settings.azure_llm_settings.deployment_embedding_name"),
-                ),
-                create_text_field(
-                    label="API Version",
-                    value=self.manager.get_setting("llm_settings.azure_llm_settings.api_version"),
-                    on_change=self._change_settings_value("llm_settings.azure_llm_settings.api_version"),
-                ),
-            ]
+            body = self._get_azure_provider_body()
         elif provider == LlmProvider.GEMINI.value:
-            body = [
-                Text("Gemini is unsupported provider."),
-            ]
+            body = self._get_gemini_provider_body()
         elif provider == LlmProvider.OLLAMA.value:
             body = [
                 Text("Ollama is unsupported provider."),
             ]
+        else:
+            body = [Text("Unknown provider selected.")]
         return visible_body_column(True, body)
 
     def _update_provider_body(self, event):

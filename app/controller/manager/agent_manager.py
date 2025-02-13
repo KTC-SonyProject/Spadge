@@ -1,6 +1,7 @@
 import logging
 import os
 import sqlite3
+from time import sleep
 from typing import Annotated, Literal
 
 from IPython.display import Image, display
@@ -8,7 +9,7 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-from langchain_core.messages import AIMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -19,7 +20,7 @@ from psycopg_pool import ConnectionPool
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
-from app.ai.settings import llm_settings
+from app.ai.settings import ChatGoogleGenerativeAI, llm_settings
 from app.ai.vector_db import get_vector_store
 from app.controller.manager.obj_manager import ObjectDatabaseManager, ObjectManager
 from app.controller.manager.server_manager import ServerManager
@@ -79,8 +80,11 @@ class SubAgent:
 
     def node(self, state):
         result = self.invoke(state)
+        message = f"{self.name}: {result["messages"][-1].content}"
+        logger.debug(f"SubAgent {self.name} message: {message}")
+        sleep(0.2)
         return Command(
-            update={"messages": [AIMessage(content=result["messages"][-1].content, name=self.name)]},
+            update={"messages": [HumanMessage(content=message, name=self.name)]},
             goto="supervisor",
         )
 
@@ -334,6 +338,12 @@ class Router(TypedDict):
     next: Literal[*options]  # type: ignore
 
 
+class PydanticRouter(BaseModel):
+    """Worker to route to next. If no workers needed, route to FINISH."""
+
+    next: Literal[*options]  # type: ignore
+
+
 system_prompt = f"""
 あなたは以下のワーカー間の会話を管理するように指示されたスーパーバイザーです:
 {sub_agents_with_generic_description_prompt}
@@ -435,8 +445,12 @@ class SupervisorAgent:
         messages = [
             {"role": "system", "content": system_prompt},
         ] + state["messages"]
-        response = self.llm.with_structured_output(Router).invoke(messages)
-        goto = response["next"]
+        if isinstance(self.llm, ChatGoogleGenerativeAI):
+            response = self.llm.with_structured_output(PydanticRouter).invoke(messages)
+            goto = response.next
+        else:
+            response = self.llm.with_structured_output(Router).invoke(messages)
+            goto = response["next"]
         if goto == "FINISH":
             logger.debug("Finished conversation")
             goto = END
@@ -473,20 +487,32 @@ class SupervisorAgent:
 
 
 if __name__ == "__main__":
+    from uuid import uuid4
+
     from app.logging_config import setup_logging
 
     setup_logging()
 
-    thread_id = "test_thread_id4"
+    uuid = uuid4()
+    thread_id = str(uuid)
     settings_manager = SettingsManager()
     db_handler = DatabaseHandler(settings_manager)
     server = ServerManager()
     obj_database_manager = ObjectDatabaseManager(db_handler)
     obj_manager = ObjectManager(obj_database_manager, server)
     supervisor = SupervisorAgent(sub_agents_with_generic, settings_manager=settings_manager, thread_id=thread_id)
-    display_agent.rebind_tools([DisplayInfoTool(), ModelChangeTool()])
+    supervisor.sub_agents[0].rebind_tools(
+        [DisplayInfoTool(dammy_model="Nao"), ModelChangeTool(obj_manager=obj_manager)]
+    )
     print("----" * 30 + "\n")
-    for res, metadata in supervisor.stream("今映っている奴について教えて", debug=True):
-        # print(res)
-        if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
-            print(res.content, end="", flush=True)
+    for res, metadata in supervisor.stream("今映っている奴の説明をして"):
+        if res.content:
+            if summarize_agent.name in metadata.get("tags", []):
+                # print(f"\n\nres: {res}, \nmetadata: {metadata}\n\n")
+                print(res.content, end="/", flush=True)
+            elif display_agent.name in metadata.get("tags", []):
+                print(res.content, end=":", flush=True)
+            elif document_agent.name in metadata.get("tags", []):
+                print(res.content, end="$", flush=True)
+        # if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
+        #     print(res.content, end="", flush=True)
