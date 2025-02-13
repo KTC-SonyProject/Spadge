@@ -193,6 +193,7 @@ class TransferCommand(CommandBase):
             "file_size": self.file_size,
         }
         self.command_body = body
+        logger.debug(f"ファイル転送コマンドのボディ: {body}")
         return body
 
 
@@ -302,6 +303,25 @@ class UpdateCommand(CommandBase):
         body = {
             "file_name": self.file_name,
         }
+        self.command_body = body
+        return body
+
+
+class GetModelCommand(CommandBase):
+    """
+    モデル取得コマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="GET_MODEL",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {}
         self.command_body = body
         return body
 

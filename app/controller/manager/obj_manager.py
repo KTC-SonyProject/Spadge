@@ -1,7 +1,7 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import TransferCommand, UpdateCommand
+from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -89,10 +89,7 @@ class ObjectDatabaseManager:
                 object_id,
             ),
         )
-        if results:
-            return results[0][0]
-        else:
-            raise RuntimeError("Failed to update object name.")
+        logger.info(f"{results} objects updated.")
 
     def delete_object(self, object_id: int):
         """
@@ -149,7 +146,11 @@ class ObjectManager:
         else:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
+            else :
+                object_name = self.obj_database_manager.get_name_by_id(object_id)
             self.server.send_command(UpdateCommand(object_id))
+            return object_name
+
 
     def delete_obj_by_id(self, object_id: int):
         """
@@ -157,7 +158,19 @@ class ObjectManager:
         :param object_id: オブジェクトID
         """
         self.obj_database_manager.delete_object(object_id)
-        # サーバーに削除コマンドを送信
+        # TODO サーバーに削除コマンドを送信
+
+    def get_obj_by_display(self):
+        """
+        ディスプレイからオブジェクトの名前を取得する。
+        """
+        response = self.server.send_command(GetModelCommand())
+        logger.debug(f"Response: {response}")
+        object_id = response["result"]
+        logger.debug(f"Object ID: {object_id}")
+        object_name = self.obj_database_manager.get_name_by_id(int(object_id))
+        logger.info(f"Object Name: {object_name}")
+        return object_name
 
 
 if __name__ == "__main__":
@@ -181,7 +194,7 @@ if __name__ == "__main__":
 
         # 全てのオブジェクトを取得
         all_objects = manager.get_all_objects()
-        print("All Objects:")
+        print("All Objects: ", all_objects)
 
         # 名前を変更
         if last_id != -1:
