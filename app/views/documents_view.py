@@ -251,12 +251,12 @@ class EditBody(Row):
     def __init__(self, page: Page, update_preview: callable, content: str = ""):
         super().__init__(
             expand=True,
-            vertical_alignment=CrossAxisAlignment.START,
+            # vertical_alignment=CrossAxisAlignment.START,
         )
         self.text_field = TextField(
             value=content,
             multiline=True,
-            expand=True,
+            # expand=True,
             border_color=Colors.TRANSPARENT,
             on_change=update_preview,
             hint_text="Document here...",
@@ -264,9 +264,25 @@ class EditBody(Row):
         self.document_body = DocumentBody(page, content=content)
 
         self.controls = [
-            self.text_field,
+            Column(
+                controls=[
+                    Text("Edit", color=Colors.BLUE_GREY_500),
+                    self.text_field,
+                ],
+                spacing=40,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+                expand=1,
+            ),
             VerticalDivider(color=Colors.BLUE_GREY_400),
-            self.document_body,
+            Column(
+                controls=[
+                    Text("Preview", color=Colors.BLUE_GREY_500),
+                    self.document_body,
+                ],
+                spacing=50,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+                expand=1,
+            ),
         ]
 
 
