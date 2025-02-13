@@ -306,6 +306,38 @@ class UpdateCommand(CommandBase):
         self.command_body = body
         return body
 
+class DeleteCommand(CommandBase):
+    """
+    オブジェクト削除コマンド
+    """
+
+    def __init__(self, object_id: str | None = None):
+        super().__init__(
+            command_name="DELETE",
+        )
+        self._object_id = object_id
+
+    @property
+    def object_id(self) -> str:
+        if self._object_id is None:
+            raise ValueError("object_idが設定されていません")
+        return self._object_id
+
+    @object_id.setter
+    def object_id(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("object_idは文字列で指定してください")
+        self._object_id = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {
+            "object_id": self.object_id,
+        }
+        self.command_body = body
+        return body
 
 class GetModelCommand(CommandBase):
     """
