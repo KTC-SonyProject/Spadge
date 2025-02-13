@@ -1,7 +1,7 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand
+from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand, DeleteCommand
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class ObjectDatabaseManager:
         全てのオブジェクトを取得する。
         :return: {"object_id": int, "object_name": str}のリスト
         """
-        query = "SELECT object_id, object_name FROM objects;"
+        query = "SELECT object_id, object_name FROM objects WHERE delete_flag = FALSE;"
         results = self.db_handler.fetch_query(query)
         return [{"object_id": row[0], "object_name": row[1]} for row in results] if results else []
 
@@ -93,11 +93,11 @@ class ObjectDatabaseManager:
 
     def delete_object(self, object_id: int):
         """
-        指定されたIDのオブジェクトを削除する。
+        指定されたIDのオブジェクトを削除フラグを立てる。
         :param object_id: オブジェクトID
         """
-        query = "DELETE FROM objects WHERE object_id = %s;"
-        logger.info(f"Deleting object with ID {object_id}")
+        query = "UPDATE objects SET delete_flag = TRUE WHERE object_id = %s;"
+        logger.info(f"Setting delete flag for object with ID {object_id}")
         results = self.db_handler.execute_query(query, (object_id,))
         logger.info(f"{results} objects deleted.")
 
@@ -159,6 +159,7 @@ class ObjectManager:
         """
         self.obj_database_manager.delete_object(object_id)
         # TODO サーバーに削除コマンドを送信
+        self.server.send_command(DeleteCommand(object_id))
 
     def get_obj_by_display(self):
         """
