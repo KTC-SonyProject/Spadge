@@ -294,7 +294,7 @@ class UnityController(AbstractController):
             model_list = [
                 ModelView(
                     model_name=obj["object_name"],
-                    show_obj=lambda _, id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
+                    show_obj=lambda _, id=obj["object_id"]: self._show_obj(id),
                     update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id),
                     delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(
                         id
@@ -306,6 +306,13 @@ class UnityController(AbstractController):
             return model_list
         else:
             return [Text("まだオブジェクトが登録されていません", size=20, color=Colors.YELLOW_700)]
+
+    def _show_obj(self, object_id):
+            """オブジェクトを表示"""
+            new_obj =self.obj_manager.change_obj_by_id(object_id)
+            logger.debug(f"Change object: {new_obj}")
+            self.pubsub_send("change_obj",new_obj)
+
 
     def refresh_list(self):
         """リストを更新"""
@@ -327,13 +334,16 @@ class UnityController(AbstractController):
         self.view.unity_status.color = color
         self.page.update()
 
-    def pubsub_send(self, msg: str):
+    def pubsub_send(self, msg: str, new_obj=None):
         if msg == "unity_status":
             self.refresh_unity_status()
         elif msg == "model_list":
             self.refresh_list()
         elif msg == "current_obj_name":
             self.view.show_current_object.value = f"現在のオブジェクト: {self._get_current_obj_name()}"
+            self.page.update()
+        elif msg == "change_obj":
+            self.view.show_current_object.value = f"現在のオブジェクト: {new_obj}"
             self.page.update()
 
     def _get_current_obj_name(self, new_name=None) -> str:
@@ -343,6 +353,7 @@ class UnityController(AbstractController):
         # TODO: サーバーが接続されている場合の処理を追加
         # これを追加することで、ディスプレイアプリからのオブジェクト名取得が可能になるが、最初うまく表示されない
         if self.server.is_connected:
+            logger.debug("Get current object name")
             obj = self.obj_manager.get_obj_by_display()
             return obj
         else:

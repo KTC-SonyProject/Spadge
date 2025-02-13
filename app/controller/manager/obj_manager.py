@@ -146,7 +146,11 @@ class ObjectManager:
         else:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
+            else :
+                object_name = self.obj_database_manager.get_name_by_id(object_id)
             self.server.send_command(UpdateCommand(object_id))
+            return object_name
+
 
     def delete_obj_by_id(self, object_id: int):
         """
