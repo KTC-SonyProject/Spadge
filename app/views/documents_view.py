@@ -5,6 +5,7 @@ from flet import (
     Colors,
     Column,
     Container,
+    Control,
     CrossAxisAlignment,
     Divider,
     ElevatedButton,
@@ -29,7 +30,6 @@ from flet import (
     VerticalDivider,
     alignment,
     border_radius,
-    Control,
 )
 
 from app.views.core import create_modal
@@ -110,6 +110,7 @@ def create_markitdown_url_modal(content: TextField, modal_yes_action: callable, 
         ],
     )
 
+
 def create_markitdown_file_modal(content: TextField, select_func: callable, modal_no_action: callable):
     return create_modal(
         title=Text("ファイルからMarkdownを作成する"),
@@ -128,6 +129,7 @@ def create_markitdown_modal(contents: list[Control], modal_no_action: callable):
         content=Text("urlかファイルを選択してください。"),
         actions=contents,
     )
+
 
 class Sidebar(Container):
     def __init__(

@@ -1,7 +1,7 @@
 import logging
 import os
 
-from flet import InputBorder, Page, TextField, TextButton, FilePicker, FilePickerResultEvent, FilePickerUploadFile
+from flet import FilePicker, FilePickerResultEvent, FilePickerUploadFile, InputBorder, Page, TextButton, TextField
 
 from app.ai.vector_db import delete_document_from_vectorstore, indexing_document
 from app.controller.core import AbstractController
@@ -18,9 +18,9 @@ from app.views.documents_view import (
     Sidebar,
     create_add_doc_modal,
     create_edit_doc_modal,
+    create_markitdown_file_modal,
     create_markitdown_modal,
     create_markitdown_url_modal,
-    create_markitdown_file_modal,
     create_nav_rail_item,
 )
 
@@ -269,15 +269,10 @@ class DocumentsController(AbstractController):
         self.page.update()
 
         self.content = "選択したファイルからマークダウンを生成します"
-        self.markitdown_file_modal = create_markitdown_file_modal(
-            self.content,
-            wrap_pick_files,
-            no_func
-        )
+        self.markitdown_file_modal = create_markitdown_file_modal(self.content, wrap_pick_files, no_func)
         self.page.overlay.append(self.markitdown_file_modal)
         self.markitdown_file_modal.open = True
         self.page.update()
-
 
     def _create_markitdown_modal(self):
         def no_func(_):
