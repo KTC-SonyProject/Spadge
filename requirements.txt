@@ -66,7 +66,7 @@ langgraph-checkpoint-sqlite==2.0.1 ; python_version >= "3.12" and python_version
 langgraph-checkpoint==2.0.10 ; python_version >= "3.12" and python_version < "4.0"
 langgraph-sdk==0.1.48 ; python_version >= "3.12" and python_version < "4.0"
 langgraph==0.2.70 ; python_version >= "3.12" and python_version < "4.0"
-langsmith==0.2.6 ; python_version >= "3.12" and python_version < "4.0"
+langsmith==0.3.8 ; python_version >= "3.12" and python_version < "4.0"
 markdown-it-py==3.0.0 ; python_version >= "3.12" and python_version < "4"
 markupsafe==3.0.2 ; python_version >= "3.12" and python_version < "4.0"
 marshmallow==3.23.2 ; python_version >= "3.12" and python_version < "4.0"
