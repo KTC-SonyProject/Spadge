@@ -8,6 +8,7 @@ from app.controller.manager import (
     AuthManager,
     DocumentsManager,
 )
+from app.controller.utils import markitdown
 from app.views.core import BannerView
 from app.views.documents_view import (
     DocumentsView,
@@ -16,6 +17,7 @@ from app.views.documents_view import (
     Sidebar,
     create_add_doc_modal,
     create_edit_doc_modal,
+    create_markitdown_modal,
     create_nav_rail_item,
 )
 
@@ -186,6 +188,35 @@ class DocumentsController(AbstractController):
         self.edit_body.update()
         # self.page.update()
 
+    def _create_markitdown_modal(self):
+        def no_func(_):
+            self.markitdown_modal.open = False
+            self.page.update()
+
+        def yes_func(_):
+            url = markitdown_field.value
+            logger.debug(f"URL: {url}")
+            doc = markitdown(url)
+            self.edit_body.text_field.value = doc
+            self.edit_body.document_body.preview_content.value = doc
+            self.markitdown_modal.open = False
+            self.edit_body.update()
+            self.page.update()
+
+        markitdown_field = TextField(
+            label="url",
+            border=InputBorder.UNDERLINE,
+            hint_text="Enter url here",
+            filled=True,
+        )
+        self.markitdown_modal = create_markitdown_modal(markitdown_field, yes_func, no_func)
+        return self.markitdown_modal
+
+    def open_markitdown_modal(self, _):
+        self.page.overlay.append(self._create_markitdown_modal())
+        self.markitdown_modal.open = True
+        self.page.update()
+
     def get_view(self) -> DocumentsView:
         self.sidebar = self.docs_sidebar_controller.get_view()
         if not self.document_id:
@@ -207,6 +238,7 @@ class DocumentsController(AbstractController):
                 self.document_id,
                 self.edit_body,
                 self._open_modal,
+                self.open_markitdown_modal,
                 self._save_document,
                 self._delete_document,
                 doc["title"],

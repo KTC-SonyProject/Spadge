@@ -99,6 +99,17 @@ def create_edit_doc_modal(save_document: callable, not_save_action: callable, ca
     )
 
 
+def create_markitdown_modal(content: TextField, modal_yes_action: callable, modal_no_action: callable):
+    return create_modal(
+        title=Text("URLからMarkdownを作成する"),
+        content=content,
+        actions=[
+            TextButton(text="Yes", on_click=modal_yes_action),
+            TextButton(text="No", on_click=modal_no_action),
+        ],
+    )
+
+
 class Sidebar(Container):
     def __init__(
         self,
@@ -241,11 +252,12 @@ class EditBody(Row):
 
 
 class EditDocumentsView(Column):
-    def __init__(
+    def __init__(  # noqa
         self,
         doc_id: int,
         edit_body: EditBody,
         open_modal: callable,
+        open_markitdown_modal: callable,
         save_document: callable,
         delete_document: callable,
         title: str = "Untitle",
@@ -274,6 +286,7 @@ class EditDocumentsView(Column):
                     ),
                     Row(
                         controls=[
+                            TextButton(text="URLから生成(Preview)", on_click=open_markitdown_modal, icon=Icons.LINK),
                             TextButton(text="Save", on_click=save_document, icon=Icons.SAVE),
                             TextButton(text="Delete", on_click=delete_document, icon=Icons.DELETE),
                         ],
