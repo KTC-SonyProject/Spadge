@@ -5,6 +5,7 @@ from flet import (
     Colors,
     Column,
     Container,
+    Control,
     CrossAxisAlignment,
     Divider,
     ElevatedButton,
@@ -96,6 +97,37 @@ def create_edit_doc_modal(save_document: callable, not_save_action: callable, ca
             TextButton(text="変更を続ける", on_click=cancel_action),
         ],
         actions_alignment=MainAxisAlignment.CENTER,
+    )
+
+
+def create_markitdown_url_modal(content: TextField, modal_yes_action: callable, modal_no_action: callable):
+    return create_modal(
+        title=Text("URLからMarkdownを作成する"),
+        content=content,
+        actions=[
+            TextButton(text="作成", on_click=modal_yes_action),
+            TextButton(text="キャンセル", on_click=modal_no_action),
+        ],
+    )
+
+
+def create_markitdown_file_modal(content: TextField, select_func: callable, modal_no_action: callable):
+    return create_modal(
+        title=Text("ファイルからMarkdownを作成する"),
+        content=Text(content),
+        actions=[
+            TextButton(text="選択する", on_click=lambda _: select_func()),
+            TextButton(text="キャンセル", on_click=modal_no_action),
+        ],
+    )
+
+
+def create_markitdown_modal(contents: list[Control], modal_no_action: callable):
+    contents.append(TextButton(text="キャンセル", on_click=modal_no_action))
+    return create_modal(
+        title=Text("Markdownを作成する"),
+        content=Text("urlかファイルを選択してください。"),
+        actions=contents,
     )
 
 
@@ -221,12 +253,12 @@ class EditBody(Row):
     def __init__(self, page: Page, update_preview: callable, content: str = ""):
         super().__init__(
             expand=True,
-            vertical_alignment=CrossAxisAlignment.START,
+            # vertical_alignment=CrossAxisAlignment.START,
         )
         self.text_field = TextField(
             value=content,
             multiline=True,
-            expand=True,
+            # expand=True,
             border_color=Colors.TRANSPARENT,
             on_change=update_preview,
             hint_text="Document here...",
@@ -234,18 +266,35 @@ class EditBody(Row):
         self.document_body = DocumentBody(page, content=content)
 
         self.controls = [
-            self.text_field,
+            Column(
+                controls=[
+                    Text("Edit", color=Colors.BLUE_GREY_500),
+                    self.text_field,
+                ],
+                spacing=40,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+                expand=1,
+            ),
             VerticalDivider(color=Colors.BLUE_GREY_400),
-            self.document_body,
+            Column(
+                controls=[
+                    Text("Preview", color=Colors.BLUE_GREY_500),
+                    self.document_body,
+                ],
+                spacing=50,
+                horizontal_alignment=CrossAxisAlignment.CENTER,
+                expand=1,
+            ),
         ]
 
 
 class EditDocumentsView(Column):
-    def __init__(
+    def __init__(  # noqa
         self,
         doc_id: int,
         edit_body: EditBody,
         open_modal: callable,
+        open_markitdown_modal: callable,
         save_document: callable,
         delete_document: callable,
         title: str = "Untitle",
@@ -274,6 +323,7 @@ class EditDocumentsView(Column):
                     ),
                     Row(
                         controls=[
+                            TextButton(text="ソースから生成(Preview)", on_click=open_markitdown_modal, icon=Icons.LINK),
                             TextButton(text="Save", on_click=save_document, icon=Icons.SAVE),
                             TextButton(text="Delete", on_click=delete_document, icon=Icons.DELETE),
                         ],
