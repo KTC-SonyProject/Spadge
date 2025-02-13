@@ -21,7 +21,7 @@ from app.controller.manager.agent_manager import (
 )
 from app.models.chat_models import Message, MessageType
 from app.models.database_models import DatabaseHandler
-from app.views.chat_view import ChatMessageCard, ChatView
+from app.views.chat_view import ChatMessageCard, ChatView, create_chat_message_tile
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +166,16 @@ class ChatController(AbstractController):
                     if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
                         if self.view.chat_list.controls[-1].body.value == "thinking...":
                             logger.debug(f"AI response: {res}, metadata: {metadata.get('tags')[0]}")
+                            self.view.chat_list.controls[-1].name.value = f"AI ({metadata.get('tags')[0]})"
+                            self.view.chat_list.controls[-1].body.value = res.content
+                        elif self.view.chat_list.controls[-1].name.value != f"AI ({metadata.get('tags')[0]})":
+                            history_tile = create_chat_message_tile(
+                                self.view.chat_list.controls[-1].name.value,
+                                self.view.chat_list.controls[-1].body.value,
+                                self.tap_link,
+                            )
+                            self.view.chat_list.controls[-1].thinking_chat.controls.append(history_tile)
+                            self.view.chat_list.controls[-1].thinking_chat.visible = True
                             self.view.chat_list.controls[-1].name.value = f"AI ({metadata.get('tags')[0]})"
                             self.view.chat_list.controls[-1].body.value = res.content
                         else:

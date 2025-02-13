@@ -7,6 +7,7 @@ from flet import (
     Container,
     CrossAxisAlignment,
     ElevatedButton,
+    ExpansionTile,
     IconButton,
     Icons,
     ListView,
@@ -17,6 +18,7 @@ from flet import (
     Row,
     Text,
     TextField,
+    TileAffinity,
     alignment,
     border,
     padding,
@@ -89,6 +91,24 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
     return body
 
 
+
+
+def create_chat_message_tile(name: str, content: str, tap_link: callable) -> ExpansionTile:
+    return ExpansionTile(
+        title=Text(name, weight="bold", color=Colors.GREY_500),
+        affinity=TileAffinity.LEADING,
+        text_color=Colors.GREY_500,
+        controls=[
+            Markdown(
+                value=content,
+                selectable=True,
+                extension_set=MarkdownExtensionSet.GITHUB_WEB,
+                on_tap_link=tap_link,
+            )
+        ],
+    )
+
+
 class ChatMessageCard(Container):
     def __init__(self, message: Message, tap_link: callable):
         super().__init__(
@@ -101,6 +121,13 @@ class ChatMessageCard(Container):
             extension_set=MarkdownExtensionSet.GITHUB_WEB,
             on_tap_link=tap_link,
         )
+        self.thinking_chat = ExpansionTile(
+            title=Text("Thinking_flow", color=Colors.GREY_500),
+            affinity=TileAffinity.LEADING,
+            text_color=Colors.GREY_500,
+            controls=[],
+            visible=False,
+        )
         self.content = Row(
             vertical_alignment=CrossAxisAlignment.START,
             alignment=MainAxisAlignment.END if message.message_type == MessageType.USER else MainAxisAlignment.START,
@@ -112,6 +139,7 @@ class ChatMessageCard(Container):
                     horizontal_alignment=CrossAxisAlignment.END if message.message_type == MessageType.USER else None,
                     controls=[
                         self.name,
+                        self.thinking_chat,
                         self.body,
                     ],
                 )
@@ -175,7 +203,7 @@ class ChatView(Column):
             expand=True,
             on_submit=send_message_click,
         )
-        self.progress_bar = ProgressBar(color=Colors.BLUE, bgcolor=Colors.GREY_200, value=0, visible=False)
+        self.progress_bar = ProgressBar(color=Colors.BLUE, bgcolor=Colors.GREY_200, visible=False)
 
         self.controls = [
             create_chat_header(session_id, init_chat_button),

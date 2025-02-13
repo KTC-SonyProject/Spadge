@@ -3,12 +3,11 @@ import os
 import sqlite3
 from typing import Annotated, Literal
 
+from IPython.display import Image, display
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
-
-# from IPython.display import Image, display
 from langchain_core.messages import AIMessage
 from langchain_core.tools import BaseTool, tool
 from langgraph.checkpoint.postgres import PostgresSaver
@@ -288,16 +287,35 @@ generic_agent = SubAgent(
 
 # 今までの履歴をまとめるエージェント ------------------------------------
 summarize_agent_prompt = """
-あなたは会話のまとめを行うエージェントです。
-あなたは与えられたtoolを使って、ユーザーの要求に応じて会話のまとめを行うことができます。
+あなたはエージェントのまとめを行うエージェントです。
+ユーザーからの要求に対して、複数のエージェントが関わった場合に、そのまとめを行います。
 
 # あなたに与えられた役割
-- 会話のまとめを行う
-- 会話の流れを把握し、ユーザーに対して必要な情報のみを提供する
+- 複数のエージェントが関わった内容のまとめを行う
+- 他のエージェントが担当している内容をわかりやすくユーザーに提供する
+- 返答はマークダウン形式で行い、ユーザーにわかりやすいように心がけること
+- 他のエージェントが残したメッセージはできるだけ含めるようなまとめ方にすること
+
+# 注意
+他のエージェントが担当している内容を理解し、それをユーザーにわかりやすく提供することが重要です。
+他のエージェントが残したメッセージを理解し、それをまとめることが求められます。
+特にDocumentSearchAgentが関わった場合は、最後の参考にしたドキュメントの情報を含めるようにしてください。
+特に、注意点として、ユーザーが求める具体的な情報や文脈を把握することを忘れないでください。
 """
+summarize_agent_description = """
+会話のまとめを行うエージェントです。
+このエージェントは、複数のエージェントが関わる会話のまとめを行います。
+複数のエージェンが関わった場合はこのエージェントを必ず選択してください。
+"""
+summarize_agent = SubAgent(
+    tools=[],
+    prompt=summarize_agent_prompt,
+    name="SummarizeAgent",
+    description=summarize_agent_description,
+)
 
 
-sub_agents_with_generic = sub_agents + [generic_agent]
+sub_agents_with_generic = sub_agents + [generic_agent, summarize_agent]
 sub_agents_with_generic_description_prompt = "\n".join(
     [f"{agent.name}: {agent.description}" for agent in sub_agents_with_generic]
 )
@@ -341,6 +359,8 @@ system_prompt = f"""
     - DisplayControlAgent: "現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: 'NAO'"
     - あなた: DocumentSearchAgent
     - DocumentSearchAgent: "NAOの解説は以下の通りです: ..."
+    - あなた: SummarizeAgent
+    - SummarizeAgent: "現在のディスプレイオブジェクトはNAOで、解説は以下の通りです: ..."
     - あなた: FINISH
 - 例3:
     - ユーザー: "モデルを変更して"
