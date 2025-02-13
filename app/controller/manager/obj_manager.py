@@ -89,10 +89,7 @@ class ObjectDatabaseManager:
                 object_id,
             ),
         )
-        if results:
-            return results[0][0]
-        else:
-            raise RuntimeError("Failed to update object name.")
+        logger.info(f"{results} objects updated.")
 
     def delete_object(self, object_id: int):
         """

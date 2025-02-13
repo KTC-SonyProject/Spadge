@@ -192,8 +192,7 @@ class UnityController(AbstractController):
             self.page.update()
 
         def yes_func(_):
-            # TODO: モデル名の更新処理をテストするためにコメントアウト中
-            # self.obj_database_manager.update_name(model_id, self.add_model_modal.content.value)
+            self.obj_database_manager.update_name(model_id, self.add_model_modal.content.value)
             logger.debug(f"Update model name: {model_id} -> {self.add_model_modal.content.value}")
             self.add_model_modal.open = False
             self.page.update()
@@ -326,6 +325,8 @@ class UnityController(AbstractController):
         """現在のオブジェクト名を取得"""
         if new_name:
             return new_name
+        # TODO: サーバーが接続されている場合の処理を追加
+        # これを追加することで、ディスプレイアプリからのオブジェクト名取得が可能になるが、最初うまく表示されない
         # if self.server.is_connected:
         #     obj = self.obj_manager.get_obj_by_display()
         #     return obj
