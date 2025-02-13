@@ -367,8 +367,8 @@ class UnityController(AbstractController):
             refresh_list=self.page.pubsub.send_all,
             unity_status=Text(self.get_unity_status()[0], color=self.get_unity_status()[1]),
             refresh_status=self.page.pubsub.send_all,
-            rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
-            rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
+            rotate_start=lambda: self.obj_manager.rotational_operation(rotational_state=True),
+            rotate_stop=lambda: self.obj_manager.rotational_operation(rotational_state=False),
         )
         return self.view
 

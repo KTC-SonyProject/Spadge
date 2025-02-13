@@ -1,7 +1,7 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand, DeleteCommand
+from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand, DeleteCommand ,ControlCommand, RotationalCommand
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -173,6 +173,12 @@ class ObjectManager:
         logger.info(f"Object Name: {object_name}")
         return object_name
 
+    def rotational_operation(self, rotational_state):
+        """
+        オブジェクトに対する回転操作を行う。
+        :param rotational_True/False: 回転状態
+        """
+        self.server.send_command(RotationalCommand(rotational_state))
 
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
