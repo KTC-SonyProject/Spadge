@@ -3,6 +3,8 @@ import logging
 import re
 from dataclasses import is_dataclass
 
+from markitdown import MarkItDown
+
 logger = logging.getLogger(__name__)
 
 
@@ -65,6 +67,21 @@ def safe_dataclass_init(cls, data: dict) -> object:
         if key in field_names
     }
     return cls(**filtered_data)
+
+
+def markitdown(source: str) -> str:
+    """
+    マークダウンに変換する関数
+    Args:
+        source (str): マークダウンに変換するファイルのパス。
+    """
+    markitdown = MarkItDown()
+    try:
+        res = markitdown.convert(source)
+        return res.text_content
+    except Exception as e:
+        logger.error(f"Error converting markdown: {e}")
+        return "error converting markdown"
 
 
 if __name__ == "__main__":

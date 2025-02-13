@@ -19,6 +19,7 @@ langgraph-checkpoint-postgres = "^2.0.4"
 langchain-chroma = "^0.1.4"
 flet = {extras = ["all"], version = "^0.25.1"}
 langchain-google-genai = "^2.0.9"
+markitdown = "^0.0.1a4"
 
 
 [tool.poetry.group.dev.dependencies]
