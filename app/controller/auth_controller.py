@@ -19,7 +19,7 @@ class AuthController(AbstractController):
 
     def _login(self, _, user_id="", password=""):
         if self.auth_manager.check_credentials(user_id, password):
-            self.page.session.set("is_authenticated", True)
+            self.page.client_storage.set("is_authenticated", True)
             self.banner.show_banner("success", "ログインしました")
             self.page.go("/home")
         else:
@@ -37,7 +37,7 @@ class LogoutController(AbstractController):
         self.banner = BannerView(page)
 
     def _logout(self, _):
-        self.page.session.set("is_authenticated", False)
+        self.page.client_storage.set("is_authenticated", False)
         self.banner.show_banner("success", "ログアウトしました")
         self.page.go("/")
 

@@ -79,11 +79,11 @@ class AuthManager:
         """
         ユーザーが認証されているかどうかをチェックする関数
         """
-        if not self.page.session.contains_key("is_authenticated"):
+        if not self.page.client_storage.contains_key("is_authenticated"):
             # 認証情報がセッションに保存されていない場合はFalseを返す
-            self.page.session.set("is_authenticated", False)
+            self.page.client_storage.set("is_authenticated", False)
             return False
-        return self.page.session.get("is_authenticated")
+        return self.page.client_storage.get("is_authenticated")
 
 
 if __name__ == "__main__":
