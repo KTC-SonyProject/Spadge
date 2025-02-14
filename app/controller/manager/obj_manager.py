@@ -156,9 +156,13 @@ class ObjectManager:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
             else:
                 object_name = self.obj_database_manager.get_name_by_id(object_id)
-            self.server.send_command(UpdateCommand(object_id))
+            # UpdateCommandの送信結果を待つ
+        response = self.server.send_command(UpdateCommand(object_id))
+        if response.get("status_code") == 200:
             self.change_name_display(object_name)
-            return object_name
+        else:
+            logger.error(f"UpdateCommandの送信に失敗しました: {response}")
+        return object_name
 
     def delete_obj_by_id(self, object_id: int):
         """
