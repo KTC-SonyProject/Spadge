@@ -192,8 +192,7 @@ class UnityController(AbstractController):
             self.page.update()
 
         def yes_func(_):
-            # TODO: モデル名の更新処理をテストするためにコメントアウト中
-            # self.obj_database_manager.update_name(model_id, self.add_model_modal.content.value)
+            self.obj_database_manager.update_name(model_id, self.add_model_modal.content.value)
             logger.debug(f"Update model name: {model_id} -> {self.add_model_modal.content.value}")
             self.add_model_modal.open = False
             self.page.update()
@@ -264,7 +263,6 @@ class UnityController(AbstractController):
 
     def _on_upload_complete(self, e):
         """アップロード完了"""
-        # TODO: モデルの名前をアップロード時に選択できるようにしたので、それに対応させる
         success, result = self.file_manager.send_file_to_unity(e.file_name)
         if success:
             if self.model_upload_view.add_model_name.value:
@@ -274,6 +272,7 @@ class UnityController(AbstractController):
                 new_name = os.path.splitext(e.file_name)[0]
                 self.obj_database_manager.new_object(new_name)
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードが完了しました"
+            self.page.pubsub.send_all("current_obj_name")
         else:
             logger.error(f"Error sending file to Unity: {result}")
             self.model_upload_view.add_model_file_name.value = "モデルのアップロードに失敗しました"
@@ -295,8 +294,8 @@ class UnityController(AbstractController):
             model_list = [
                 ModelView(
                     model_name=obj["object_name"],
-                    show_obj=lambda _, id=obj["object_id"]: self.obj_manager.change_obj_by_id(id),
-                    update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id),
+                    show_obj=lambda _, id=obj["object_id"]: self._show_obj(id),
+                    update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id), # TODO ここで名前も与える
                     delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(
                         id
                     ),  # TODO: modelの削除処理を追加
@@ -307,6 +306,14 @@ class UnityController(AbstractController):
             return model_list
         else:
             return [Text("まだオブジェクトが登録されていません", size=20, color=Colors.YELLOW_700)]
+
+    def _show_obj(self, object_id):
+            """オブジェクトを表示"""
+            new_obj =self.obj_manager.change_obj_by_id(object_id)
+            logger.debug(f"Change object: {new_obj}")
+            self.pubsub_send("current_obj_name")
+            # self.pubsub_send("current_obj_name", new_obj)
+
 
     def refresh_list(self):
         """リストを更新"""
@@ -322,27 +329,33 @@ class UnityController(AbstractController):
         else:
             return "ディスプレイアプリ 接続状況: ❌ 未接続", Colors.RED_700
 
-    def refresh_unity_status(self, pubsub: str | None = None):
-        logger.debug(f"{pubsub=}")
+    def refresh_unity_status(self):
         value, color = self.get_unity_status()
         self.view.unity_status.value = value
         self.view.unity_status.color = color
         self.page.update()
 
-    def pubsub_send(self, msg: str):
+    def pubsub_send(self, msg: str, new_obj=None):
         if msg == "unity_status":
             self.refresh_unity_status()
         elif msg == "model_list":
             self.refresh_list()
+        elif msg == "current_obj_name":
+            self.view.show_current_object.value = f"現在のオブジェクト: {self._get_current_obj_name(new_obj)}"
+            self.page.update()
 
-    def _get_current_obj_name(self) -> str:
+    def _get_current_obj_name(self, new_name=None) -> str:
         """現在のオブジェクト名を取得"""
+        # これを追加することで、ディスプレイアプリからのオブジェクト名取得が可能になるが、最初うまく表示されない
         if self.server.is_connected:
-            # TODO: 現在のオブジェクト名を取得する処理を追加
-            obj = "Nao"
-            return obj
+            if new_name:
+                logger.debug(f"Update object name: {new_name}")
+            else:
+                logger.debug("Get current object name")
+                new_name = self.obj_manager.get_obj_by_display()
+            return new_name
         else:
-            return "不明"
+            return "ディスプレイに未接続です"
 
     def get_view(self) -> UnityView:
         self.page.pubsub.subscribe(self.pubsub_send)
@@ -354,9 +367,8 @@ class UnityController(AbstractController):
             refresh_list=self.page.pubsub.send_all,
             unity_status=Text(self.get_unity_status()[0], color=self.get_unity_status()[1]),
             refresh_status=self.page.pubsub.send_all,
-            show_current_obj_name=self._get_current_obj_name(),
-            rotate_start=lambda: print("Rotate start"),  # TODO: rotate_startの処理を追加
-            rotate_stop=lambda: print("Rotate stop"),  # TODO: rotate_stopの処理を追加
+            rotate_start=lambda: self.obj_manager.rotational_operation(rotational_state=True),
+            rotate_stop=lambda: self.obj_manager.rotational_operation(rotational_state=False),
         )
         return self.view
 

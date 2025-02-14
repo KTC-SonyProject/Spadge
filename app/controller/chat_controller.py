@@ -69,7 +69,7 @@ class ChatController(AbstractController):
         # ここにDisplayAgentに全てのツールを登録しなおす
         agent.sub_agents[0].rebind_tools(
             [
-                DisplayInfoTool(dammy_model="NAO"),
+                DisplayInfoTool(obj_manager=self.obj_manager),
                 ModelChangeTool(obj_manager=self.obj_manager),
                 ModelListTool(obj_database_manager=self.obj_database_manager),
             ]
