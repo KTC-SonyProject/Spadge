@@ -295,7 +295,7 @@ class UnityController(AbstractController):
                 ModelView(
                     model_name=obj["object_name"],
                     show_obj=lambda _, id=obj["object_id"]: self._show_obj(id),
-                    update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id),
+                    update_obj_name=lambda _, id=obj["object_id"]: self.open_modal(id), # TODO ここで名前も与える
                     delete_obj=lambda _, id=obj["object_id"]: self.obj_manager.delete_obj_by_id(
                         id
                     ),  # TODO: modelの削除処理を追加

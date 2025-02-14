@@ -1,7 +1,15 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import GetModelCommand, TransferCommand, UpdateCommand, DeleteCommand ,ControlCommand, RotationalCommand
+from app.models.command_models import (
+    ChangeNameCommand,
+    DeleteCommand,
+    GetModelCommand,
+    RotationalCommand,
+    ShowNameCommand,
+    TransferCommand,
+    UpdateCommand,
+)
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -146,11 +154,11 @@ class ObjectManager:
         else:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
-            else :
+            else:
                 object_name = self.obj_database_manager.get_name_by_id(object_id)
             self.server.send_command(UpdateCommand(object_id))
+            self.change_name_display(object_name)
             return object_name
-
 
     def delete_obj_by_id(self, object_id: int):
         """
@@ -179,6 +187,22 @@ class ObjectManager:
         :param rotational_True/False: 回転状態
         """
         self.server.send_command(RotationalCommand(rotational_state))
+
+    def show_name_display(self, state: bool , object_name: str):
+        """
+        ディスプレイにオブジェクト名を表示する。
+        :param state: 表示状態 (True または False)
+        """
+        object_name = self.get_obj_by_display()
+        self.server.send_command(ShowNameCommand(state=state, obj_name=object_name))
+
+    def change_name_display(self, object_name: str):
+        """
+        ディスプレイにオブジェクト名を表示する。
+        :param object_name: 表示するオブジェクト名
+        """
+        self.server.send_command(ChangeNameCommand(obj_name=object_name))
+
 
 if __name__ == "__main__":
     # 設定を読み込み、DatabaseHandlerを初期化
