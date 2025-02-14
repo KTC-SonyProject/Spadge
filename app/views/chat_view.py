@@ -90,6 +90,7 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
 
     return body
 
+
 class ChatMessageTile(ExpansionTile):
     def __init__(self, name: str, content: str, tap_link: callable):
         self.name = Text(name, weight="bold", color=Colors.GREY_500)
@@ -106,8 +107,10 @@ class ChatMessageTile(ExpansionTile):
             controls=[self.body],
         )
 
+
 def create_chat_message_tile(name: str, content: str, tap_link: callable) -> ExpansionTile:
     return ChatMessageTile(name, content, tap_link)
+
 
 class ChatMessageCard(Container):
     def __init__(self, message: Message, tap_link: callable):

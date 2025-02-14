@@ -313,6 +313,7 @@ summarize_agent_description = """
 複数のエージェントが関わった場合はこのエージェントを必ず選択してください。
 """
 
+
 class SummarizeAgent(SubAgent):
     def __init__(self):
         super().__init__(
@@ -330,6 +331,8 @@ class SummarizeAgent(SubAgent):
             update={"messages": [HumanMessage(content=message, name=self.name)]},
             goto=END,
         )
+
+
 summarize_agent = SummarizeAgent()
 
 
