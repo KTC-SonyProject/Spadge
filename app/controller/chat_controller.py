@@ -18,6 +18,7 @@ from app.controller.manager.agent_manager import (
     ModelListTool,
     SupervisorAgent,
     sub_agents_with_generic,
+    summarize_agent,
 )
 from app.models.chat_models import Message, MessageType
 from app.models.database_models import DatabaseHandler
@@ -79,7 +80,6 @@ class ChatController(AbstractController):
     def get_chat_history(self) -> list[Message]:
         # chat_history = self.chatbot.graph.get_state(self.chatbot.memory_config)
         chat_history = self.agent.graph.get_state(self.agent.memory_config)
-        logger.debug(f"\n\n\nChat history: {chat_history}\n\n\n")
         try:
             chat_history = chat_history.values["messages"]
             messages = []
@@ -88,10 +88,11 @@ class ChatController(AbstractController):
                     continue
 
                 if message.name:
-                    logger.debug(f"Message name: {message.name}, from {message}")
-                    sender = f"AI ({message.name})"
+                    if message.name == "SummarizeAgent":
+                        sender = "AI"
+                    else:
+                        continue
                 else:
-                    logger.debug(f"Message name: user, from {message}")
                     sender = "USER"
                 message_type = MessageType.USER if sender == "USER" else MessageType.AI
                 messages.append(Message(name=sender, content=message.content, message_type=message_type))
@@ -123,6 +124,21 @@ class ChatController(AbstractController):
             self._add_message(message)
         self.page.update()
 
+    def _is_first_thinking(self) -> bool:
+        if self.view.chat_list.controls[-1].body.value == "thinking...":
+            return True
+        return False
+
+    def _is_correct_agent(self, metadata: dict) -> bool:
+        if self._is_first_thinking() and not self.view.chat_list.controls[-1].thinking_chat.visible:
+            self.view.chat_list.controls[-1].thinking_chat.visible = True
+            return False
+        before_agent = self.view.chat_list.controls[-1].thinking_chat.controls[-1].name.value
+        after_agent = metadata.get("tags")[0]
+        if before_agent == after_agent:
+            return True
+        return False
+
     def send_message(self, _):
         if self.view.text_field.value != "":
             message = self.view.text_field.value
@@ -131,21 +147,6 @@ class ChatController(AbstractController):
             self.page.update()
 
             try:
-                # for response in self.chatbot.stream_graph_updates(message):
-                #     logger.debug(f"Response: {response}")
-                #     if "tool_calls" in response.additional_kwargs:
-                #         # TODO: toolを実行した場合の表示処理を記述する
-                #         pass
-                #     else:
-                #         sender = "USER" if "HumanMessage" in str(type(response)) else "AI"
-                #         message_type = MessageType.USER if sender == "USER" else MessageType.AI
-                #         self.add_message(
-                #             Message(
-                #                 name=sender,
-                #                 content=response.content,
-                #                 message_type=message_type,
-                #             )
-                #         )
                 # まず今回のメッセージ用UIを作成
                 self.add_message(  # ユーザーのメッセージ
                     Message(
@@ -163,23 +164,25 @@ class ChatController(AbstractController):
                 )
 
                 for res, metadata in self.agent.stream(message):
-                    if res.content and any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
-                        if self.view.chat_list.controls[-1].body.value == "thinking...":
-                            logger.debug(f"AI response: {res}, metadata: {metadata.get('tags')[0]}")
-                            self.view.chat_list.controls[-1].name.value = f"AI ({metadata.get('tags')[0]})"
-                            self.view.chat_list.controls[-1].body.value = res.content
-                        elif self.view.chat_list.controls[-1].name.value != f"AI ({metadata.get('tags')[0]})":
-                            history_tile = create_chat_message_tile(
-                                self.view.chat_list.controls[-1].name.value,
-                                self.view.chat_list.controls[-1].body.value,
-                                self.tap_link,
-                            )
-                            self.view.chat_list.controls[-1].thinking_chat.controls.append(history_tile)
-                            self.view.chat_list.controls[-1].thinking_chat.visible = True
-                            self.view.chat_list.controls[-1].name.value = f"AI ({metadata.get('tags')[0]})"
-                            self.view.chat_list.controls[-1].body.value = res.content
-                        else:
-                            self.view.chat_list.controls[-1].body.value += res.content
+                    if res.content:  # ストリーミングの結果がある場合
+                        if summarize_agent.name in metadata.get("tags", []):  # summarize_agentの結果の場合
+                            if self._is_first_thinking():
+                                self.view.chat_list.controls[-1].body.value = res.content
+                            else:
+                                self.view.chat_list.controls[-1].body.value += res.content
+                        elif any(agent.name in metadata.get("tags", []) for agent in sub_agents_with_generic):
+                            # sub_agents_with_genericの結果の場合
+                            if not self._is_correct_agent(metadata):
+                                # 前回のAIの名前と違う場合は、新たにタイルを追加
+                                history_tile = create_chat_message_tile(
+                                    metadata.get("tags")[0],
+                                    res.content,
+                                    self.tap_link,
+                                )
+                                self.view.chat_list.controls[-1].thinking_chat.controls.append(history_tile)
+                            else:
+                                # 前回のAIの名前と同じ場合は、前回のAIのメッセージに追加
+                                self.view.chat_list.controls[-1].thinking_chat.controls[-1].body.value += res.content
                         self.view.chat_list.update()
             except Exception as err:
                 logger.error(f"Error sending message: {err}")
