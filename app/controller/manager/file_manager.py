@@ -79,12 +79,21 @@ class FileManager:
                 # 送信前にファイル名を連番にリネーム
                 folder_path = os.path.dirname(command.file_path)
                 renamed_files = self.rename_files_in_folder(folder_path, extracted_files)
+                logger.debug(f"リネームされたファイル: {renamed_files}")
                 for renamed_file in renamed_files:
-                    file_path = os.path.join(folder_path, renamed_file)
+                    if renamed_file.endswith(".jpg"):
+                    # .jpgファイルは元のパスを使用
+                        file_path = os.path.join(folder_path, extracted_files[renamed_files.index(renamed_file)])
+                    else:
+                        file_path = os.path.join(folder_path, renamed_file)
+                    logger.debug(f"ファイルを送信: {file_path}")
                     command = TransferCommand(file_path)
+                    command.convert_body()  # command_bodyを設定
+                    logger.debug(f"送信ファイル: {command}")
                     self._send_file(command)
                 result = {"status_message": "OK", "message": "zipファイル送信完了"}
             else:
+                command.convert_body()  # command_bodyを設定
                 result = self._send_file(command)
             logger.debug(f"Unity送信結果: {result}")
             return True, result
@@ -145,9 +154,13 @@ class FileManager:
             for file in files:
                 file_extension = os.path.splitext(file)[1]
                 old_file_path = os.path.join(folder_path, file)
-                new_file_path = os.path.join(folder_path, f"{last_id}{file_extension}")
-                os.rename(old_file_path, new_file_path)
-                renamed_files.append(f"{last_id}{file_extension}")
+                if file_extension.lower() == ".jpg":
+                    # .jpgファイルは名前を変更しない
+                    new_file_path = old_file_path
+                else:
+                    new_file_path = os.path.join(folder_path, f"{last_id}{file_extension}")
+                    os.rename(old_file_path, new_file_path)
+                renamed_files.append(os.path.basename(new_file_path))
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
             logger.error(f"ファイルリネーム中にエラー: {e}")

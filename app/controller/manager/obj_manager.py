@@ -1,7 +1,15 @@
 import logging
 
 from app.controller.manager.server_manager import ServerManager
-from app.models.command_models import TransferCommand, UpdateCommand
+from app.models.command_models import (
+    ChangeNameCommand,
+    DeleteCommand,
+    GetModelCommand,
+    RotationalCommand,
+    ShowNameCommand,
+    TransferCommand,
+    UpdateCommand,
+)
 from app.models.database_models import DatabaseHandler
 
 logger = logging.getLogger(__name__)
@@ -47,7 +55,7 @@ class ObjectDatabaseManager:
         全てのオブジェクトを取得する。
         :return: {"object_id": int, "object_name": str}のリスト
         """
-        query = "SELECT object_id, object_name FROM objects;"
+        query = "SELECT object_id, object_name FROM objects WHERE delete_flag = FALSE;"
         results = self.db_handler.fetch_query(query)
         return [{"object_id": row[0], "object_name": row[1]} for row in results] if results else []
 
@@ -89,18 +97,15 @@ class ObjectDatabaseManager:
                 object_id,
             ),
         )
-        if results:
-            return results[0][0]
-        else:
-            raise RuntimeError("Failed to update object name.")
+        logger.info(f"{results} objects updated.")
 
     def delete_object(self, object_id: int):
         """
-        指定されたIDのオブジェクトを削除する。
+        指定されたIDのオブジェクトを削除フラグを立てる。
         :param object_id: オブジェクトID
         """
-        query = "DELETE FROM objects WHERE object_id = %s;"
-        logger.info(f"Deleting object with ID {object_id}")
+        query = "UPDATE objects SET delete_flag = TRUE WHERE object_id = %s;"
+        logger.info(f"Setting delete flag for object with ID {object_id}")
         results = self.db_handler.execute_query(query, (object_id,))
         logger.info(f"{results} objects deleted.")
 
@@ -149,7 +154,15 @@ class ObjectManager:
         else:
             if object_name:
                 object_id = self.obj_database_manager.get_id_by_name(object_name)
-            self.server.send_command(UpdateCommand(object_id))
+            else:
+                object_name = self.obj_database_manager.get_name_by_id(object_id)
+            # UpdateCommandの送信結果を待つ
+        response = self.server.send_command(UpdateCommand(object_id))
+        if response.get("status_code") == 200:
+            self.change_name_display(object_name)
+        else:
+            logger.error(f"UpdateCommandの送信に失敗しました: {response}")
+        return object_name
 
     def delete_obj_by_id(self, object_id: int):
         """
@@ -157,7 +170,42 @@ class ObjectManager:
         :param object_id: オブジェクトID
         """
         self.obj_database_manager.delete_object(object_id)
-        # サーバーに削除コマンドを送信
+        # TODO サーバーに削除コマンドを送信
+        self.server.send_command(DeleteCommand(object_id))
+
+    def get_obj_by_display(self):
+        """
+        ディスプレイからオブジェクトの名前を取得する。
+        """
+        response = self.server.send_command(GetModelCommand())
+        logger.debug(f"Response: {response}")
+        object_id = response["result"]
+        logger.debug(f"Object ID: {object_id}")
+        object_name = self.obj_database_manager.get_name_by_id(int(object_id))
+        logger.info(f"Object Name: {object_name}")
+        return object_name
+
+    def rotational_operation(self, rotational_state):
+        """
+        オブジェクトに対する回転操作を行う。
+        :param rotational_True/False: 回転状態
+        """
+        self.server.send_command(RotationalCommand(rotational_state))
+
+    def show_name_display(self, state: bool , object_name: str):
+        """
+        ディスプレイにオブジェクト名を表示する。
+        :param state: 表示状態 (True または False)
+        """
+        object_name = self.get_obj_by_display()
+        self.server.send_command(ShowNameCommand(state=state, obj_name=object_name))
+
+    def change_name_display(self, object_name: str):
+        """
+        ディスプレイにオブジェクト名を表示する。
+        :param object_name: 表示するオブジェクト名
+        """
+        self.server.send_command(ChangeNameCommand(obj_name=object_name))
 
 
 if __name__ == "__main__":
@@ -181,7 +229,7 @@ if __name__ == "__main__":
 
         # 全てのオブジェクトを取得
         all_objects = manager.get_all_objects()
-        print("All Objects:")
+        print("All Objects: ", all_objects)
 
         # 名前を変更
         if last_id != -1:

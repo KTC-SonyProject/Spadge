@@ -193,6 +193,7 @@ class TransferCommand(CommandBase):
             "file_size": self.file_size,
         }
         self.command_body = body
+        logger.debug(f"ファイル転送コマンドのボディ: {body}")
         return body
 
 
@@ -303,6 +304,169 @@ class UpdateCommand(CommandBase):
             "file_name": self.file_name,
         }
         self.command_body = body
+        return body
+
+
+class DeleteCommand(CommandBase):
+    """
+    オブジェクト削除コマンド
+    """
+
+    def __init__(self, object_id: str | None = None):
+        super().__init__(
+            command_name="DELETE",
+        )
+        self._object_id = object_id
+
+    @property
+    def object_id(self) -> str:
+        if self._object_id is None:
+            raise ValueError("object_idが設定されていません")
+        return self._object_id
+
+    @object_id.setter
+    def object_id(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("object_idは文字列で指定してください")
+        self._object_id = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {
+            "object_id": self.object_id,
+        }
+        self.command_body = body
+        return body
+
+
+class GetModelCommand(CommandBase):
+    """
+    モデル取得コマンド
+    """
+
+    def __init__(self):
+        super().__init__(
+            command_name="GET_MODEL",
+        )
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {}
+        self.command_body = body
+        return body
+
+
+class RotationalCommand(CommandBase):
+    """
+    回転コマンド
+    """
+
+    def __init__(self, rotation: bool | None = None):
+        super().__init__(
+            command_name="ROTATIONAL",
+        )
+        self._rotation = rotation
+
+    @property
+    def rotation(self) -> bool:
+        if self._rotation is None:
+            raise ValueError("rotationが設定されていません")
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, value: bool):
+        if not isinstance(value, bool):
+            raise ValueError("rotationはブール型で指定してください")
+        self._rotation = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {"state": "ON" if self.rotation else "OFF"}
+        self.command_body = body
+        return body
+
+
+class ShowNameCommand(CommandBase):
+    """
+    名前表示コマンド
+    """
+
+    def __init__(self, state: bool | None = None, obj_name: str | None = None):
+        super().__init__(
+            command_name="SHOW_NAME",
+        )
+        self._state = state
+        self._obj_name = obj_name
+
+    @property
+    def state(self) -> bool:
+        if self._state is None:
+            raise ValueError("stateが設定されていません")
+        return self._state
+
+    @state.setter
+    def state(self, value: bool):
+        if not isinstance(value, bool):
+            raise ValueError("stateはブール型で指定してください")
+        self._state = value
+
+    @property
+    def obj_name(self) -> str:
+        if self._obj_name is None:
+            raise ValueError("obj_nameが設定されていません")
+        return self._obj_name
+
+    @obj_name.setter
+    def obj_name(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("obj_nameは文字列で指定してください")
+        self._obj_name = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {"state": self.state, "obj_name": self.obj_name}
+        self.command_body = body
+        return body
+
+
+class ChangeNameCommand(CommandBase):
+    """
+    名前変更コマンド
+    """
+
+    def __init__(self, obj_name: str | None = None):
+        super().__init__(
+            command_name="CHANGE_NAME",
+        )
+        self._obj_name = obj_name
+
+    @property
+    def obj_name(self) -> str:
+        if self._obj_name is None:
+            raise ValueError("obj_nameが設定されていません")
+        return self._obj_name
+
+    @obj_name.setter
+    def obj_name(self, value: str):
+        if not isinstance(value, str):
+            raise ValueError("obj_nameは文字列で指定してください")
+        self._obj_name = value
+
+    def convert_body(self) -> dict:
+        """
+        コマンドのボディを生成
+        """
+        body = {"obj_name": self.obj_name}
+        self.command_body = body
+        logger.debug(f"名前変更コマンドのボディ: {body}")
         return body
 
 

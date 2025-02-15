@@ -139,7 +139,7 @@ class DisplayInfoTool(BaseTool):
     name: str = "display_info_tool"
     description: str = "現在ディスプレイに表示されている3Dモデルの情報を返すツール"
 
-    dammy_model: str = "dammy"
+    obj_manager: ObjectManager
 
     def _run(self, run_manager: CallbackManagerForToolRun | None = None) -> str:
         """
@@ -148,7 +148,8 @@ class DisplayInfoTool(BaseTool):
         # TODO:ディスプレイに表示されている3Dモデルの情報を返す処理を追加する
         print("DisplayInfoTool")
         logger.debug("\n\ndisplay_info_tool called\n\n")
-        return f"現在のディスプレイオブジェクト: 3Dモデル ID: ABC123, タイトル: '{self.dammy_model}'"
+        dammy_model = self.obj_manager.get_obj_by_display()
+        return f"現在のディスプレイオブジェクト: 3Dモデル タイトル: '{dammy_model}'"
 
     def _arun(self, run_manager: AsyncCallbackManagerForToolRun | None = None) -> str:
         return self._run(run_manager=run_manager.get_sync())
