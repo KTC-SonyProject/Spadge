@@ -22,7 +22,7 @@ from app.controller.manager.agent_manager import (
 )
 from app.models.chat_models import Message, MessageType
 from app.models.database_models import DatabaseHandler
-from app.views.chat_view import ChatMessageCard, ChatView, create_chat_message_tile
+from app.views.chat_view import ChatMessageCard, ChatView, create_chat_message_tile, create_example_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -198,8 +198,22 @@ class ChatController(AbstractController):
         self.view.chat_list.controls.clear()
         self.page.update()
 
+    def add_example_prompt(self, prompt: str):
+        logger.debug(f"Example prompt clicked: {prompt}")
+        self.view.text_field.value = prompt
+        self.send_message(prompt)
+
+    def create_example_prompts(self):
+        example_prompts = {
+            "AIについて質問する": "あなたは誰ですか？",
+            "モデルを変更する": "今表示してるモデルを変更して",
+            "今映っているモデルについて質問する": "今映ってるモデルの解説を詳しく知りたい"
+        }
+
+        return [create_example_prompt(text, prompt, self.add_example_prompt) for text, prompt in example_prompts.items()]
+
     def get_view(self):
-        self.view = ChatView(self.session_id, self.send_message, self.init_chat_button)
+        self.view = ChatView(self.session_id, self.send_message, self.init_chat_button, self.create_example_prompts())
         self.add_messages(self.get_chat_history())
         return self.view
 

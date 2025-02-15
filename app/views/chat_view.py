@@ -18,6 +18,7 @@ from flet import (
     Row,
     Text,
     TextField,
+    TextButton,
     TileAffinity,
     alignment,
     border,
@@ -65,12 +66,13 @@ def create_chat_message(message: Message, tap_link: callable) -> Container:
                     expand=True,
                     horizontal_alignment=CrossAxisAlignment.END if message.message_type == MessageType.USER else None,
                     controls=[
-                        Text(message.name, weight="bold"),
+                        Text(message.name, weight="bold", size=20),
                         Markdown(
                             value=message.content,
                             selectable=True,
-                            extension_set=MarkdownExtensionSet.GITHUB_WEB,
+                            extension_set=MarkdownExtensionSet.GITHUB_FLAVORED,
                             on_tap_link=tap_link,
+                            scale=1.5,
                         ),
                     ],
                 )
@@ -121,7 +123,7 @@ class ChatMessageCard(Container):
         self.body = Markdown(
             value=message.content,
             selectable=True,
-            extension_set=MarkdownExtensionSet.GITHUB_WEB,
+            extension_set=MarkdownExtensionSet.GITHUB_FLAVORED,
             on_tap_link=tap_link,
         )
         self.thinking_chat = ExpansionTile(
@@ -175,6 +177,12 @@ def create_chat_header(session_id: str, init_chat_button: callable) -> Container
         ),
     )
 
+def create_example_prompt(text: str, prompt: str, on_click: callable) -> TextButton:
+    return TextButton(
+        text=text,
+        on_click=lambda _: on_click(prompt),
+    )
+
 
 class ChatView(Column):
     """
@@ -184,6 +192,7 @@ class ChatView(Column):
         session_id (str): セッションID
         send_message_click (callable): メッセージ送信ボタンをクリックしたときのコールバック
         init_chat_button (callable): チャットを初期化するボタンをクリックしたときのコールバック
+        example_prompts (list[TextButton]): ユーザーが選択できる例のプロンプトリスト
 
     Attributes:
         chat_list (ListView): チャットメッセージのリスト
@@ -191,7 +200,13 @@ class ChatView(Column):
         progress_bar (ProgressBar): メッセージ送信中のプログレスバー
     """
 
-    def __init__(self, session_id: str, send_message_click: callable, init_chat_button: callable):
+    def __init__(
+            self,
+            session_id: str,
+            send_message_click: callable,
+            init_chat_button: callable,
+            example_prompts: list[TextButton]
+        ):
         super().__init__(
             expand=True,
         )
@@ -215,6 +230,13 @@ class ChatView(Column):
                 border=border.all(1, Colors.OUTLINE),
                 border_radius=5,
                 expand=True,
+            ),
+            Row(
+                controls=example_prompts,
+                alignment=MainAxisAlignment.CENTER,
+                vertical_alignment=CrossAxisAlignment.CENTER,
+                spacing=10,
+                wrap=True,
             ),
             self.progress_bar,
             Row(
