@@ -80,12 +80,18 @@ class FileManager:
                 folder_path = os.path.dirname(command.file_path)
                 renamed_files = self.rename_files_in_folder(folder_path, extracted_files)
                 logger.debug(f"リネームされたファイル: {renamed_files}")
+
+                # .objファイルを最後に送信するために順序を調整
+                renamed_files.sort(key=lambda x: (x.endswith(".obj"), x))
+
                 for renamed_file in renamed_files:
-                    if renamed_file.endswith(".jpg"):
-                    # .jpgファイルは元のパスを使用
-                        file_path = os.path.join(folder_path, extracted_files[renamed_files.index(renamed_file)])
-                    else:
+                    if renamed_file.endswith(".obj") or renamed_file.endswith(".mtl"):
+                        # .objと.mtlファイルはリネームされたパスを使用
                         file_path = os.path.join(folder_path, renamed_file)
+                    else:
+                        # その他のファイルは元のパスを使用
+                        original_file = next(file for file in extracted_files if os.path.basename(file) == renamed_file)
+                        file_path = os.path.join(folder_path, original_file)
                     logger.debug(f"ファイルを送信: {file_path}")
                     command = TransferCommand(file_path)
                     command.convert_body()  # command_bodyを設定
@@ -154,12 +160,11 @@ class FileManager:
             for file in files:
                 file_extension = os.path.splitext(file)[1]
                 old_file_path = os.path.join(folder_path, file)
-                if file_extension.lower() == ".jpg":
-                    # .jpgファイルは名前を変更しない
-                    new_file_path = old_file_path
-                else:
+                if file_extension.lower() in [".obj", ".mtl"]:
                     new_file_path = os.path.join(folder_path, f"{last_id}{file_extension}")
                     os.rename(old_file_path, new_file_path)
+                else:
+                    new_file_path = old_file_path
                 renamed_files.append(os.path.basename(new_file_path))
             logger.debug(f"フォルダー内のファイルを連番にリネームしました: {folder_path}")
         except Exception as e:
